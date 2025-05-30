@@ -2667,6 +2667,11 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
+"@stripe/stripe-react-native@^0.23.3":
+  version "0.23.3"
+  resolved "https://registry.yarnpkg.com/@stripe/stripe-react-native/-/stripe-react-native-0.23.3.tgz#aa997afb2012ce2f34848015a24798da562de1e8"
+  integrity sha512-jfvmNDYxjkIdc/Hths3wdKAAXThAf+IieV+KQhd5b7f1eWrTXBzA9IzUZkXb73r/LiSw/GB5K4bBOJTDjgvd+A==
+
 "@svgr/babel-plugin-add-jsx-attribute@^6.5.1":
   version "6.5.1"
   resolved "https://registry.yarnpkg.com/@svgr/babel-plugin-add-jsx-attribute/-/babel-plugin-add-jsx-attribute-6.5.1.tgz#74a5d648bd0347bda99d82409d87b8ca80b9a1ba"
