@@ -13,6 +13,8 @@
     "@react-native-async-storage/async-storage": "^1.21.0",
     "@react-native-community/checkbox": "^0.5.16",
     "@react-native-firebase/app": "^22.2.0",
+    "@react-native-firebase/firestore": "^22.2.0",
+    "@react-native-firebase/messaging": "^22.2.0",
     "@reduxjs/toolkit": "^2.5.0",
     "@stripe/stripe-react-native": "^0.23.3",
     "axios": "^1.7.7",
