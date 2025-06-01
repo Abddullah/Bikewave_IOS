@@ -31,8 +31,19 @@
 		<key>NSAllowsLocalNetworking</key>
 		<true/>
 	</dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string></string>
+	
+	<key>NSCameraUsageDescription</key>
+<string>This app uses the camera to allow users to take photos for bike listings.</string>
+
+<key>NSPhotoLibraryUsageDescription</key>
+<string>This app needs access to your photo library so you can upload bike images.</string>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs your location to show nearby bikes available for rent.</string>
+
+<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+<string>We use your location to provide location-based features, even when the app is in the background.</string>
+
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>CFBundleIconName</key>
