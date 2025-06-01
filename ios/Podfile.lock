@@ -2475,6 +2475,8 @@ PODS:
   - RNCCheckbox (0.5.20):
     - BEMCheckBox (~> 1.4)
     - React-Core
+  - RNDeviceInfo (13.2.0):
+    - React-Core
   - RNFastImage (8.6.3):
     - React-Core
     - SDWebImage (~> 5.11.1)
@@ -2506,6 +2508,10 @@ PODS:
     - React-Core
     - React-RCTImage
   - RNSVG (14.2.0):
+    - React-Core
+  - RNVectorIcons (10.2.0):
+    - glog
+    - RCT-Folly (= 2022.05.16.00)
     - React-Core
   - SDWebImage (5.11.1):
     - SDWebImage/Core (= 5.11.1)
@@ -2612,6 +2618,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNCCheckbox (from `../node_modules/@react-native-community/checkbox`)"
+  - RNDeviceInfo (from `../node_modules/react-native-device-info`)
   - RNFastImage (from `../node_modules/react-native-fast-image`)
   - "RNFBApp (from `../node_modules/@react-native-firebase/app`)"
   - "RNFBFirestore (from `../node_modules/@react-native-firebase/firestore`)"
@@ -2619,6 +2626,7 @@ DEPENDENCIES:
   - RNImageCropPicker (from `../node_modules/react-native-image-crop-picker`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNSVG (from `../node_modules/react-native-svg`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - "stripe-react-native (from `../node_modules/@stripe/stripe-react-native`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -2773,6 +2781,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNCCheckbox:
     :path: "../node_modules/@react-native-community/checkbox"
+  RNDeviceInfo:
+    :path: "../node_modules/react-native-device-info"
   RNFastImage:
     :path: "../node_modules/react-native-fast-image"
   RNFBApp:
@@ -2787,6 +2797,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-screens"
   RNSVG:
     :path: "../node_modules/react-native-svg"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   stripe-react-native:
     :path: "../node_modules/@stripe/stripe-react-native"
   Yoga:
@@ -2872,6 +2884,7 @@ SPEC CHECKSUMS:
   ReactCommon: 062f0e3b4530fe6b2ea99c5f577395d3cb05c582
   RNCAsyncStorage: ec53e44dc3e75b44aa2a9f37618a49c3bc080a7a
   RNCCheckbox: 471ebdc33884c084f362615c1ef3507496cc07f1
+  RNDeviceInfo: 29e01d5ae94bdb5a0f6c11a4c438132545b4df80
   RNFastImage: 5c9c9fed9c076e521b3f509fe79e790418a544e8
   RNFBApp: 4110e3d5c109de1f81454247e5d0f83ee9408c8c
   RNFBFirestore: 62a440a32798199db7b8b68ccc02128ca0d03449
@@ -2879,6 +2892,7 @@ SPEC CHECKSUMS:
   RNImageCropPicker: e7ab6fb43d2fc3e84651e786ef4a080d63b0ed3d
   RNScreens: 3a900e2e2a2819aafe939449d342da5454a84dcf
   RNSVG: 963a95f1f5d512a13d11ffd50d351c87fb5c6890
+  RNVectorIcons: e547446004607b9037ae4bea770d0fd2ba15c4a7
   SDWebImage: a7f831e1a65eb5e285e3fb046a23fcfbf08e696d
   SDWebImageWebPCoder: 908b83b6adda48effe7667cd2b7f78c897e5111d
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17

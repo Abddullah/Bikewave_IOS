@@ -1,118 +1,43 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, {useRef} from 'react';
+import {SafeAreaView} from 'react-native';
+import Toast from 'react-native-toast-message';
+import {Provider} from 'react-redux';
+import store from './src/redux/store';
+import {NativeBaseProvider} from 'native-base';
+import AppNavigator from './src/navigation/navigation';
+import {I18nextProvider} from 'react-i18next';
+import i18n, {fetchTranslations} from './src/utilities/languageData/index';
+import Colors from './src/utilities/constants/colors';
+import {StripeProvider} from '@stripe/stripe-react-native';
+import {EnvConfig} from './src/config/envConfig';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
-
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
-
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
-
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
-
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
+// Initialize Stripe
+const stripePromise = new Promise(resolve => {
+  resolve(EnvConfig.stripe.publishKey);
 });
+
+function App() {
+  console.disableYellowBox = true;
+  const navigationRef = useRef(null);
+
+  React.useEffect(() => {
+    fetchTranslations();
+  }, []);
+
+  return (
+    <I18nextProvider i18n={i18n}>
+      <NativeBaseProvider>
+        <Provider store={store}>
+          <StripeProvider publishableKey={EnvConfig.stripe.publishKey}>
+            <SafeAreaView style={{flex: 1, backgroundColor: 'transparent'}}>
+              <AppNavigator ref={navigationRef} />
+              <Toast />
+            </SafeAreaView>
+          </StripeProvider>
+        </Provider>
+      </NativeBaseProvider>
+    </I18nextProvider>
+  );
+}
 
 export default App;
