@@ -496,7 +496,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   flatListContainer: {
-    marginTop: -50,
+    marginTop:Platform.OS === 'ios' ? -20 : -50 ,
     flex: 1,
   },
   modalBackground: {

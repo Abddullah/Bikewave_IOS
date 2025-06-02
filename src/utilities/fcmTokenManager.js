@@ -1,13 +1,43 @@
 import messaging from '@react-native-firebase/messaging';
 import firestore from '@react-native-firebase/firestore';
+import { Platform } from 'react-native';
+
+export const requestIOSPermissions = async () => {
+  try {
+    if (Platform.OS === 'ios') {
+      const authStatus = await messaging().requestPermission();
+      const enabled =
+        authStatus === messaging.AuthorizationStatus.AUTHORIZED ||
+        authStatus === messaging.AuthorizationStatus.PROVISIONAL;
+      
+      console.log('FCM Authorization status:', authStatus);
+      return enabled;
+    }
+    return true;
+  } catch (error) {
+    console.error('Error requesting iOS notifications permission:', error);
+    return false;
+  }
+};
 
 export const saveFCMToken = async (userId) => {
   try {
     // Get the FCM token
     if (userId) {
+      // Request iOS permissions if needed
+      if (Platform.OS === 'ios') {
+        const permissionEnabled = await requestIOSPermissions();
+        console.log('FCM iOS permission enabled:', permissionEnabled);
+        if (!permissionEnabled) {
+          console.warn('FCM permissions not granted for iOS');
+          return;
+        }
+      }
 
       await messaging().registerDeviceForRemoteMessages();
       const token = await messaging().getToken();
+      console.log('FCM token:', token);
+      
       if (token) {
         await firestore()
           .collection('userFCMTokens')
@@ -15,6 +45,7 @@ export const saveFCMToken = async (userId) => {
           .set({
             userId, // Add user ID to the document
             token,
+            platform: Platform.OS,
             updatedAt: firestore.FieldValue.serverTimestamp()
           });
       }

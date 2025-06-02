@@ -15,7 +15,6 @@ import {EnvConfig} from './src/config/envConfig';
 const stripePromise = new Promise(resolve => {
   resolve(EnvConfig.stripe.publishKey);
 });
-
 function App() {
   console.disableYellowBox = true;
   const navigationRef = useRef(null);

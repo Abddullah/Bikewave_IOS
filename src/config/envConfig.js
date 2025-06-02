@@ -16,6 +16,7 @@ import {
   APP_HTTP_DOMAIN,
   STRIPE_PUBLISHABLE_KEY
 } from '@env';
+console.log('baseUrl', BASE_URL);
 
 export const EnvConfig = {
   socket: {

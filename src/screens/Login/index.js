@@ -26,6 +26,7 @@ import { useTranslation } from 'react-i18next';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { saveFCMToken } from '../../utilities/fcmTokenManager';
+import { EnvConfig } from '../../config/envConfig';
 
 export default function Login({ navigation }) {
   const [securePassword, setSecurePassword] = useState(true);
@@ -44,6 +45,7 @@ export default function Login({ navigation }) {
       .min(6, t('password_min_length'))
       .required(t('password_required')),
   });
+  console.log(EnvConfig,'_____EnvConfig_____ ');
 
   const handleLogin = async values => {
     const { email, password } = values;
