@@ -64,7 +64,16 @@ const AppNavigator = React.forwardRef((props, ref) => {
   }
 
   return (
-    <NavigationContainer ref={ref} linking={linking}>
+    <NavigationContainer 
+      ref={ref} 
+      linking={linking}
+      onStateChange={state => {
+        const currentRouteName = ref?.current?.getCurrentRoute()?.name;
+        if (currentRouteName) {
+          console.log('Navigation State Changed - Current Route2:', currentRouteName);
+        }
+      }}
+    >
       <Stack.Navigator initialRouteName={initialRoute}>
         <Stack.Screen
           options={{headerShown: false}}
