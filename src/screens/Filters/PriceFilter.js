@@ -16,7 +16,7 @@ import {getAllBicycles} from '../../redux/features/main/mainThunks';
 export default function PriceFilter({navigation}) {
   const dispatch = useDispatch();
   const [lowValue, setLowValue] = useState(0);
-  const [highValue, setHighValue] = useState(3000);
+  const [highValue, setHighValue] = useState(300);
 
   const Thumb = () => <View style={styles.thumb} />;
   const Rail = () => <View style={styles.rail} />;
@@ -60,8 +60,8 @@ export default function PriceFilter({navigation}) {
       <RangeSlider
         style={styles.slider}
         min={0}
-        max={3000}
-        step={100}
+        max={300}
+        step={10}
         renderThumb={renderThumb}
         renderRail={renderRail}
         renderRailSelected={renderRailSelected}
@@ -83,7 +83,7 @@ export default function PriceFilter({navigation}) {
         </Text>
         <View style={{width: '40%'}}>
           <AppTextInput
-            placeholder={'€3000'}
+            placeholder={'€300'}
             value={String(highValue)}
             onChangeText={text => setHighValue(Number(text))}
             keyboardType="numeric"
