@@ -66,7 +66,7 @@ export default function Favorites({ navigation }) {
         key={item._id}
         brand={item.brand}
         model={item.model}
-        location={`${item?.location?.city},${item?.location?.country}`}
+        location={item?.location?.city}
         price={item.price}
         image={imageUrl}
         style={{ marginBottom: index === favorites.length - 1 ? 120 : 20 }}
@@ -151,8 +151,9 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
     width: "100%",
+    paddingHorizontal: '15%',
     position: "absolute", zIndex: -1,
-    paddingTop: 40,
+    paddingTop: 20,
   },
   loader: {
     marginTop: 50,
