@@ -362,16 +362,17 @@ const Home = React.memo(({navigation}) => {
               styles={{
                 container: {
                   backgroundColor: Colors.white,
+                  
                   borderRadius: 50,
                   paddingHorizontal: 10,
                   shadowColor: '#000',
                   shadowOffset: {
                     width: 0,
-                    height: 2,
+                    height: 1,
                   },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 3,
-                  elevation: 4,
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
+                  elevation: 2,
                 },
                 textInput: {
                   backgroundColor: Colors.white,
@@ -390,11 +391,11 @@ const Home = React.memo(({navigation}) => {
                   shadowColor: '#000',
                   shadowOffset: {
                     width: 0,
-                    height: 2,
+                    height: 1,
                   },
-                  shadowOpacity: 0.15,
-                  shadowRadius: 3,
-                  elevation: 4,
+                  shadowOpacity: 0.1,
+                  shadowRadius: 2,
+                  elevation: 2,
                 },
                 description: {
                   ...Typography.f_14_inter_medium,
@@ -567,7 +568,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   categoryContainer: {
-    backgroundColor: Colors.white,
+    // backgroundColor: 'red',
   },
   categoryItem: {
     gap: 5,
@@ -588,11 +589,12 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 4,
+      height: 2,
     },
-    shadowOpacity: 0.3,
-    shadowRadius: 4.65,
-    elevation: 8,
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 4,
+    borderTopWidth: 0,
     zIndex: -1,
   },
   mapButtonContainer: {
