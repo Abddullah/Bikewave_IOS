@@ -20,7 +20,7 @@ export default function Splash() {
     <ImageBackground
       style={[styles.background,{backgroundColor:'red'}]}
       resizeMode="cover"
-      source={Images.splashBg}>
+      source={Images.splashBg2}>
       <View style={styles.overlay}>
         <Logo />
       </View>

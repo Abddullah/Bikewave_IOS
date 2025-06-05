@@ -10,6 +10,13 @@ const setLanguageAsync = async lang => {
   await setItem('languagecode', lang);
 };
 
+// Clear saved language and force default
+export const clearSavedLanguage = async () => {
+  await setItem('languagecode', DEFAULT_LANGUAGE);
+  await i18n.changeLanguage(DEFAULT_LANGUAGE);
+  return true;
+};
+
 export const onLanguageSelect = async (langId, setflag, flag) => {
   let lang = appLanguages.find(item => item.code === langId);
   if (lang) {
@@ -42,9 +49,17 @@ export const fetchTranslations = async () => {
       let lang;
 
       try {
-        lang = await getItem('languagecode', DEFAULT_LANGUAGE);
+        // Try to get saved language, if not found use default
+        lang = await getItem('languagecode');
+        // If no language is saved or it's not valid, use default
+        if (!lang || !locales.includes(lang)) {
+          lang = DEFAULT_LANGUAGE;
+          await setItem('languagecode', DEFAULT_LANGUAGE);
+        }
       } catch (error) {
-        // console.log(error)
+        // If any error, use default
+        lang = DEFAULT_LANGUAGE;
+        await setItem('languagecode', DEFAULT_LANGUAGE);
       }
 
       selectedLocale = locales.find(locale => locale === lang);

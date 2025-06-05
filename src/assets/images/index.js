@@ -1,5 +1,6 @@
 export default Images = {
   splashBg: require('./splashBg.png'),
+  splashBg2: require('./splashBg2.png'),
   bicycle: require('./Products/bicycle.png'),
   // map: require('./Map.png'),
   map: require('./Map1.png'),
