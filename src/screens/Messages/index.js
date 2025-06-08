@@ -46,7 +46,7 @@ const translations = {
     no: 'لا',
     unknown: 'غير معروف',
   },
-  es: {
+  sp: {
     header: 'Chats',
     emptyTitle: 'No hay chats disponibles',
     emptySubtitle: 'Tus conversaciones aparecerán aquí',
@@ -132,6 +132,9 @@ export default function Messages({navigation}) {
   const [unreadMessages, setUnreadMessages] = useState({});
   // Local state to store chats
   const [localChats, setLocalChats] = useState([]);
+  const {t, i18n} = useTranslation();
+
+  const currentLanguage = i18n.language === 'sp' ? 'sp' : 'en';
 
   // Update local state when Redux store changes
   useEffect(() => {
@@ -217,10 +220,18 @@ export default function Messages({navigation}) {
     };
   }, [authUserId]);
 
-  // Initial fetch of chats
+  // Fetch chats whenever the screen is focused
   useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      dispatch(getAllChats());
+    });
+    
+    // Initial fetch
     dispatch(getAllChats());
-  }, []);
+    
+    // Cleanup listener on unmount
+    return unsubscribe;
+  }, [navigation]);
 
   const handleDeletePress = chat => {
     setChatToDelete(chat);
@@ -288,7 +299,7 @@ export default function Messages({navigation}) {
         : '';
     const ownerName =
       item.members.find(member => member._id !== authUserId)?.firstName ||
-      translations[DEFAULT_LANGUAGE].unknown;
+      translations[DEFAULT_LANGUAGE]?.unknown;
     const time = item.updatedAt
       ? new Date(item.updatedAt).toLocaleString('en-US', {
           hour: '2-digit',
@@ -299,8 +310,7 @@ export default function Messages({navigation}) {
 
     // Check if this chat has unread messages
     const hasUnread = unreadMessages[item._id] || false;
-
-    return (
+     return (
       <ChatItem
         item={{
           ...item,
@@ -330,7 +340,7 @@ export default function Messages({navigation}) {
       <AppStatusBar />
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>
-          {translations[DEFAULT_LANGUAGE].header}
+          {translations[DEFAULT_LANGUAGE]?.header}
         </Text>
       </View>
       <View style={styles.flatListContainer}>
@@ -356,21 +366,21 @@ export default function Messages({navigation}) {
         <View style={styles.modalBackground}>
           <View style={styles.modalContainer}>
             <Text style={styles.modalTitle}>
-              {translations[DEFAULT_LANGUAGE].deleteConfirmation}
+              {translations[currentLanguage]?.deleteConfirmation}
             </Text>
             <View style={styles.modalActions}>
               <TouchableOpacity
                 onPress={handleDeleteChat}
                 style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>
-                  {translations[DEFAULT_LANGUAGE].yes}
+                  {translations[currentLanguage]?.yes}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={handleCancelDelete}
                 style={styles.modalButton}>
                 <Text style={styles.modalButtonText}>
-                  {translations[DEFAULT_LANGUAGE].no}
+                  {translations[currentLanguage]?.no}
                 </Text>
               </TouchableOpacity>
             </View>

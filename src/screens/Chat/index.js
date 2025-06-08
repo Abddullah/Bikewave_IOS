@@ -7,6 +7,8 @@ import {
   TouchableOpacity,
   FlatList,
   ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AppStatusBar from '../../components/AppStatusBar';
 import Colors from '../../utilities/constants/colors';
@@ -272,7 +274,6 @@ const Chat = ({route, navigation}) => {
       // like showing a user-friendly error message
     }
   };
-
   const chatInfo = reciepentData
     ? {
         email: reciepentData.email || '',
@@ -298,7 +299,10 @@ const Chat = ({route, navigation}) => {
       };
 
   return (
-    <View style={styles.background}>
+    <KeyboardAvoidingView 
+      style={styles.background}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
       <AppStatusBar />
       <View style={styles.headerStyle}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -392,7 +396,7 @@ const Chat = ({route, navigation}) => {
               <View
                 key={item._id}
                 style={[
-                  index === realTimeMessages.length - 1 && {paddingBottom: 40},
+                  index === realTimeMessages.length - 1 && {paddingBottom:Platform.OS === 'ios' ? 0 : 40},
                 ]}>
                 <Message
                   message={item.text}
@@ -422,6 +426,7 @@ const Chat = ({route, navigation}) => {
             value={message}
             onChangeText={setMessage}
             multiline
+            style={styles.inputStyle}
           />
         </View>
         <View style={{marginBottom: -12}}>
@@ -433,7 +438,7 @@ const Chat = ({route, navigation}) => {
           </TouchableOpacity>
         </View>
       </View>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -550,7 +555,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingBottom: 8,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 8,
+  },
+  inputStyle: {
+    maxHeight: 100,
   },
   sendButtonStyle: {
     width: 45,
