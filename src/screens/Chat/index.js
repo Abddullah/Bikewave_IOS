@@ -297,7 +297,6 @@ const Chat = ({route, navigation}) => {
         firstInitial: 'P',
         userId: null,
       };
-
   return (
     <KeyboardAvoidingView 
       style={styles.background}

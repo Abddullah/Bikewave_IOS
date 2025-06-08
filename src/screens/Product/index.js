@@ -63,6 +63,7 @@ import {
 } from '../../redux/features/main/mainSelectors';
 import axios from 'axios';
 import { createChat, getAllChats, getOneChat } from '../../redux/features/chat/chatThunks';
+import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
 
 export default function Product({ navigation, route }) {
   const refRBSheet = useRef();
@@ -191,6 +192,7 @@ export default function Product({ navigation, route }) {
       alert('Chat can\'t be initialized because owner ID is missing');
       return;
     }
+    dispatch(clearCurrentChat());
     navigation.navigate('Tabs', {
       screen: 'Messages',
       params: {
