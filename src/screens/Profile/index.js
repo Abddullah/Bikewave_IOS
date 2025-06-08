@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   StyleSheet,
   View,
@@ -10,15 +10,15 @@ import {
 } from 'react-native';
 
 import AppStatusBar from '../../components/AppStatusBar';
-import {Typography} from '../../utilities/constants/constant.style';
+import { Typography } from '../../utilities/constants/constant.style';
 import Colors from '../../utilities/constants/colors';
 import TabBar from '../../components/TabBar';
 import ProfileHeader from '../../components/ProfileHeader';
 import BikeCard from '../../components/BikeCard';
 import Images from '../../assets/images';
-import {useTranslation} from 'react-i18next';
-import {useDispatch, useSelector} from 'react-redux';
-import {fetchUserInfo, deleteUser} from '../../redux/features/auth/authThunks';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
+import { fetchUserInfo, deleteUser } from '../../redux/features/auth/authThunks';
 import {
   selectAuthLoading,
   selectUserDetails,
@@ -27,18 +27,18 @@ import {
   authStates,
 } from '../../redux/features/auth/authSelectors';
 import images from '../../assets/images';
-import {heightFlex1} from '../../utilities/constants/screenResolution';
-import {NextGreen, TickGreenWithBG, Cross} from '../../assets/svg';
+import { heightFlex1 } from '../../utilities/constants/screenResolution';
+import { NextGreen, TickGreenWithBG, Cross } from '../../assets/svg';
 import BottomSheet from '../../components/BottomSheet';
 import AppButton from '../../components/AppButton';
 import PopUp from '../../components/PopUp';
-import {LanguageSwitcher} from '../../components/LanguageSwitcher';
+import { LanguageSwitcher } from '../../components/LanguageSwitcher';
 import store from '../../redux/store';
-import {setUserToken} from '../../redux/features/auth/authSlice';
-import {deleteItem} from '../../services/assynsStorage';
-import {removeFCMToken} from '../../utilities/fcmTokenManager';
+import { setUserToken } from '../../redux/features/auth/authSlice';
+import { deleteItem } from '../../services/assynsStorage';
+import { removeFCMToken } from '../../utilities/fcmTokenManager';
 
-const MenuItem = ({title, onPress}) => (
+const MenuItem = ({ title, onPress }) => (
   <TouchableOpacity
     activeOpacity={0.8}
     onPress={onPress}
@@ -48,8 +48,8 @@ const MenuItem = ({title, onPress}) => (
   </TouchableOpacity>
 );
 
-const MenuSection = ({title, items}) => {
-  const {t} = useTranslation();
+const MenuSection = ({ title, items }) => {
+  const { t } = useTranslation();
   return (
     <View style={styles.menuSectionContainer}>
       <View style={styles.menuCardContainer}>
@@ -62,9 +62,9 @@ const MenuSection = ({title, items}) => {
   );
 };
 
-export default function Profile({navigation}) {
+export default function Profile({ navigation }) {
   const dispatch = useDispatch();
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('about');
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
@@ -85,8 +85,8 @@ export default function Profile({navigation}) {
   };
 
   const tabs = [
-    {key: 'about', label: t('about_me')},
-    {key: 'config', label: t('configuration')},
+    { key: 'about', label: t('about_me') },
+    { key: 'config', label: t('configuration') },
   ];
 
   const firstName = userDetails?.firstName ?? 'User';
@@ -108,7 +108,7 @@ export default function Profile({navigation}) {
       model: bike?.model,
       location: `${bike?.location?.city}, ${bike?.location?.country}`,
       price: bike?.price.toString(),
-      image: bike.photo ? {uri: bike.photo} : images.bicycle,
+      image: bike.photo ? { uri: bike.photo } : images.bicycle,
       description: bike?.description,
       deposit: bike?.deposit,
       category: bike?.category,
@@ -123,15 +123,15 @@ export default function Profile({navigation}) {
   const accountItems = [
     {
       key: 'my_reservations_client',
-      onPress: () => navigation.navigate('Profile', {screen: 'InProgress'}),
+      onPress: () => navigation.navigate('Profile', { screen: 'InProgress' }),
     },
     {
       key: 'my_reservations_owner',
-      onPress: () => navigation.navigate('Profile', {screen: 'Earrings'}),
+      onPress: () => navigation.navigate('Profile', { screen: 'Earrings' }),
     },
     {
       key: 'my_featured_bikes',
-      onPress: () => navigation.navigate('Profile', {screen: 'FeaturedBikes'}),
+      onPress: () => navigation.navigate('Profile', { screen: 'FeaturedBikes' }),
     },
     {
       key: 'subscriptions',
@@ -140,7 +140,7 @@ export default function Profile({navigation}) {
   ];
 
   const configItems = [
-    {key: 'my_documents', onPress: () => navigation.navigate('MyDocuments')},
+    { key: 'my_documents', onPress: () => navigation.navigate('MyDocuments') },
     {
       key: 'payment_preferences',
       onPress: () => navigation.navigate('PaymentPreferences'),
@@ -149,8 +149,8 @@ export default function Profile({navigation}) {
       key: 'edit_personal_data',
       onPress: () => navigation.navigate('EditProfile'),
     },
-    {key: 'edit_password', onPress: () => navigation.navigate('EditPassword')},
-    {key: 'delete_account', onPress: openBottomSheet},
+    { key: 'edit_password', onPress: () => navigation.navigate('EditPassword') },
+    { key: 'delete_account', onPress: openBottomSheet },
     {
       key: 'sign_out',
       onPress: async () => {
@@ -168,7 +168,7 @@ export default function Profile({navigation}) {
     },
   ];
 
-  const otherItems = [{key: 'report_incident'}];
+  const otherItems = [{ key: 'report_incident' }];
 
   const handleDeleteUser = async () => {
     try {
@@ -200,16 +200,16 @@ export default function Profile({navigation}) {
       return (
         <View>
           <ProfileHeader user={user} />
-          <ScrollView contentContainerStyle={{height: heightFlex1 * 4.5,}}>
+          <ScrollView contentContainerStyle={{ height: heightFlex1 * (Platform.OS === 'ios' ? 5 : 4.5) }}>
             <Text style={styles.sectionTitle}>{t('my_garage')}</Text>
             {bikes.length === 0 ? (
-              <Text style={styles.noBikesMessage}>
+              <Text style={styles.noBikesMessage} onPress={() => navigation.navigate('Offer')}>
                 {t('no_bikes_available')}
               </Text>
             ) : (
               <FlatList
                 data={bikes}
-                renderItem={({item}) => (
+                renderItem={({ item }) => (
                   <BikeCard
                     bike={item}
                     promote={true}
@@ -219,7 +219,7 @@ export default function Profile({navigation}) {
                 keyExtractor={item => item.id}
                 numColumns={2}
                 columnWrapperStyle={styles.bikeGrid}
-                contentContainerStyle={{paddingBottom: 5}}
+                contentContainerStyle={{ paddingBottom: 5 }}
               />
             )}
           </ScrollView>
@@ -229,8 +229,8 @@ export default function Profile({navigation}) {
       return (
         <ScrollView
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{gap: 20}}
-          style={{marginTop: Platform.OS === 'ios' ? -20 : -35,}}>
+          contentContainerStyle={{ gap: 20 }}
+          style={{ marginTop: Platform.OS === 'ios' ? -20 : -35, }}>
           <MenuSection title={t('account')} items={accountItems} />
           <MenuSection title={t('configuration')} items={configItems} />
           <MenuSection items={otherItems} />
@@ -273,7 +273,7 @@ export default function Profile({navigation}) {
             <ActivityIndicator
               color={Colors.primary}
               size={'small'}
-              style={{marginTop: 10}}
+              style={{ marginTop: 10 }}
             />
           ) : (
             renderContent()
@@ -327,7 +327,7 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     backgroundColor: Colors.primary,
-    paddingTop: 40,
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
     paddingBottom: 10,
   },
   headerTitle: {
@@ -350,6 +350,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: Colors.primary,
     padding: 20,
+    marginTop: "auto",
     ...Typography.f_16_inter_medium,
   },
   menuSectionContainer: {
