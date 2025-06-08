@@ -462,7 +462,7 @@ const Home = React.memo(({navigation}) => {
                 position: 'absolute',
                 width: '100%',
                 top: screenResolution.screenHeight * 0.2,
-                zIndex: 1,
+                zIndex: -1,
                 elevation: 5,
               }}>
               <AppButton
