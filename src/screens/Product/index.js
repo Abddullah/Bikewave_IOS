@@ -208,7 +208,7 @@ export default function Product({ navigation, route }) {
   console.log('bicycle?.owner');
   return (
     <View style={styles.container}>
-      <AppStatusBar />
+      <AppStatusBar backgroundColor={Colors.white} barStyle="dark-content" />
       {bicycle && (
         <>
           <View>

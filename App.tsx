@@ -1,5 +1,5 @@
 import React, {useRef, useEffect, useState} from 'react';
-import {SafeAreaView, LogBox} from 'react-native';
+import {SafeAreaView, LogBox, View, Platform} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {Provider} from 'react-redux';
 import store from './src/redux/store';
@@ -77,16 +77,42 @@ function App() {
     console.log('📱 CURRENT ROUTE STATE UPDATED:', currentRouteName);
   }, [currentRouteName]);
 
+  // For iOS, we need separate styling for the bottom inset
+  const isIOS = Platform.OS === 'ios';
+  const isProduct = currentRouteName === 'Product';
+
   return (
     <I18nextProvider i18n={i18n}>
       <NativeBaseProvider>
         <Provider store={store}>
           <StripeProvider publishableKey={EnvConfig.stripe.publishKey}>
            
-            <SafeAreaView style={{flex: 1, backgroundColor:currentRouteName=="Splash"?'#102224': 'transparent'}}>
-              <AppNavigator ref={navigationRef} />
-              <Toast />
-            </SafeAreaView>
+            <View style={{flex: 1}}>
+              {/* Main content with transparent or splash background */}
+              <SafeAreaView 
+                style={{
+                  flex: 1,
+                  backgroundColor: currentRouteName === "Splash" ? '#102224' : 'transparent'
+                }}
+              >
+                <AppNavigator ref={navigationRef} />
+                <Toast />
+              </SafeAreaView>
+              
+              {/* iOS home indicator area */}
+              {isIOS && (
+                <View 
+                  style={{
+                    height: 34, // Height of the iOS home indicator area
+                    backgroundColor: isProduct ? Colors.primary : 'transparent',
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                  }}
+                />
+              )}
+            </View>
           </StripeProvider>
         </Provider>
       </NativeBaseProvider>
