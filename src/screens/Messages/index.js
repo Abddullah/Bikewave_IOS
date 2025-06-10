@@ -26,6 +26,8 @@ import {selectAllChats} from '../../redux/features/chat/chatSelectors';
 import {selectAuthUserId} from '../../redux/features/auth/authSelectors';
 import io from 'socket.io-client';
 import {EnvConfig} from '../../config/envConfig';
+import { RFValue } from 'react-native-responsive-fontsize';
+import screenResolution from '../../utilities/constants/screenResolution';
 
 // Multi-language translations
 const translations = {
@@ -508,7 +510,7 @@ const styles = StyleSheet.create({
     height: 40,
   },
   flatListContainer: {
-    marginTop:Platform.OS === 'ios' ? -20 : -50 ,
+    marginTop:Platform.OS === 'ios' ?RFValue(-50,screenResolution.screenHeight) : -50 ,
     flex: 1,
   },
   modalBackground: {
