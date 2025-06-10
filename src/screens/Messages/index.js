@@ -7,6 +7,7 @@ import {
   Image,
   TouchableOpacity,
   Modal,
+  Platform,
 } from 'react-native';
 import Colors from '../../utilities/constants/colors';
 import {useTranslation} from 'react-i18next';
@@ -398,16 +399,17 @@ const styles = StyleSheet.create({
   },
   headerContainer: {
     paddingHorizontal: 40,
-    paddingBottom: 20,
+    paddingTop: Platform.OS === 'ios' ? 20 : 40,
+    paddingBottom: 85,
     backgroundColor: Colors.primary,
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
-    paddingTop: 20,
   },
   headerTitle: {
-    ...Typography.f_24_inter_semi_bold,
     color: Colors.white,
     textAlign: 'center',
+    ...Typography.f_20_inter_semi_bold,
+    fontWeight: '600',
   },
   chatItemWrapper: {
     marginHorizontal: 15,
