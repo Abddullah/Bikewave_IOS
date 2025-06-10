@@ -7,6 +7,8 @@ import {
   Keyboard,
   ScrollView,
   TouchableOpacity,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import AppButton from '../../components/AppButton';
@@ -176,101 +178,122 @@ export const Step3 = ({formData, updateFormData, onNext, onBack}) => {
   };
 
   return (
-    <View style={styles.screenContainer}>
-      <AppStatusBar />
-      <ListProductHeader
-        title={``}
-        currentStep={3}
-        steps={steps}
-        onBack={onBack}
-        desc={`${t('address_description')}`}
-      />
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.contentWrapper}>
-          <View>
-            <Text style={styles.inputLabel}>
-              {t('direction')} <Text style={styles.requiredAsterisk}>*</Text>
-            </Text>
-            <View style={styles.autocompleteContainer}>
-              <GooglePlacesAutocomplete
-                ref={placesRef}
-                placeholder={t('direction_placeholder')}
-                query={{
-                  key: 'AIzaSyAN1-XDuQSu2O6V4nwbQP7M-U3xWO1ENDM',
-                  language: [DEFAULT_LANGUAGE],
-                }}
-                fetchDetails={true}
-                minLength={2}
-                onPress={onPlaceSelected}
-                enablePoweredByContainer={false}
-                textInputProps={{
-                  value: inputValue,
-                  onChangeText: setInputValue,
-                }}
-                styles={{
-                  textInput: {
-                    ...Typography.f_16_inter_medium,
-                    color: Colors.black,
-                    paddingHorizontal: 14,
-                    borderWidth: 0.3,
-                    borderColor: Colors.gray,
-                    borderRadius: 8,
-                    backgroundColor: Colors.white,
-                  },
-                  listView: {
-                    backgroundColor: Colors.white,
-                    borderWidth: 0.3,
-                    borderColor: Colors.gray,
-                    borderRadius: 8,
-                    zIndex: 1000,
-                  },
-                }}
-              />
-              {inputValue ? (
-                <TouchableOpacity
-                  style={styles.clearButton}
-                  onPress={clearInput}>
-                  <Icon name="close" size={20} color={Colors.gray} />
-                </TouchableOpacity>
-              ) : null}
-            </View>
-          </View>
-          <View
-            style={[
-              styles.map,
-              {
-                borderWidth: error.length > 0 ? 2 : 0,
-                overflow: 'hidden',
-                borderColor: Colors.error,
-              },
-            ]}>
-            <MapView
-              style={{height: '100%', width: '100%'}}
-              // provider={PROVIDER_GOOGLE}
-              region={mapRegion}
-              onPress={handleMapPress}>
-              {marker && (
-                <Marker
-                  coordinate={{
-                    latitude: marker.latitude,
-                    longitude: marker.longitude,
-                  }}
-                  title="Selected Location"
-                />
-              )}
-            </MapView>
-          </View>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-        </View>
-        <AppButton
-          title={t('following')}
-          btnColor={Colors.primary}
-          btnTitleColor={Colors.white}
-          style={styles.nextButton}
-          onPress={handleNext} // Changed from onNext to handleNext
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{flex: 1}}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <View style={styles.screenContainer}>
+        <AppStatusBar />
+        <ListProductHeader
+          title={``}
+          currentStep={3}
+          steps={steps}
+          onBack={onBack}
+          desc={`${t('address_description')}`}
         />
-      </ScrollView>
-    </View>
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.contentWrapper}>
+            <View>
+              <Text style={styles.inputLabel}>
+                {t('direction')} <Text style={styles.requiredAsterisk}>*</Text>
+              </Text>
+              <View style={styles.autocompleteContainer}>
+                <GooglePlacesAutocomplete
+                  ref={placesRef}
+                  placeholder={t('direction_placeholder')}
+                  query={{
+                    key: 'AIzaSyAN1-XDuQSu2O6V4nwbQP7M-U3xWO1ENDM',
+                    language: [DEFAULT_LANGUAGE],
+                  }}
+                  fetchDetails={true}
+                  minLength={2}
+                  onPress={onPlaceSelected}
+                  enablePoweredByContainer={false}
+                  textInputProps={{
+                    value: inputValue,
+                    onChangeText: setInputValue,
+                  }}
+                  keyboardShouldPersistTaps="handled"
+                  listViewDisplayed="auto"
+                  returnKeyType="search"
+                  styles={{
+                    textInput: {
+                      ...Typography.f_16_inter_medium,
+                      color: Colors.black,
+                      paddingHorizontal: 14,
+                      borderWidth: 0.3,
+                      borderColor: Colors.gray,
+                      borderRadius: 8,
+                      backgroundColor: Colors.white,
+                    },
+                    listView: {
+                      backgroundColor: Colors.white,
+                      borderWidth: 0.3,
+                      borderColor: Colors.gray,
+                      borderRadius: 8,
+                      zIndex: 1000,
+                    },
+                    row: {
+                      padding: 13,
+                      height: 44,
+                      flexDirection: 'row',
+                    },
+                    separator: {
+                      height: 0.5,
+                      backgroundColor: Colors.gray,
+                    },
+                  }}
+                />
+                {inputValue ? (
+                  <TouchableOpacity
+                    style={styles.clearButton}
+                    onPress={clearInput}>
+                    <Icon name="close" size={20} color={Colors.gray} />
+                  </TouchableOpacity>
+                ) : null}
+              </View>
+            </View>
+            <View
+              style={[
+                styles.map,
+                {
+                  borderWidth: error.length > 0 ? 2 : 0,
+                  overflow: 'hidden',
+                  borderColor: Colors.error,
+                },
+              ]}>
+              <MapView
+                style={{height: '100%', width: '100%'}}
+                // provider={PROVIDER_GOOGLE}
+                region={mapRegion}
+                onPress={handleMapPress}>
+                {marker && (
+                  <Marker
+                    coordinate={{
+                      latitude: marker.latitude,
+                      longitude: marker.longitude,
+                    }}
+                    title="Selected Location"
+                  />
+                )}
+              </MapView>
+            </View>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+          </View>
+          <AppButton
+            title={t('following')}
+            btnColor={Colors.primary}
+            btnTitleColor={Colors.white}
+            style={styles.nextButton}
+            onPress={handleNext} // Changed from onNext to handleNext
+          />
+        </ScrollView>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 

@@ -6,6 +6,8 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import AppButton from '../../components/AppButton';
 import { ListProductHeader } from '../../components/ListProductHeader';
@@ -78,63 +80,69 @@ export const Step1 = ({ formData, updateFormData, onNext }) => {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <View style={styles.container}>
-        <AppStatusBar />
-        <ListProductHeader
-          title={``}
-          currentStep={1}
-          steps={steps}
-          desc={`${t('select_brand_model_description')}`}
-        />
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={{ paddingHorizontal: 20 }}>
-            <View style={styles.form}>
-              <View>
-                <Text style={styles.label}>
-                  {t('brand')} <Text style={styles.required}>*</Text>
-                </Text>
-                <AppTextInput
-                  placeholder={t('brand_placeholder')}
-                  value={formData.brand}
-                  onChangeText={text => handleFieldChange('brand', text)}
-                />
-                {errors.brand ? <Text style={styles.errorText}>{errors.brand}</Text> : null}
-              </View>
-              <View>
-                <Text style={styles.label}>
-                  {t('model')} <Text style={styles.required}>*</Text>
-                </Text>
-                <AppTextInput
-                  placeholder={t('model_placeholder')}
-                  value={formData.model}
-                  onChangeText={text => handleFieldChange('model', text)}
-                />
-                {errors.model ? <Text style={styles.errorText}>{errors.model}</Text> : null}
-              </View>
-              <View>
-                <Text style={styles.label}>{t('description')}</Text>
-                <AppTextInput
-                  placeholder={t('description_placeholder')}
-                  value={formData.description}
-                  onChangeText={text => updateFormData('description', text)}
-                  multiline
-                  numberOfLines={4}
-                  fieldStyle={{ textAlignVertical: 'top' }}
-                />
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <View style={styles.container}>
+          <AppStatusBar />
+          <ListProductHeader
+            title={``}
+            currentStep={1}
+            steps={steps}
+            desc={`${t('select_brand_model_description')}`}
+          />
+          <ScrollView showsVerticalScrollIndicator={false}>
+            <View style={{ paddingHorizontal: 20 }}>
+              <View style={styles.form}>
+                <View>
+                  <Text style={styles.label}>
+                    {t('brand')} <Text style={styles.required}>*</Text>
+                  </Text>
+                  <AppTextInput
+                    placeholder={t('brand_placeholder')}
+                    value={formData.brand}
+                    onChangeText={text => handleFieldChange('brand', text)}
+                  />
+                  {errors.brand ? <Text style={styles.errorText}>{errors.brand}</Text> : null}
+                </View>
+                <View>
+                  <Text style={styles.label}>
+                    {t('model')} <Text style={styles.required}>*</Text>
+                  </Text>
+                  <AppTextInput
+                    placeholder={t('model_placeholder')}
+                    value={formData.model}
+                    onChangeText={text => handleFieldChange('model', text)}
+                  />
+                  {errors.model ? <Text style={styles.errorText}>{errors.model}</Text> : null}
+                </View>
+                <View>
+                  <Text style={styles.label}>{t('description')}</Text>
+                  <AppTextInput
+                    placeholder={t('description_placeholder')}
+                    value={formData.description}
+                    onChangeText={text => updateFormData('description', text)}
+                    multiline
+                    numberOfLines={4}
+                    fieldStyle={{ textAlignVertical: 'top' }}
+                  />
+                </View>
               </View>
             </View>
-          </View>
-          <AppButton
-            title={t('following')}
-            btnColor={Colors.primary}
-            btnTitleColor={Colors.white}
-            style={styles.followBtn}
-            onPress={handleNext}
-          />
-        </ScrollView>
-      </View>
-    </TouchableWithoutFeedback>
+            <AppButton
+              title={t('following')}
+              btnColor={Colors.primary}
+              btnTitleColor={Colors.white}
+              style={styles.followBtn}
+              onPress={handleNext}
+            />
+          </ScrollView>
+        </View>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 };
 
