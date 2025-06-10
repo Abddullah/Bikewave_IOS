@@ -217,7 +217,7 @@ export function AppBottomNavigator() {
       <Tab.Screen
         options={{
           headerShown: false,
-          tabBarStyle: { display: 'none' },
+          // tabBarStyle: { display: 'none' },
           tabBarLabel: ({ focused }) => {
             return (
               <Text
