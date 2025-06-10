@@ -54,9 +54,9 @@ const ProductCard = ({
         <View style={styles.cardDetails}>
           <View style={styles.rowSpaceBetween}>
             <View style={styles.rowAligned}>
-              <Text style={[Typography.f_18_inter_semi_bold, styles.text]}>
+              {/* <Text style={[Typography.f_18_inter_semi_bold, styles.text]}>
                 {t(`Brand`)}
-              </Text>
+              </Text> */}
               <Text style={[Typography.f_16_inter_regular, styles.text]}>
                 {brand}
               </Text>
