@@ -76,7 +76,9 @@ export default function Favorites({ navigation }) {
 
   const renderFavoritesList = () => (
     <View style={styles.favoritesListContainer}>
-      <Text style={styles.favoritesListTitle}>{t('favorites_list_title')}</Text>
+      <View style={styles.favoritesListTitleContainer}>
+        <Text style={styles.favoritesListTitle}>{t('favorites_list_title')}</Text>
+      </View>
       {loader ? (
         <ActivityIndicator
           size="large"
@@ -141,19 +143,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  favoritesListTitleContainer: {
+    position: "absolute",
+    zIndex: -1,
+    top: 0,
+    left: 0,
+    right: 0,
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
+    overflow: "hidden",
+  },
   favoritesListTitle: {
     ...Typography.f_20_inter_semi_bold,
     color: Colors.white,
     backgroundColor: Colors.primary,
     textAlign: 'center',
     paddingVertical: 20,
-    paddingBottom: 70,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
+    paddingBottom: 100,
     width: "100%",
     paddingHorizontal: '15%',
-    position: "absolute", zIndex: -1,
-    paddingTop: 20,
   },
   loader: {
     marginTop: 50,
