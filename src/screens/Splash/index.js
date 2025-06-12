@@ -21,9 +21,9 @@ export default function Splash() {
       style={[styles.background,{backgroundColor:'red'}]}
       resizeMode="cover"
       source={Images.splashBg2}>
-      <View style={styles.overlay}>
+      {/* <View style={styles.overlay}>
         <Logo />
-      </View>
+      </View> */}
     </ImageBackground>
   );
 }
