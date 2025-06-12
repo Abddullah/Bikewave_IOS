@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert} from 'react-native';
+import {View, StyleSheet, Text, ScrollView, TouchableOpacity, Alert, KeyboardAvoidingView, Platform} from 'react-native';
 import AppButton from '../../components/AppButton';
 import Colors from '../../utilities/constants/colors';
 import AppStatusBar from '../../components/AppStatusBar';
@@ -224,9 +224,16 @@ export const Step2 = ({navigation, route}) => {
   ];
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
       <AppStatusBar />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
         <CheckoutHeader
           title={t('billing_info')}
           currentStep={2}
@@ -428,7 +435,7 @@ export const Step2 = ({navigation, route}) => {
           onPress={handleSaveContinue}
         />
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -436,6 +443,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   formWrapper: {
     backgroundColor: Colors.white,

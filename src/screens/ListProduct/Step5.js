@@ -60,33 +60,33 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
     }
 
     // Deposit checkbox must be checked
-    if (!deposit) {
-      setError(t('validation.deposit_required'));
-      setTimeout(() => setError(''), 3000);
-      return false;
-    }
+    // if (!deposit) {
+    //   setError(t('validation.deposit_required'));
+    //   setTimeout(() => setError(''), 3000);
+    //   return false;
+    // }
 
     // Deposit field validations
-    if (deposit) {
-      if (!formData.deposit || formData.deposit.trim() === '') {
-        setError(t('validation.deposit_required'));
-        setTimeout(() => setError(''), 3000);
-        return false;
-      }
+    // if (deposit) {
+    //   if (!formData.deposit || formData.deposit.trim() === '') {
+    //     setError(t('validation.deposit_required'));
+    //     setTimeout(() => setError(''), 3000);
+    //     return false;
+    //   }
 
-      const depositValue = parseFloat(formData.deposit);
-      if (isNaN(depositValue)) {
-        setError(t('validation.deposit_invalid'));
-        setTimeout(() => setError(''), 3000);
-        return false;
-      }
+    //   const depositValue = parseFloat(formData.deposit);
+    //   if (isNaN(depositValue)) {
+    //     setError(t('validation.deposit_invalid'));
+    //     setTimeout(() => setError(''), 3000);
+    //     return false;
+    //   }
 
-      if (depositValue <= 0) {
-        setError(t('validation.deposit_positive'));
-        setTimeout(() => setError(''), 3000);
-        return false;
-      }
-    }
+    //   if (depositValue <= 0) {
+    //     setError(t('validation.deposit_positive'));
+    //     setTimeout(() => setError(''), 3000);
+    //     return false;
+    //   }
+    // }
 
     setError('');
     return true;

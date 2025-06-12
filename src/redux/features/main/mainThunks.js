@@ -134,7 +134,7 @@ export const addBicycle = createAsyncThunk(
 
     // Generate geohash from latitude and longitude
     const geoHash = geohash.encode(lat, lng);
-    
+
     console.log({ userId, lng, lat, location, country, city, description, deposit, price, category, brand, model, geoHash }, '________________');
 
     let formData = new FormData();
@@ -142,7 +142,7 @@ export const addBicycle = createAsyncThunk(
     formData.append('model', model);
     formData.append('category', category);
     formData.append('price', price);
-    formData.append('deposit', deposit);
+    formData.append('deposit', deposit && deposit > 0 ? deposit : 0);
     formData.append('description', description);
     formData.append('city', city);
     formData.append('country', country);
@@ -196,7 +196,7 @@ export const createAccount = createAsyncThunk(
   'transactions/createAccount',
   async (_, { getState }) => {
     const token = getState().auth.userToken;
-    const accountType =   'individual'
+    const accountType = 'individual'
 
     try {
       const response = await axios.post(

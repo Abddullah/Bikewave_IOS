@@ -229,6 +229,8 @@ export const AddBicycleWrapper = () => {
                       deposit: '',
                       myUserId: user_id,
                     })
+                    dispatch(fetchUserInfo(user_id));
+
                     setShowSuccessPopup(true);
                   } else {
                     setShowErrorPopup(true);

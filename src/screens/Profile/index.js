@@ -200,7 +200,7 @@ export default function Profile({ navigation }) {
       return (
         <View>
           <ProfileHeader user={user} />
-          <ScrollView contentContainerStyle={{ height: heightFlex1 * (Platform.OS === 'ios' ? 5 : 4.5) }}>
+          <ScrollView contentContainerStyle={{ height: heightFlex1 * (Platform.OS === 'ios' ? 5.5 : 4.5) }}>
             <Text style={styles.sectionTitle}>{t('my_garage')}</Text>
             {bikes.length === 0 ? (
               <Text style={styles.noBikesMessage} onPress={() => navigation.navigate('Offer')}>
@@ -219,7 +219,7 @@ export default function Profile({ navigation }) {
                 keyExtractor={item => item.id}
                 numColumns={2}
                 columnWrapperStyle={styles.bikeGrid}
-                contentContainerStyle={{ paddingBottom: 5 }}
+                contentContainerStyle={{ paddingBottom: 5,gap:20 }}
               />
             )}
           </ScrollView>
@@ -345,6 +345,7 @@ const styles = StyleSheet.create({
   bikeGrid: {
     justifyContent: 'space-between',
     paddingHorizontal: 20,
+    // marginVertical:20
   },
   noBikesMessage: {
     textAlign: 'center',
