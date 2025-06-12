@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
   },
   paymentButton: {
     margin: 20,
-    marginTop: 60,
+    marginTop: Platform.OS === 'ios' ? 20 : 60 ,
   },
   dateSectionContainer: {
     gap: 15,

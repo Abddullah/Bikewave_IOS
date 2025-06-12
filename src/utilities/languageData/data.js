@@ -336,7 +336,7 @@ export const languageData = [
       please_fill_required_fields: 'Por favor, complete todos los campos requeridos',
       error: 'Error',
       ok: 'Aceptar',
-      chat: 'charlar',
+      chat: 'Chat',
       no_chats_available: 'No hay chats disponibles',
       your_conversations_will_appear: 'Tus conversaciones aparecerán aquí',
       errors: {
