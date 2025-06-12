@@ -213,6 +213,22 @@ export const AddBicycleWrapper = () => {
                 if (approvalRes.payload.isApproved) {
                   const response = await dispatch(addBicycle(formData));
                   if (response?.payload?.success) {
+                    setCurrentStep(1)
+                    setFormData({
+                      brand: '',
+                      model: '',
+                      description: '',
+                      category: '',
+                      location: '',
+                      lng: '',
+                      lat: '',
+                      country: '',
+                      city: '',
+                      photo: null,
+                      price: '',
+                      deposit: '',
+                      myUserId: user_id,
+                    })
                     setShowSuccessPopup(true);
                   } else {
                     setShowErrorPopup(true);
