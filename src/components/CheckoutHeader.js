@@ -20,6 +20,7 @@ export const CheckoutHeader = ({currentStep, steps, title, children}) => {
           style={styles.headerWrapper}>
           <PrevWhite />
           <Text style={styles.headerTitle}>{title}</Text>
+          <View/>
         </TouchableOpacity>
       </View>
       <DropShadow style={styles.childrenCard}>{children}</DropShadow>
@@ -38,8 +39,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 25,
+    paddingHorizontal: 25,
     marginTop: 20,
-    justifyContent: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
     ...Typography.f_18_inter_semi_bold,

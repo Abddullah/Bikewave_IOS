@@ -144,7 +144,7 @@ export const Step3 = ({ navigation, route }) => {
             title={t('booking_save')}
             description={t('booking_success_msg')}
           />
-          <View style={{ position: 'absolute', top: '5%' }}>
+          <View style={{ position: 'absolute', top: '5%',alignSelf: 'center'}}>
             <StepIndicator currentStep={4} steps={checkoutSteps} />
           </View>
         </View>

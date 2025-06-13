@@ -159,7 +159,7 @@ export const languageData = [
         5: 'Acceso anticipado a nuevas funciones de la app',
       },
       reservation_details: 'Datos de la reserva',
-      payment_proceed: 'Proceder al p',
+      payment_proceed: 'Proceder al pago',
       offer_bike_component: 'Ofrece tu bicicleta o componente',
       brand_value: 'Bicicleta de Montaña Pro',
       add_photo_desc: 'Añade un foto de tu bicicleta/componente.',
