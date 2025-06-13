@@ -53,7 +53,8 @@ export default function Login({ navigation }) {
       const response = await dispatch(login({ email, password }));
        if (response?.payload?.success) {
         if (userId) await saveFCMToken(userId);
-        setShowSuccessPopup(true);
+    navigation.replace('Tabs');
+    // setShowSuccessPopup(true);
       } else {
         setShowErrorPopup(true);
       }
