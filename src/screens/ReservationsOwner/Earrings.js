@@ -25,6 +25,7 @@ import moment from 'moment';
 import PopUp from '../../components/PopUp';
 import { SendMessageNotifications } from '../../utilities/notificationService';
 import { getAllFCMTokens } from '../../utilities/fcmTokenManager';
+import { platform } from '../../utilities';
 
 export default function Earrings({ navigation }) {
   const [activeTab, setActiveTab] = useState('earrings');
@@ -306,7 +307,9 @@ export default function Earrings({ navigation }) {
                         brand={booking?.bicycle?.brand || 'Brand'}
                         model={booking?.bicycle?.model || 'Model'}
                         photo={{ uri: booking?.bicycle?.photo?.replace(/\.avif$/, '.jpg') || booking?.bicycle?.photo }}
-                        reserverName={activeTab === 'confirmed' ? '' : booking?.userName + ' ' + booking?.userSurname || 'User'}
+                        // reserverName={activeTab === 'confirmed' ? '' : booking?.userName + ' ' + booking?.userSurname || 'User'}
+                        category={activeTab === 'confirmed' ? '' : booking?.bicycle?.category|| 'User'}
+                        city={booking?.bicycle?.city }
                       />
                       {booking.statusId === 1 && (
                         <DropShadow style={styles.dateCardShadow}>
@@ -390,8 +393,8 @@ const styles = StyleSheet.create({
     marginTop: -30,
   },
   mainContent: {
-    gap: 20,
-    paddingBottom: 20,
+    gap:platform=='ios'?0: 20,
+    paddingBottom:platform=='ios'?0: 20,
   },
   productDetails: {
     gap: 20,

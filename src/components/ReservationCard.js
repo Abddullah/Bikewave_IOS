@@ -2,13 +2,40 @@ import React from 'react';
 import {View, Text, Image, StyleSheet, TouchableOpacity} from 'react-native';
 import {Typography} from '../utilities/constants/constant.style';
 import {Activity, Reserve} from '../assets/svg';
+import {
+  AllGreen,
+  RoadGreen,
+  CityGreen,
+  MountainGreen,
+  GravelGreen,
+  ElectricalGreen,
+  Competition,
+  Component,
+} from '../assets/svg';
 import DropShadow from 'react-native-drop-shadow';
 import Colors from '../utilities/constants/colors';
 import Images from '../assets/images';
 import { useTranslation } from 'react-i18next';
 
-const ReservationCard = ({brand, model, onPress, reserverName, photo, dateFrom, dateEnd}) => {
-   const {  t } = useTranslation();
+const ReservationCard = ({brand, model, onPress, reserverName, category,city, photo, dateFrom, dateEnd}) => {
+  const { t } = useTranslation();
+
+  const getCategoryIcon = (category) => {
+    const categoryMap = {
+      'all': AllGreen,
+      'road': RoadGreen,
+      'city': CityGreen,
+      'mountain': MountainGreen,
+      'gravel': GravelGreen,
+      'electrical': ElectricalGreen,
+      'competition': Competition,
+      'component': Component,
+    };
+    return categoryMap[category?.toLowerCase()] || AllGreen;
+  };
+
+  const CategoryIcon = getCategoryIcon(category);
+
   return (
     <DropShadow style={styles.productCardShadow}>
       <TouchableOpacity
@@ -31,18 +58,22 @@ const ReservationCard = ({brand, model, onPress, reserverName, photo, dateFrom, 
           <Text style={[Typography.f_16_inter_regular, styles.productModel]}>
             {model}
           </Text>
-          {reserverName ? (
-            <View style={{paddingTop:10}}>
-              <Text
-                style={[Typography.f_14_inter_medium, {color: Colors.black}]}>
-                {t('reserved_by')}
-              </Text>
+          {city&&
+          <Text style={[Typography.f_16_inter_regular, styles.productModel]}>
+            {city}
+          </Text>
+          }
+          {category ? (
+            <View style={styles.categoryContainer}>
+              <View style={styles.iconContainer}>
+                <CategoryIcon width={20} height={20} />
+              </View>
               <Text
                 style={[
                   Typography.f_14_inter_semi_bold,
                   {color: Colors.black},
                 ]}>
-                {reserverName}
+                {category}
               </Text>
             </View>
           ) : (
@@ -97,6 +128,16 @@ const styles = StyleSheet.create({
     color: Colors.black,
     width: '25%',
     paddingTop: 5,
+  },
+  categoryContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingTop: 10,
+  },
+  iconContainer: {
+    width: 20,
+    height: 20,
   },
 });
 
