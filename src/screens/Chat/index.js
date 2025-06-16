@@ -78,7 +78,6 @@ const Chat = ({route, navigation}) => {
   const currentChat = useSelector(selectCurrentChat);
   const authorId = useSelector(selectAuthUserId);
   const userDetails = useSelector(selectUserDetails);
-
   const messages = useSelector(selectAllMessages);
   const userId = useSelector(selectAuthUserId);
   const {t} = useTranslation();
@@ -210,6 +209,7 @@ const Chat = ({route, navigation}) => {
             }
             // Get the chat details after creating/finding it
             const res = await dispatch(getOneChat(secondUserId));
+            
             if (res && res.payload && res.payload.length > 0) {
               chatId = res.payload[0]._id;
             }
@@ -274,6 +274,7 @@ const Chat = ({route, navigation}) => {
       // like showing a user-friendly error message
     }
   };
+  console.log(reciepentData,'reciepentData')
   const chatInfo = reciepentData
     ? {
         email: reciepentData.email || '',

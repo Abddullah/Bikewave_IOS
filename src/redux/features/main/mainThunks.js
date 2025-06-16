@@ -13,18 +13,31 @@ export const getAllBicycles = createAsyncThunk(
   'bicycles/fetchAll',
   async ({ category }, { getState }) => {
     const { filters } = getState().main;
+    let location = null;
+    // console.log(filters, 'filters')
+    if (filters?.location?.cityName) {
+      const geoHash = filters.location.lat && filters.location.lng
+        ? geohash.encode(filters.location.lat, filters.location.lng)
+        : null;
+
+      location = geoHash
+    }
+
     const payload = {
       category,
       dateFrom: filters.dateFrom,
       dateEnd: filters.dateEnd,
-      location: filters?.location?.cityName ? filters?.location : null,
+      location: location,
       minPrice: filters.minPrice,
       maxPrice: filters.maxPrice,
     };
     try {
+      console.log(payload,'payload')
       const response = await ApiManager.post('/bicycles', payload);
+      // console.log(response, 'responseresponseresponse')
       return response.data;
     } catch (error) {
+      console.log(error, 'errorerrorerror')
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);

@@ -229,6 +229,8 @@ const Home = React.memo(({navigation}) => {
               setFilters({
                 location: {
                   cityName: city,
+                  lat: lat,
+                  lng: lng
                 },
               }),
             );
