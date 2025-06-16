@@ -18,7 +18,7 @@ export default function Splash() {
 
   return (
     <ImageBackground
-      style={[styles.background,{backgroundColor:'red'}]}
+      style={[styles.background]}
       resizeMode="cover"
       source={Images.splashBg2}>
       {/* <View style={styles.overlay}>
