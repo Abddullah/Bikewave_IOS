@@ -1,5 +1,5 @@
 import React, {useRef, useEffect, useState} from 'react';
-import {SafeAreaView, LogBox, View, Platform} from 'react-native';
+import {SafeAreaView, LogBox, View, Platform, StatusBar} from 'react-native';
 import Toast from 'react-native-toast-message';
 import {Provider} from 'react-redux';
 import store from './src/redux/store';
@@ -92,6 +92,7 @@ function App() {
               <SafeAreaView 
                 style={{
                   flex: 1,
+                  paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
                   backgroundColor: currentRouteName === "Splash" ? '#102224' : 'transparent'
                 }}
               >

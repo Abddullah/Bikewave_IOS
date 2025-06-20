@@ -230,7 +230,7 @@ export default function Profile({ navigation }) {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ gap: 20 }}
-          style={{ marginTop: Platform.OS === 'ios' ? -20 : -35, }}>
+          style={{ marginTop: Platform.OS === 'ios' ? -20 : -20, }}>
           <MenuSection title={t('account')} items={accountItems} />
           <MenuSection title={t('configuration')} items={configItems} />
           <MenuSection items={otherItems} />
