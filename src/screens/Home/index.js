@@ -55,7 +55,7 @@ import {
   getFavorites,
 } from '../../redux/features/main/mainThunks';
 import {selectBicycles} from '../../redux/features/main/mainSelectors';
-// import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
+import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
 import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
 import axios from 'axios';
 import {setFilters} from '../../redux/features/main/mainSlice';
@@ -435,7 +435,7 @@ const Home = React.memo(({navigation}) => {
         </View>
         {showMap ? (
           <>
-            {/* <MapView
+            <MapView
               // provider={PROVIDER_GOOGLE}
               style={{
                 height: screenResolution.screenHeight * 0.67,
@@ -458,7 +458,7 @@ const Home = React.memo(({navigation}) => {
                   </Marker>
                 ) : null;
               })}
-            </MapView>  */}
+            </MapView> 
             <View
               style={{
                 position: 'absolute',

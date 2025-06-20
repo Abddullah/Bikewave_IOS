@@ -10,7 +10,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-// import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
+import MapView, {Marker, PROVIDER_GOOGLE} from 'react-native-maps';
 import AppButton from '../../components/AppButton';
 import {ListProductHeader} from '../../components/ListProductHeader';
 import Colors from '../../utilities/constants/colors';
@@ -266,7 +266,7 @@ export const Step3 = ({formData, updateFormData, onNext, onBack}) => {
                   borderColor: Colors.error,
                 },
               ]}>
-              {/* <MapView
+              <MapView
                 style={{height: '100%', width: '100%'}}
                 // provider={PROVIDER_GOOGLE}
                 region={mapRegion}
@@ -280,7 +280,7 @@ export const Step3 = ({formData, updateFormData, onNext, onBack}) => {
                     title="Selected Location"
                   />
                 )}
-              </MapView> */}
+              </MapView>
             </View>
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
           </View>
