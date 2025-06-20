@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Dimensions } from 'react-native';
 import { TickGreen, CrossRed } from '../assets/svg';
 import Colors from '../utilities/constants/colors';
 import { Typography } from '../utilities/constants/constant.style';
+import { platform } from '../utilities';
 
 const StepIndicator = ({ currentStep, steps, failedStepIndex }) => {
   const screenWidth = Dimensions.get('window').width;
@@ -37,7 +38,7 @@ const StepIndicator = ({ currentStep, steps, failedStepIndex }) => {
               key={index}
               style={[
                 styles.stepLabel,
-                { left: step === 'Pay' ? 15 : 0 },
+                { left: step === 'Pay' ? platform.isIOS ? 15 : 0 : 0 },
                 index + 1 !== currentStep && styles.hiddenStepLabel
               ]}>
               {step}
