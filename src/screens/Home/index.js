@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, useCallback, useMemo} from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   StyleSheet,
   Text,
@@ -38,94 +38,94 @@ import {
   Bike,
 } from '../../assets/svg';
 
-import {Typography} from '../../utilities/constants/constant.style';
+import { Typography } from '../../utilities/constants/constant.style';
 import Colors from '../../utilities/constants/colors';
-import {DEFAULT_LANGUAGE} from '../../utilities';
+import { DEFAULT_LANGUAGE, platform } from '../../utilities';
 import ProductCard from '../../components/ProductCard';
 import AppButton from '../../components/AppButton';
 import ProductCardDetails from '../../components/ProductCardDetails';
 import screenResolution, {
   heightFlex1,
 } from '../../utilities/constants/screenResolution';
-import {useTranslation} from 'react-i18next';
-import {useDispatch, useSelector} from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   getAllBicycles,
   getBicyclesNearCity,
   getFavorites,
 } from '../../redux/features/main/mainThunks';
-import {selectBicycles} from '../../redux/features/main/mainSelectors';
-import MapView, {PROVIDER_GOOGLE, Marker} from 'react-native-maps';
-import {GooglePlacesAutocomplete} from 'react-native-google-places-autocomplete';
+import { selectBicycles } from '../../redux/features/main/mainSelectors';
+import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
+import { GooglePlacesAutocomplete } from 'react-native-google-places-autocomplete';
 import axios from 'axios';
-import {setFilters} from '../../redux/features/main/mainSlice';
-import {RFValue} from 'react-native-responsive-fontsize';
+import { setFilters } from '../../redux/features/main/mainSlice';
+import { RFValue } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
-import {saveFCMToken} from '../../utilities/fcmTokenManager';
-import {selectAuthUserId} from '../../redux/features/auth/authSelectors';
-import {EnvConfig} from '../../config/envConfig';
+import { saveFCMToken } from '../../utilities/fcmTokenManager';
+import { selectAuthUserId } from '../../redux/features/auth/authSelectors';
+import { EnvConfig } from '../../config/envConfig';
 const categories = [
-  {id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: {en: 'All', sp: 'Todos'}},
+  { id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: { en: 'All', sp: 'Todos' } },
   {
     id: 2,
     icon: Road,
     iconBlack: RoadBlack,
     iconGreen: RoadGreen,
-    label: {en: 'Road', sp: 'Carretera'},
+    label: { en: 'Road', sp: 'Carretera' },
   },
   {
     id: 3,
     icon: City,
     iconBlack: CityBlack,
     iconGreen: CityGreen,
-    label: {en: 'City', sp: 'Ciudad'},
+    label: { en: 'City', sp: 'Ciudad' },
   },
   {
     id: 4,
     icon: Mountain,
     iconBlack: MountainBlack,
     iconGreen: MountainGreen,
-    label: {en: 'Mountain', sp: 'Montaña'},
+    label: { en: 'Mountain', sp: 'Montaña' },
   },
   {
     id: 5,
     icon: Gravel,
     iconBlack: GravelBlack,
     iconGreen: GravelGreen,
-    label: {en: 'Gravel', sp: 'Gravel'},
+    label: { en: 'Gravel', sp: 'Gravel' },
   },
   {
     id: 6,
     icon: Electrical,
     iconBlack: ElectricalBlack,
     iconGreen: ElectricalGreen,
-    label: {en: 'Electric', sp: 'Electrica'},
+    label: { en: 'Electric', sp: 'Electrica' },
   },
   {
     id: 7,
     icon: CompetitionGray,
     iconBlack: CompetitionBlack,
-    label: {en: 'Pro', sp: 'Pro'},
+    label: { en: 'Pro', sp: 'Pro' },
   },
   {
     id: 8,
     icon: ComponentGray,
     iconBlack: ComponentBlack,
-    label: {en: 'Component', sp: 'Componente'},
+    label: { en: 'Component', sp: 'Componente' },
   },
 ];
 
-const Home = React.memo(({navigation}) => {
+const Home = React.memo(({ navigation }) => {
   const [selectedCategory, setSelectedCategory] = useState(1);
   const [showMap, setShowMap] = useState(false);
   const dispatch = useDispatch();
   const bicycles = useSelector(selectBicycles);
   const userId = useSelector(selectAuthUserId);
-  const {dateFrom, dateEnd} = useSelector(state => state.main.filters);
+  const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
   const [selectedBike, setSelectedBike] = useState(null);
   const [city, setCity] = useState('');
   const [loader, setloader] = useState('');
-  const {t, i18n} = useTranslation();
+  const { t, i18n } = useTranslation();
   const currentLanguage = i18n.language === 'sp' ? 'sp' : 'en';
   const regionTimeout = useRef(null);
   const [markers, setMarkers] = useState([]);
@@ -195,7 +195,7 @@ const Home = React.memo(({navigation}) => {
     const markersData = bicycles.filter(item => item?.lat && item?.lng);
     setMarkers(markersData);
   }, [bicycles]);
-  
+
   useEffect(() => {
     if (userId) {
       saveFCMToken(userId);
@@ -203,10 +203,10 @@ const Home = React.memo(({navigation}) => {
   }, [userId]);
   const handlePlaceSelect = useCallback(
     async (data, details = null) => {
-      const {northeast, southwest} = details?.geometry?.viewport;
+      const { northeast, southwest } = details?.geometry?.viewport;
       const latitudeDelta = Math.abs(northeast.lat - southwest.lat);
       const longitudeDelta = Math.abs(northeast.lng - southwest.lng);
-      const {lat, lng} = details?.geometry?.location;
+      const { lat, lng } = details?.geometry?.location;
 
       try {
         const response = await axios.get(
@@ -280,7 +280,7 @@ const Home = React.memo(({navigation}) => {
   };
 
   const renderCategoryItem = useCallback(
-    ({item}) => {
+    ({ item }) => {
       const isSelected = selectedCategory === item.id;
       const Icon = isSelected ? (item.iconGreen || item.iconBlack) : item.icon;
       const textColor = isSelected ? Colors.primary : Colors.gray;
@@ -289,11 +289,11 @@ const Home = React.memo(({navigation}) => {
           activeOpacity={0.8}
           onPress={() => handleCategoryPress(item.id)}>
           <View style={[
-            styles.categoryItem, 
+            styles.categoryItem,
             isSelected && styles.selectedCategoryItem
           ]}>
             <Icon />
-            <Text style={[Typography.f_12_inter_medium, {color: textColor}]}>
+            <Text style={[Typography.f_12_inter_medium, { color: textColor }]}>
               {item.label[currentLanguage]}
             </Text>
           </View>
@@ -304,7 +304,7 @@ const Home = React.memo(({navigation}) => {
   );
 
   const renderProductItem = useCallback(
-    ({item, index}) => {
+    ({ item, index }) => {
       const imageUrl = item.photo
         ? item.photo.replace(/\.avif$/, '.jpg')
         : item.photo;
@@ -332,7 +332,7 @@ const Home = React.memo(({navigation}) => {
       <View>
         <AppStatusBar />
         <View style={styles.headerContainer}>
-          <View style={{width: '83%', height: 50}}>
+          <View style={{ width: '83%', height: 50 }}>
             <GooglePlacesAutocomplete
               ref={placesRef}
               placeholder={t('your_city')}
@@ -345,7 +345,7 @@ const Home = React.memo(({navigation}) => {
               minLength={2}
               enablePoweredByContainer={false}
               renderLeftButton={() => (
-                <View style={{alignSelf: 'center', top: 8}}>
+                <View style={{ alignSelf: 'center', top: 8 }}>
                   <Search />
                 </View>
               )}
@@ -353,7 +353,7 @@ const Home = React.memo(({navigation}) => {
                 city?.length > 0 && (
                   <TouchableOpacity
                     onPress={clearInput}
-                    style={{alignSelf: 'center', top: 8}}>
+                    style={{ alignSelf: 'center', top: 8 }}>
                     <AntDesign
                       name={'close'}
                       size={RFValue(20, screenResolution.screenHeight)}
@@ -364,7 +364,7 @@ const Home = React.memo(({navigation}) => {
               styles={{
                 container: {
                   backgroundColor: Colors.white,
-                  
+
                   borderRadius: 50,
                   paddingHorizontal: 10,
                   shadowColor: '#000',
@@ -458,12 +458,12 @@ const Home = React.memo(({navigation}) => {
                   </Marker>
                 ) : null;
               })}
-            </MapView> 
+            </MapView>
             <View
               style={{
                 position: 'absolute',
                 width: '100%',
-                top: screenResolution.screenHeight * 0.2,
+                top: platform.isIOS ? screenResolution.screenHeight * 0.2 : screenResolution.screenHeight * 0.25,
                 zIndex: -1,
                 elevation: 5,
               }}>
@@ -513,7 +513,7 @@ const Home = React.memo(({navigation}) => {
               <ActivityIndicator
                 color={Colors.primary}
                 size={'large'}
-                style={{marginTop: 50}}
+                style={{ marginTop: 50 }}
               />
             ) : bicycles.length === 0 ? (
               <View style={styles.noBicyclesContainer}>
