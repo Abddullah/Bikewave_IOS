@@ -7,6 +7,8 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Platform,
+  KeyboardAvoidingView,
 } from 'react-native';
 import Colors from '../../utilities/constants/colors';
 import images from '../../assets/images';
@@ -29,6 +31,7 @@ import {
 } from '../../assets/svg';
 
 import CheckBox from '@react-native-community/checkbox';
+import RNCheckBox from 'react-native-check-box';
 import AppButton from '../../components/AppButton';
 import { useTranslation } from 'react-i18next';
 import BottomSheet from '../../components/BottomSheet';
@@ -133,7 +136,11 @@ export default function EditBike({ route, navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
       <AppStatusBar />
       <View style={styles.header}>
         <TouchableOpacity
@@ -144,7 +151,11 @@ export default function EditBike({ route, navigation }) {
         <Text style={styles.headerTitle}>{t('edit_bike')}</Text>
         <Text />
       </View>
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView 
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
         <View>
           <Image
             source={
@@ -255,17 +266,31 @@ export default function EditBike({ route, navigation }) {
           </View>
           <View>
             <View style={styles.depositContainer}>
-              <CheckBox
-                tintColors={{ true: Colors.primary, false: Colors.primary }}
-                value={formData.deposit > 0}
-                onValueChange={value => {
-                  if (!value) {
-                    setFormData({ ...formData, deposit: 0 });
-                  } else {
-                    setFormData({ ...formData, deposit: formData.deposit || 0 });
-                  }
-                }}
-              />
+              {Platform.OS === 'ios' ? (
+                <RNCheckBox
+                  onClick={() => {
+                    if (formData.deposit > 0) {
+                      setFormData({ ...formData, deposit: 0 });
+                    } else {
+                      setFormData({ ...formData, deposit: formData.deposit || 0 });
+                    }
+                  }}
+                  isChecked={formData.deposit > 0}
+                  checkBoxColor={Colors.primary}
+                />
+              ) : (
+                <CheckBox
+                  tintColors={{ true: Colors.primary, false: Colors.primary }}
+                  value={formData.deposit > 0}
+                  onValueChange={value => {
+                    if (!value) {
+                      setFormData({ ...formData, deposit: 0 });
+                    } else {
+                      setFormData({ ...formData, deposit: formData.deposit || 0 });
+                    }
+                  }}
+                />
+              )}
               <Text style={[styles.label, { marginBottom: 0 }]}>{t('bill')}</Text>
             </View>
             <AppTextInput
@@ -344,7 +369,7 @@ export default function EditBike({ route, navigation }) {
           </ScrollView>
         </BottomSheet>
       </ScrollView>
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
@@ -352,6 +377,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: Colors.white,
+  },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: Platform.OS === 'ios' ? 20 : 0,
   },
   header: {
     backgroundColor: Colors.primary,

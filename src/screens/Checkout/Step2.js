@@ -9,6 +9,7 @@ import AppTextInput from '../../components/AppTextInput';
 import {Typography} from '../../utilities/constants/constant.style';
 import DropShadow from 'react-native-drop-shadow';
 import CheckBox from '@react-native-community/checkbox';
+import RNCheckBox from 'react-native-check-box';
 import { useTranslation } from 'react-i18next';
 import { useDispatch } from 'react-redux';
 import { setInvoiceAddress } from '../../redux/features/main/mainThunks';
@@ -408,16 +409,29 @@ export const Step2 = ({navigation, route}) => {
           </View>
         </DropShadow>
         <View style={styles.checkboxWrapper}>
-          <CheckBox
-            tintColors={{true: Colors.primary, false: Colors.primary}}
-            value={formData.agree}
-            onValueChange={() => {
-              setFormData({...formData, agree: !formData.agree});
-              if (errors.agree) {
-                setErrors({...errors, agree: ''});
-              }
-            }}
-          />
+          {Platform.OS === 'ios' ? (
+            <RNCheckBox
+              onClick={() => {
+                setFormData({...formData, agree: !formData.agree});
+                if (errors.agree) {
+                  setErrors({...errors, agree: ''});
+                }
+              }}
+              isChecked={formData.agree}
+              checkBoxColor={Colors.primary}
+            />
+          ) : (
+            <CheckBox
+              tintColors={{true: Colors.primary, false: Colors.primary}}
+              value={formData.agree}
+              onValueChange={() => {
+                setFormData({...formData, agree: !formData.agree});
+                if (errors.agree) {
+                  setErrors({...errors, agree: ''});
+                }
+              }}
+            />
+          )}
           <Text style={styles.checkBoxLabel}>
             {t('accept_terms')}{' '}
             <Text style={{textDecorationLine: 'underline'}}>

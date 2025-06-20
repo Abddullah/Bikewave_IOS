@@ -14,7 +14,7 @@ export const languageData = [
       messages: 'Mensajes',
       profile: 'Perfil',
       create_your_account: 'Crea tu cuenta',
-      first_name: 'Nombre de pila',
+      first_name: 'Nombre',
       street_and_number: 'Calle y numero',
       street_number_placeholder: 'calle de Pez',
       door: 'Puerta',
