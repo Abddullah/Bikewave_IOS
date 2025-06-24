@@ -305,7 +305,7 @@ const Chat = ({route, navigation}) => {
       keyboardVerticalOffset={Platform.OS === 'ios' ? 60 : 0}>
       <AppStatusBar />
       <View style={styles.headerStyle}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={() => navigation.navigate('Messages1')}>
           <PrevWhite height={18} width={18} />
         </TouchableOpacity>
         <Text style={[Typography.f_24_inter_semi_bold, styles.headerTextStyle]}>
