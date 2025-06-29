@@ -22,6 +22,7 @@ import {
   deleteChat,
   markMessagesAsSeen,
 } from '../../redux/features/chat/chatThunks';
+import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
 import {selectAllChats} from '../../redux/features/chat/chatSelectors';
 import {selectAuthUserId} from '../../redux/features/auth/authSelectors';
 import io from 'socket.io-client';
@@ -265,6 +266,9 @@ export default function Messages({navigation}) {
   };
 
   const handleChatPress = (chatId, secondUserId, recipientData) => {
+    // Clear current chat state first
+    dispatch(clearCurrentChat());
+    
     // Mark messages as seen when opening a chat
     dispatch(markMessagesAsSeen(chatId));
 
@@ -279,6 +283,7 @@ export default function Messages({navigation}) {
       secondUserId: secondUserId,
       reciepentData: recipientData,
       socketInstance: socket.current, // Pass the socket instance
+      key: `chat-${secondUserId}` // Add unique key for each chat
     });
   };
 

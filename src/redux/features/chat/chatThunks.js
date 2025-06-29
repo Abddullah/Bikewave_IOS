@@ -78,14 +78,14 @@ export const sendMessage = createAsyncThunk(
   'chat/sendMessage',
   async (message, { getState }) => {
     const token = getState().auth.userToken;
-     try {
+    try {
       const response = await ApiManager.post('/messages', message, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `${token}`,
         },
       });
-       return response.data;
+      return response.data;
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);

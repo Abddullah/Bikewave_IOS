@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
 
   arrowContainer: {
-    height: 20,
+    height: 30,
     width: 40,
     justifyContent: 'center',
     alignItems: 'center',

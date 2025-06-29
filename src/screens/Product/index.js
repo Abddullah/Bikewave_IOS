@@ -193,19 +193,13 @@ export default function Product({ navigation, route }) {
       return;
     }
     dispatch(clearCurrentChat());
-    navigation.navigate('Tabs', {
-      screen: 'Messages',
-      params: {
-        screen: 'Chat',
-        params: {
-          secondUserId: route?.params?.ownerId,
-          reciepentData: bicycle?.owner
-        }
-      }
+    navigation.navigate('Chat', {
+      secondUserId: route?.params?.ownerId,
+      reciepentData: bicycle?.owner,
+      key: `chat-${route?.params?.ownerId}`
     });
   };
 
-  console.log('bicycle?.owner');
   return (
     <View style={styles.container}>
       <AppStatusBar backgroundColor={Colors.white} barStyle="dark-content" />

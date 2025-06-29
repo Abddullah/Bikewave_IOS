@@ -29,6 +29,7 @@ import {
   markMessagesAsSeen,
   createChat,
 } from '../../redux/features/chat/chatThunks';
+import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
 import {
   selectCurrentChat,
   selectAllMessages,
@@ -90,12 +91,54 @@ const Chat = ({route, navigation}) => {
     dispatch(fetchUserInfo(authorId));
   }, [authorId]);
 
+  // Clear messages when component mounts or when secondUserId changes
   useEffect(() => {
+    setRealTimeMessages([]);
+    setIsLoading(true);
+    
     if (secondUserId) {
-      setIsLoading(true);
+      // Clear current chat state first
+      dispatch(clearCurrentChat());
+      
+      // Then get the chat for the new user
       dispatch(getOneChat(secondUserId));
     }
   }, [secondUserId]);
+
+  // Handle route params changes
+  useEffect(() => {
+    const { secondUserId: newSecondUserId } = route?.params || {};
+    if (newSecondUserId && newSecondUserId !== secondUserId) {
+      setRealTimeMessages([]);
+      setIsLoading(true);
+      dispatch(clearCurrentChat());
+      dispatch(getOneChat(newSecondUserId));
+    }
+  }, [route?.params]);
+
+  // Cleanup when component unmounts
+  useEffect(() => {
+    return () => {
+      // Clear chat state when leaving the screen
+      dispatch(clearCurrentChat());
+      setRealTimeMessages([]);
+    };
+  }, []);
+
+  // Handle screen focus to ensure proper chat loading
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (secondUserId) {
+        // Clear and reload chat when screen comes into focus
+        setRealTimeMessages([]);
+        setIsLoading(true);
+        dispatch(clearCurrentChat());
+        dispatch(getOneChat(secondUserId));
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, secondUserId]);
 
   const scrollToBottom = (animated = true) => {
     if (flatListRef.current && realTimeMessages.length > 0) {
