@@ -1,11 +1,11 @@
 import {useState, useEffect} from 'react';
-import {Modal, View, Text, TouchableOpacity, StyleSheet} from 'react-native';
+import {Modal, View, Text, TouchableOpacity, StyleSheet, Platform} from 'react-native';
 import {Calendar, LocaleConfig} from 'react-native-calendars';
 import {useTranslation} from 'react-i18next';
 import Colors from '../utilities/constants/colors';
 import {Typography} from '../utilities/constants/constant.style';
 import {DEFAULT_LANGUAGE} from '../utilities';
-import {Next, PrevGray} from '../assets/svg';
+import {Next, Prev, PrevGray} from '../assets/svg';
 
 const DateRangePickerModal = ({
   visible,
@@ -18,6 +18,8 @@ const DateRangePickerModal = ({
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [isLocaleReady, setIsLocaleReady] = useState(false);
+
+  const todayDateString = new Date().toISOString().split('T')[0];
 
   useEffect(() => {
     if (
@@ -45,6 +47,24 @@ const DateRangePickerModal = ({
     const newDate = new Date(currentDate);
     newDate.setMonth(newDate.getMonth() + 1);
     setCurrentDate(newDate);
+  };
+
+  const handlePrevMonth = () => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    
+    // Check if the new date would be before the minimum date
+    const minDate = new Date(todayDateString);
+    if (newDate >= minDate) {
+      setCurrentDate(newDate);
+    }
+  };
+
+  const canGoToPrevMonth = () => {
+    const prevMonth = new Date(currentDate);
+    prevMonth.setMonth(prevMonth.getMonth() - 1);
+    const minDate = new Date(todayDateString);
+    return prevMonth >= minDate;
   };
 
   const formatMonthYear = date => {
@@ -128,8 +148,6 @@ const DateRangePickerModal = ({
     return markedDates;
   };
 
-  const todayDateString = new Date().toISOString().split('T')[0];
-
   return (
     <Modal visible={visible} animationType="slide" transparent={true}>
       <View style={styles.modalContainer}>
@@ -160,12 +178,20 @@ const DateRangePickerModal = ({
                     {formatMonthYear(currentDate)}
                   </Text>
                   <View style={styles.monthNavigation}>
-                    <TouchableOpacity activeOpacity={0.8}>
-                      <PrevGray />
+                    <TouchableOpacity 
+                      activeOpacity={0.8}
+                      onPress={handlePrevMonth}
+                      disabled={!canGoToPrevMonth()}
+                      style={[
+                        styles.navButton,
+                        !canGoToPrevMonth() && styles.disabledNavButton
+                      ]}>
+                      <Prev />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={handleNextMonth}
-                      activeOpacity={0.8}>
+                      activeOpacity={0.8}
+                      style={styles.navButton}>
                       <Next />
                     </TouchableOpacity>
                   </View>
@@ -258,7 +284,18 @@ const styles = StyleSheet.create({
   monthNavigation: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 30,
+    gap: 0,
+  },
+  navButton: {
+    // padding: 5,
+    // borderWidth: 2,
+    height: 20,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+    },
+  disabledNavButton: {
+    opacity: 0.3,
   },
 });
 

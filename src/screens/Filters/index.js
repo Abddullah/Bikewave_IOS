@@ -1,26 +1,26 @@
-import React, {useState, useEffect} from 'react';
-import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import AppStatusBar from '../../components/AppStatusBar';
 import Colors from '../../utilities/constants/colors';
-import {CrossBlack, Next, Prev} from '../../assets/svg';
-import {Typography} from '../../utilities/constants/constant.style';
+import { CrossBlack, Next, Prev } from '../../assets/svg';
+import { Typography } from '../../utilities/constants/constant.style';
 import AppButton from '../../components/AppButton';
-import {Calendar, LocaleConfig} from 'react-native-calendars';
+import { Calendar, LocaleConfig } from 'react-native-calendars';
 import DropShadow from 'react-native-drop-shadow';
-import {DEFAULT_LANGUAGE} from '../../utilities';
-import {useTranslation} from 'react-i18next';
-import {setFilters} from '../../redux/features/main/mainSlice';
-import {useDispatch, useSelector} from 'react-redux';
-import {getAllBicycles} from '../../redux/features/main/mainThunks';
+import { DEFAULT_LANGUAGE } from '../../utilities';
+import { useTranslation } from 'react-i18next';
+import { setFilters } from '../../redux/features/main/mainSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllBicycles } from '../../redux/features/main/mainThunks';
 
-export default function DateFilter({navigation}) {
+export default function DateFilter({ navigation }) {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [markedDates, setMarkedDates] = useState({});
   const [isLocaleReady, setIsLocaleReady] = useState(false);
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const dispatch = useDispatch();
-  const {dateFrom, dateEnd} = useSelector(state => state.main.filters);
+  const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
 
   useEffect(() => {
     if (dateFrom && dateEnd) {
@@ -65,12 +65,12 @@ export default function DateFilter({navigation}) {
       t('calendarData.today')
     ) {
       LocaleConfig.locales[DEFAULT_LANGUAGE] = {
-        monthNames: t('calendarData.monthNames', {returnObjects: true}),
+        monthNames: t('calendarData.monthNames', { returnObjects: true }),
         monthNamesShort: t('calendarData.monthNamesShort', {
           returnObjects: true,
         }),
-        dayNames: t('calendarData.dayNames', {returnObjects: true}),
-        dayNamesShort: t('calendarData.dayNamesShort', {returnObjects: true}),
+        dayNames: t('calendarData.dayNames', { returnObjects: true }),
+        dayNamesShort: t('calendarData.dayNamesShort', { returnObjects: true }),
         today: t('calendarData.today'),
       };
       LocaleConfig.defaultLocale = DEFAULT_LANGUAGE;
@@ -201,12 +201,15 @@ export default function DateFilter({navigation}) {
                   <View style={styles.monthNavigation}>
                     <TouchableOpacity
                       activeOpacity={0.8}
+                      style={styles.arrowContainer}
                       onPress={handlePrevMonth}>
                       <Prev />
                     </TouchableOpacity>
                     <TouchableOpacity
                       onPress={handleNextMonth}
-                      activeOpacity={0.8}>
+                      activeOpacity={0.8}
+                      style={styles.arrowContainer}
+                    >
                       <Next />
                     </TouchableOpacity>
                   </View>
@@ -272,9 +275,17 @@ const styles = StyleSheet.create({
   monthNavigation: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 30,
+    gap: 0,
   },
   applyButton: {
     marginTop: 35,
   },
+
+  arrowContainer: {
+    height: 20,
+    width: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
 });
