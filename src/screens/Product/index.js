@@ -193,10 +193,13 @@ export default function Product({ navigation, route }) {
       return;
     }
     dispatch(clearCurrentChat());
-    navigation.navigate('Chat', {
-      secondUserId: route?.params?.ownerId,
-      reciepentData: bicycle?.owner,
-      key: `chat-${route?.params?.ownerId}`
+    navigation.navigate('Messages', {
+      screen: 'Chat',
+      params: {
+        secondUserId: route?.params?.ownerId,
+        reciepentData: bicycle?.owner,
+        key: `chat-${route?.params?.ownerId}`,
+      },
     });
   };
 
