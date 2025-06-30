@@ -186,7 +186,7 @@ export default function Product({ navigation, route }) {
     }
   }, [favorites]);
 
-
+console.log(route?.params,'route?.params')
   const handleChatPress = async () => {
     if (!route?.params?.ownerId) {
       alert('Chat can\'t be initialized because owner ID is missing');

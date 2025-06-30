@@ -44,7 +44,9 @@ const ProductCard = ({
     <TouchableOpacity
       activeOpacity={0.8}
       style={[styles.cardShadow, style]}
-      onPress={onPress?onPress:() => productId && navigation.navigate('Product', { productId, ownerId: data?.owner?._id })}>
+      onPress={onPress ? onPress : () => {
+         productId && navigation.navigate('Product', { productId, ownerId: data.ownerId})
+       }}>
       <View>
         <FastImage
           style={styles.cardImage}

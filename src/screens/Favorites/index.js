@@ -65,6 +65,7 @@ export default function Favorites({ navigation }) {
         productId={item._id}
         key={item._id}
         brand={item.brand}
+        data={item}
         model={item.model}
         location={item?.location?.city}
         price={item.price}
