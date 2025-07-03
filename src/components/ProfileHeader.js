@@ -19,6 +19,8 @@ import {colors} from '../utilities/constants';
 export default function ProfileHeader({user}) {
   const sheetRef = useRef(null);
 
+  //updated
+
   return (
     <>
       <View style={styles.shadowContainer}>
