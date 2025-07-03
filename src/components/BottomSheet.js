@@ -3,7 +3,7 @@ import {View} from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Colors from '../utilities/constants/colors';
 
-const BottomSheet = forwardRef(({children, HEIGHT, ...props}, ref) => {
+const BottomSheet = forwardRef(({children, HEIGHT,backgroundColor,...props}, ref) => {
   return (
     <RBSheet
       ref={ref}
@@ -22,9 +22,9 @@ const BottomSheet = forwardRef(({children, HEIGHT, ...props}, ref) => {
         container: {
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          backgroundColor: Colors.primary,
+          backgroundColor:backgroundColor|| Colors.primary,
           borderWidth:1,
-          borderColor:Colors.white
+          borderColor:Colors.white,
         },
       }}
       height={HEIGHT || 365}
