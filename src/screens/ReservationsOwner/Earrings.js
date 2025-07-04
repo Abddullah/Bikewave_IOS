@@ -19,7 +19,7 @@ import AppButton from '../../components/AppButton';
 import ReservationCard from '../../components/ReservationCard';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount } from '../../redux/features/main/mainThunks';
+import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount, addReview } from '../../redux/features/main/mainThunks';
 import { returnBicycle } from '../../redux/features/main/pickupReturnThunks';
 import moment from 'moment';
 import PopUp from '../../components/PopUp';
@@ -35,8 +35,9 @@ export default function Earrings({ navigation }) {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [popupAction, setPopupAction] = useState(null);
-  const [showReviewSheet, setShowReviewSheet] = useState(true);
+  const [showReviewSheet, setShowReviewSheet] = useState(false);
   const [reviewDismissed, setReviewDismissed] = useState(false);
+  const [reviewBooking, setReviewBooking] = useState(null);
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const bookings = useSelector((state) => state.main.ownerBookings);
@@ -234,14 +235,24 @@ export default function Earrings({ navigation }) {
     setErrorMessage('');
   };
 
-  const handleReviewSubmit = (review) => {
-    setShowReviewSheet(false);
+  const handleReviewSubmit = ({ rating, comment }) => {
+    if (!reviewBooking) return;
+    dispatch(addReview({
+      bookingId: reviewBooking._id,
+      bicycleId: reviewBooking.bicycle?._id,
+      rating,
+      comment,
+      ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
+    }));
+    setReviewBooking(null);
     setReviewDismissed(true);
+    setShowReviewSheet(false);
   };
 
   const handleReviewClose = () => {
-    setShowReviewSheet(false);
+    setReviewBooking(null);
     setReviewDismissed(true);
+    setShowReviewSheet(false);
   };
 
   const bookingInfo = {
@@ -374,10 +385,10 @@ export default function Earrings({ navigation }) {
             )}
           </ScrollView>
           <ReviewBottomSheet
-            visible={showReviewSheet}
+            visible={!!reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
-            bookingInfo={bookingInfo}
+            bookingInfo={reviewBooking}
           />
         </>
       )}
