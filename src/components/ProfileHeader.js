@@ -15,9 +15,11 @@ import {RFValue} from 'react-native-responsive-fontsize';
 import {CrossBlack, Star} from '../assets/svg';
 import BottomSheet from './BottomSheet';
 import {colors} from '../utilities/constants';
+import {useTranslation} from 'react-i18next';
 
 export default function ProfileHeader({user}) {
   const sheetRef = useRef(null);
+  const {t} = useTranslation();
 
   return (
     <>
@@ -45,7 +47,7 @@ export default function ProfileHeader({user}) {
               onPress={() => sheetRef.current && sheetRef.current.open()}>
               <Text
                 style={[Typography.f_14_extra_bold, {color: Colors.primary}]}>
-                (Ver reseñas)
+                ({t('SeeReviews')})
               </Text>
             </TouchableOpacity>
           </View>
@@ -65,14 +67,15 @@ export default function ProfileHeader({user}) {
               Typography.f_18_inter_bold,
               {marginBottom: 20, color: Colors.black, alignSelf: 'center'},
             ]}>
-            Reseñas sobre Marcos Marcos
+            {t('Reviewabout')} Marcos Marcos
           </Text>
           <ScrollView showsVerticalScrollIndicator={false}>
             <View
               style={{
                 backgroundColor: Colors.white,
                 borderRadius: 12,
-                padding: 16,
+                margin: 5,
+                padding:15,
                 marginBottom: 16,
                 shadowColor: '#000',
                 shadowOffset: {width: 0, height: 2},
@@ -137,6 +140,8 @@ export default function ProfileHeader({user}) {
                 backgroundColor: Colors.white,
                 borderRadius: 12,
                 padding: 16,
+                                margin: 5,
+
                 marginBottom: 16,
                 shadowColor: '#000',
                 shadowOffset: {width: 0, height: 2},

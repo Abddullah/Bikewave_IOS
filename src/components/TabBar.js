@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   tabText: {
-    ...Typography.f_20_inter_semi_bold,
+    ...Typography.f_18_inter_bold,
     fontWeight: '700',
   },
 });
