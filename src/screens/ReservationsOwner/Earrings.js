@@ -26,6 +26,7 @@ import PopUp from '../../components/PopUp';
 import { SendMessageNotifications } from '../../utilities/notificationService';
 import { getAllFCMTokens } from '../../utilities/fcmTokenManager';
 import { platform } from '../../utilities';
+import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 
 export default function Earrings({ navigation }) {
   const [activeTab, setActiveTab] = useState('earrings');
@@ -34,6 +35,8 @@ export default function Earrings({ navigation }) {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [popupAction, setPopupAction] = useState(null);
+  const [showReviewSheet, setShowReviewSheet] = useState(true);
+  const [reviewDismissed, setReviewDismissed] = useState(false);
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const bookings = useSelector((state) => state.main.ownerBookings);
@@ -43,7 +46,12 @@ export default function Earrings({ navigation }) {
     dispatch(getBookingsAsOwner());
   }, [dispatch, returnStatus]);
 
-  // Filter bookings for earrings status
+  useEffect(() => {
+    if (!reviewDismissed) {
+      setShowReviewSheet(true);
+    }
+  }, [reviewDismissed]);
+
   const earringsBookings = bookings?.filter(booking => {
     if (activeTab === 'earrings') {
       return booking.statusId === 1;
@@ -66,7 +74,6 @@ export default function Earrings({ navigation }) {
       const checkAccountResult = await dispatch(checkAccount());
       console.log(checkAccountResult, 'checkAccountResult');
 
-      // Show popup if account is not completed, regardless of error
       if (checkAccountResult?.payload?.accountCompleted === false) {
         setErrorMessage(t('stripe_capabilities_required'));
         setPopupAction(() => () => {
@@ -76,7 +83,6 @@ export default function Earrings({ navigation }) {
         setShowErrorPopup(true);
         return;
       }
-      // Handle actual errors
       if (checkAccountResult?.error && Object.keys(checkAccountResult.error).length > 0) {
         setErrorMessage(t('something_went_wrong'));
         setPopupAction(() => () => {
@@ -88,7 +94,6 @@ export default function Earrings({ navigation }) {
       }
 
       const result = await dispatch(confirmPayment(bookingId));
-      // Check for specific Stripe capabilities error
       if (result?.error?.payload?.data?.error?.code === 'account_capabilities_required' ||
         result?.error?.response?.data?.error?.code === 'account_capabilities_required' ||
         result?.payload?.error?.code === 'insufficient_capabilities_for_transfer') {
@@ -99,13 +104,11 @@ export default function Earrings({ navigation }) {
         });
         setShowErrorPopup(true);
       }
-      // Check for any other API error (but ignore empty error objects)
       else if (
         (result?.error && Object.keys(result.error).length > 0) ||
         (result?.payload?.error && Object.keys(result.payload.error).length > 0) ||
         (result?.payload && result.payload.success === false)
       ) {
-        // Extract error message from different possible locations in the response
         const errorMsg =
           result?.error?.message ||
           result?.error?.payload?.message ||
@@ -114,13 +117,11 @@ export default function Earrings({ navigation }) {
           t('something_went_wrong');
 
         setErrorMessage(errorMsg);
-        setPopupAction(null); // No specific action for general errors
+        setPopupAction(null);
         setShowErrorPopup(true);
       } else {
-        // No error or empty error object - treat as success
         await dispatch(getBookingsAsOwner());
 
-        // Send notification to the client
         try {
           const allTokens = await getAllFCMTokens();
           const booking = bookings.find(b => b._id === bookingId);
@@ -170,10 +171,8 @@ export default function Earrings({ navigation }) {
         setPopupAction(null);
         setShowErrorPopup(true);
       } else {
-        // No error or empty error object - treat as success
         await dispatch(getBookingsAsOwner());
 
-        // Send notification to the client
         try {
           const allTokens = await getAllFCMTokens();
           const booking = bookings.find(b => b._id === bookingId);
@@ -233,6 +232,21 @@ export default function Earrings({ navigation }) {
   const handleClosePopup = () => {
     setShowErrorPopup(false);
     setErrorMessage('');
+  };
+
+  const handleReviewSubmit = (review) => {
+    setShowReviewSheet(false);
+    setReviewDismissed(true);
+  };
+
+  const handleReviewClose = () => {
+    setShowReviewSheet(false);
+    setReviewDismissed(true);
+  };
+
+  const bookingInfo = {
+    clientName: 'John Doe',
+    bikeName: 'Mountain Bike',
   };
 
   const tabs = [
@@ -307,7 +321,6 @@ export default function Earrings({ navigation }) {
                         brand={booking?.bicycle?.brand || 'Brand'}
                         model={booking?.bicycle?.model || 'Model'}
                         photo={{ uri: booking?.bicycle?.photo?.replace(/\.avif$/, '.jpg') || booking?.bicycle?.photo }}
-                        // reserverName={activeTab === 'confirmed' ? '' : booking?.userName + ' ' + booking?.userSurname || 'User'}
                         category={activeTab === 'confirmed' ? '' : booking?.bicycle?.category|| 'User'}
                         city={booking?.bicycle?.city }
                       />
@@ -360,6 +373,12 @@ export default function Earrings({ navigation }) {
               })
             )}
           </ScrollView>
+          <ReviewBottomSheet
+            visible={showReviewSheet}
+            onClose={handleReviewClose}
+            onSubmit={handleReviewSubmit}
+            bookingInfo={bookingInfo}
+          />
         </>
       )}
     </View>
@@ -378,7 +397,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
     flexDirection: 'row',
     alignItems: 'center',
-    // gap: 25,
   },
   backButton: {
     padding: 5,
