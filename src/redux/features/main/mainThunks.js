@@ -683,3 +683,26 @@ export const checkUserSubscription = createAsyncThunk(
     }
   },
 );
+
+// Add Review
+export const addReview = createAsyncThunk(
+  'reviews/add',
+  async ({ bookingId, bicycleId, rating, comment, ownerId }, { getState }) => {
+    const token = getState().auth.userToken;
+    try {
+      const response = await ApiManager.post(
+        '/reviews',
+        { bookingId, bicycleId, rating, comment, ownerId },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to add review'));
+      }
+    }
+  }
+);
