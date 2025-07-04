@@ -195,6 +195,11 @@ export const Typography = StyleSheet.create({
     fontWeight: Platform.OS === 'ios' ? '600' : null,
     fontSize: RFValue(18, screenResolution.screenHeight),
   },
+  f_18_inter_bold: {
+    fontFamily: Platform.OS === 'ios' ? null : 'Inter_18pt-Bold',
+    fontWeight: Platform.OS === 'ios' ? '700' : null,
+    fontSize: RFValue(18, screenResolution.screenHeight),
+  },
   f_16_inter_semi_bold: {
     fontFamily: Platform.OS === 'ios' ? null : 'Inter_18pt-SemiBold',
     fontWeight: Platform.OS === 'ios' ? '600' : null,
@@ -208,6 +213,11 @@ export const Typography = StyleSheet.create({
   f_14_inter_medium: {
     fontFamily: Platform.OS === 'ios' ? null : 'Inter_18pt-Medium',
     fontWeight: Platform.OS === 'ios' ? '500' : null,
+    fontSize: RFValue(14, screenResolution.screenHeight),
+  },
+  f_14_extra_bold: {
+    fontFamily: Platform.OS === 'ios' ? null : 'Inter_18pt-ExtraBold',
+    fontWeight: Platform.OS === 'ios' ? '800' : null,
     fontSize: RFValue(14, screenResolution.screenHeight),
   },
   f_13_inter_medium: {
