@@ -21,6 +21,8 @@ export default function ProfileHeader({user}) {
   const sheetRef = useRef(null);
   const {t} = useTranslation();
 
+  //updated
+
   return (
     <>
       <View style={styles.shadowContainer}>
