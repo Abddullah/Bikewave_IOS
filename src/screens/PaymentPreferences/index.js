@@ -59,7 +59,7 @@ export default function PaymentPreferences({navigation}) {
       console.log(accountResult, 'accountResult',accountId);
       if (accountId || accountResult.payload.account) {
         const updatedAccountId = accountId || accountResult.payload.account;
-
+        console.log(updatedAccountId, 'updatedAccountId');
         try {
           // Create account link for onboarding
           const response = await fetch(
