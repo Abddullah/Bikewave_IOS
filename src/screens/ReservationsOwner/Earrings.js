@@ -28,6 +28,9 @@ import { getAllFCMTokens } from '../../utilities/fcmTokenManager';
 import { platform } from '../../utilities';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 import Toast from 'react-native-toast-message';
+import { getItem, setItem } from '../../services/assynsStorage';
+
+const MODAL_STATE_KEY = 'modalState_Earrings';
 
 export default function Earrings({ navigation }) {
   const [activeTab, setActiveTab] = useState('earrings');
@@ -38,6 +41,7 @@ export default function Earrings({ navigation }) {
   const [popupAction, setPopupAction] = useState(null);
   const [showReviewSheet, setShowReviewSheet] = useState(false);
   const [reviewDismissed, setReviewDismissed] = useState(false);
+  const [modalState, setModalState] = useState(false);
   const [reviewBooking, setReviewBooking] = useState(null);
   const { t } = useTranslation();
   const dispatch = useDispatch();
@@ -53,6 +57,21 @@ export default function Earrings({ navigation }) {
       setShowReviewSheet(true);
     }
   }, [reviewDismissed]);
+
+  // On mount, read modalState from AsyncStorage
+  useEffect(() => {
+    (async () => {
+      const storedModalState = await getItem(MODAL_STATE_KEY, false);
+      setModalState(!!storedModalState);
+    })();
+  }, []);
+
+  // Whenever modalState changes, persist it
+  useEffect(() => {
+    (async () => {
+      await setItem(MODAL_STATE_KEY, modalState);
+    })();
+  }, [modalState]);
 
   const earringsBookings = bookings?.filter(booking => {
     if (activeTab === 'earrings') {
@@ -208,6 +227,7 @@ export default function Earrings({ navigation }) {
       const result = await dispatch(returnBicycle(booking._id));
       if (!result.error && (result.payload?.success || result.payload?.status === 'success' || result.payload)) {
         setReviewBooking(booking);
+        setModalState(true);
       } else {
         console.log('Return error:', result.error || result);
       }
@@ -233,7 +253,8 @@ export default function Earrings({ navigation }) {
       }));
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
-        setReviewBooking(null); // Only close after success
+        setReviewBooking(null);
+        setModalState(false);
       } else {
         Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
       }
@@ -243,8 +264,9 @@ export default function Earrings({ navigation }) {
     }
   };
 
-  const handleReviewClose = () => {
+  const handleReviewClose = async () => {
     setReviewBooking(null);
+    setModalState(false);
   };
 
   const bookingInfo = {
@@ -375,7 +397,7 @@ export default function Earrings({ navigation }) {
             )}
           </ScrollView>
           <ReviewBottomSheet
-            visible={!!reviewBooking}
+            visible={modalState}
             bookingInfo={reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
