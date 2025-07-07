@@ -202,31 +202,16 @@ export default function Earrings({ navigation }) {
     }
   };
 
-  const handleReturn = async (bookingId) => {
+  const handleReturn = async (booking) => {
     try {
-      const result = await dispatch(returnBicycle(bookingId));
-
-      if (
-        (result?.error && Object.keys(result.error).length > 0) ||
-        (result?.payload?.error && Object.keys(result.payload.error).length > 0) ||
-        (result?.payload && result.payload.success === false)
-      ) {
-        const errorMsg =
-          result?.error?.message ||
-          result?.error?.payload?.message ||
-          result?.error?.response?.data?.message ||
-          result?.payload?.error?.message ||
-          t('something_went_wrong');
-
-        setErrorMessage(errorMsg);
-        setPopupAction(null);
-        setShowErrorPopup(true);
+      const result = await dispatch(returnBicycle(booking._id));
+      if (!result.error && (result.payload?.success || result.payload?.status === 'success' || result.payload)) {
+        setReviewBooking(booking);
+      } else {
+        console.log('Return error:', result.error || result);
       }
     } catch (error) {
       console.log('Error in handleReturn:', error);
-      setErrorMessage(error.message || t('something_went_wrong'));
-      setPopupAction(null);
-      setShowErrorPopup(true);
     }
   };
 
@@ -237,22 +222,29 @@ export default function Earrings({ navigation }) {
 
   const handleReviewSubmit = ({ rating, comment }) => {
     if (!reviewBooking) return;
+    console.log('reviewBooking:', reviewBooking);
+    console.log('bookingId:', reviewBooking._id);
+    console.log('bicycleId:', reviewBooking.bicycle?._id);
+    console.log('ownerId:', reviewBooking.ownerId || reviewBooking.bicycle?.ownerId);
     dispatch(addReview({
       bookingId: reviewBooking._id,
       bicycleId: reviewBooking.bicycle?._id,
       rating,
       comment,
       ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
-    }));
+    }))
+    .then(res => console.log('Review add result:', res))
+    .catch(err => {
+      console.error('Review add error:', err);
+      if (err && err.error) console.error('Error details:', err.error);
+      if (err && err.payload) console.error('Payload:', err.payload);
+      if (err && err.error && err.error.message) console.error('Backend error:', err.error.message);
+    });
     setReviewBooking(null);
-    setReviewDismissed(true);
-    setShowReviewSheet(false);
   };
 
   const handleReviewClose = () => {
     setReviewBooking(null);
-    setReviewDismissed(true);
-    setShowReviewSheet(false);
   };
 
   const bookingInfo = {
@@ -369,12 +361,10 @@ export default function Earrings({ navigation }) {
                       <View style={styles.buttonsContainer}>
                         {booking.statusId === 3 && (
                           <AppButton
-                            title={returnLoading ? t('loading') : t('return')}
+                            title={t('return')}
                             btnColor={Colors.primary}
                             btnTitleColor={Colors.white}
-                            onPress={() => handleReturn(booking._id)}
-                            disabled={returnLoading}
-                            icon={returnLoading ? <ActivityIndicator color={Colors.white} /> : null}
+                            onPress={() => handleReturn(booking)}
                           />
                         )}
                       </View>
@@ -386,9 +376,9 @@ export default function Earrings({ navigation }) {
           </ScrollView>
           <ReviewBottomSheet
             visible={!!reviewBooking}
+            bookingInfo={reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
-            bookingInfo={reviewBooking}
           />
         </>
       )}

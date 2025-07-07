@@ -70,7 +70,6 @@ export default function Profile({ navigation }) {
   const [showErrorPopup, setShowErrorPopup] = useState(false);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const refRBSheet = useRef();
-  const [showReviewsSheet, setShowReviewsSheet] = useState(false);
 
   const loading = useSelector(selectAuthLoading);
   const userDetails = useSelector(selectUserDetails);
@@ -78,6 +77,8 @@ export default function Profile({ navigation }) {
   const authError = useSelector(selectAuthError);
   const userId = useSelector(selectAuthUserId);
   const userReviews = useSelector(state => state.main.userReviews);
+
+  console.log(userReviews,'userReviews')
   const reviewsLoading = useSelector(state => state.main.reviewsLoading);
 
   useEffect(() => {
@@ -173,6 +174,11 @@ export default function Profile({ navigation }) {
   ];
 
   const otherItems = [{ key: 'report_incident' }];
+
+  useEffect(() => {
+    dispatch(getReviewsByUserId());
+}, [userId, dispatch]);
+
 
   const handleDeleteUser = async () => {
     try {

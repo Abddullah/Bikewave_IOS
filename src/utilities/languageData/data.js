@@ -375,7 +375,7 @@ export const languageData = [
       review: {
         how_was_experience: '¿Cómo fue tu experiencia con {{client}}?',
         bike_returned: 'Tu bicicleta {{bike}} ha sido devuelta por {{client}}. Tu valoración ayudará a otros propietarios a tomar decisiones sobre sus alquileres.',
-        comment_placeholder: 'Comentario (opcional)',
+        comment_placeholder: 'Comentario',
         submit: 'Enviar reseña',
         not_now: 'Ahora no',
         client: 'cliente',
@@ -753,7 +753,7 @@ export const languageData = [
       review: {
         how_was_experience: 'How was your experience with {{client}}?',
         bike_returned: 'Your bike {{bike}} has been returned by {{client}}. Your rating will help other owners make decisions about their rentals.',
-        comment_placeholder: 'Comment (optional)',
+        comment_placeholder: 'Comment',
         submit: 'Submit review',
         not_now: 'Not now',
         client: 'client',

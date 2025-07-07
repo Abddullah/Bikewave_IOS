@@ -689,11 +689,12 @@ export const addReview = createAsyncThunk(
   'reviews/add',
   async ({ bookingId, bicycleId, rating, comment, ownerId }, { getState }) => {
     const token = getState().auth.userToken;
+    console.log(token,'tolen')
     try {
       const response = await ApiManager.post(
         '/reviews',
         { bookingId, bicycleId, rating, comment, ownerId },
-        { headers: { Authorization: `Bearer ${token}` } }
+        { headers: { Authorization: token } }
       );
       return response.data;
     } catch (error) {
@@ -712,13 +713,15 @@ export const getReviewsByUserId = createAsyncThunk(
   'reviews/getByUserId',
   async (_, { getState }) => {
     const token = getState().auth.userToken;
-    const userId = getState().auth.user?._id;
+    console.log(token,'token')
+    const userId = getState().auth.user.id;
+    console.log(userId,'userId')
     if (!userId) {
       throw new Error('User ID not found');
     }
     try {
       const response = await ApiManager.get(`/reviews/getByUser/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+        headers: { Authorization: token },
       });
       return response.data;
     } catch (error) {

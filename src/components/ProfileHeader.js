@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,7 +6,6 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
-  ActivityIndicator,
 } from 'react-native';
 import Colors from '../utilities/constants/colors';
 import {Typography} from '../utilities/constants/constant.style';
@@ -17,15 +16,32 @@ import {CrossBlack, Star} from '../assets/svg';
 import BottomSheet from './BottomSheet';
 import {colors} from '../utilities/constants';
 import {useTranslation} from 'react-i18next';
+import {useDispatch, useSelector} from 'react-redux';
+import {getReviewsByUserId} from '../redux/features/main/mainThunks';
 
-export default function ProfileHeader({user, userReviews, reviewsLoading, fetchReviews}) {
+export default function ProfileHeader({user}) {
   const sheetRef = useRef(null);
   const {t} = useTranslation();
+  const dispatch = useDispatch();
+  const userId = useSelector(state => state.auth.user?._id);
+  const userReviews = useSelector(state => state.main.userReviews);
+  const reviewsLoading = useSelector(state => state.main.reviewsLoading);
+
+  useEffect(() => {
+    if (userId) {
+      dispatch(getReviewsByUserId());
+    }
+  }, [userId, dispatch]);
 
   const handleOpenReviews = () => {
-    if (fetchReviews) fetchReviews();
     if (sheetRef.current) sheetRef.current.open();
   };
+
+  let averageRating = '0';
+  if (userReviews && userReviews.length > 0) {
+    const avg = userReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / userReviews.length;
+    averageRating = avg === 0 ? '0' : (Math.round(avg * 10) / 10).toString().replace(/\.0$/, '');
+  }
 
   return (
     <>
@@ -46,10 +62,9 @@ export default function ProfileHeader({user, userReviews, reviewsLoading, fetchR
               marginTop: -5,
             }}>
             <Star />
-            <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>
-              4.8
-            </Text>
-            <TouchableOpacity onPress={handleOpenReviews}>
+            <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>{averageRating}</Text>
+            <TouchableOpacity
+              onPress={handleOpenReviews}>
               <Text
                 style={[Typography.f_14_extra_bold, {color: Colors.primary}]}>
                 ({t('SeeReviews')})
@@ -60,7 +75,7 @@ export default function ProfileHeader({user, userReviews, reviewsLoading, fetchR
         </View>
       </View>
       <BottomSheet ref={sheetRef} HEIGHT={400} backgroundColor={colors.white}>
-        <View style={{paddingHorizontal: 15, paddingTop: 10}}>
+        <View style={{paddingHorizontal: 15}}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => sheetRef.current && sheetRef.current.close()}
@@ -74,15 +89,31 @@ export default function ProfileHeader({user, userReviews, reviewsLoading, fetchR
             ]}>
             {t('Reviewabout')} {user.name}
           </Text>
-          <ScrollView showsVerticalScrollIndicator={false} style={{maxHeight: 300}}>
+          <ScrollView showsVerticalScrollIndicator={false}>
             {reviewsLoading ? (
-              <ActivityIndicator color={Colors.primary} />
+              <Text style={{alignSelf: 'center', marginTop: 20}}>{t('Loading...')}</Text>
             ) : userReviews && userReviews.length > 0 ? (
               userReviews.map((review, idx) => (
-                <View key={review._id || idx} style={{marginBottom: 16, borderBottomWidth: 1, borderColor: '#eee', paddingBottom: 8}}>
+                <View
+                  key={review._id || idx}
+                  style={{
+                    backgroundColor: Colors.white,
+                    borderRadius: 12,
+                    margin: 5,
+                    padding: 15,
+                    marginBottom: 16,
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 2},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                  }}>
                   <View style={{flexDirection: 'row', marginBottom: 8}}>
-                    {[...Array(review.rating)].map((_, i) => (
+                    {[...Array(review.rating || 0)].map((_, i) => (
                       <Star key={i} style={{marginRight: 2}} />
+                    ))}
+                    {[...Array(5 - (review.rating || 0))].map((_, i) => (
+                      <Star key={i + (review.rating || 0)} style={{marginRight: 2, opacity: 0.3}} />
                     ))}
                   </View>
                   <Text
@@ -90,12 +121,49 @@ export default function ProfileHeader({user, userReviews, reviewsLoading, fetchR
                       Typography.f_16_inter_regular,
                       {color: Colors.black, marginBottom: 12, lineHeight: 24},
                     ]}>
-                    {review.comment}
+                    {review.comment || review.text || t('No review text')}
                   </Text>
+                  <View
+                    style={{
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                      marginTop: 4,
+                    }}>
+                    <Image
+                      source={review.user && review.user.avatar ? { uri: review.user.avatar } : user.avatar}
+                      style={styles.avatarSmall}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <Text
+                        style={[
+                          Typography.f_14_inter_semi_bold,
+                          {color: Colors.black, marginRight: 8},
+                        ]}>
+                        {review.author ? `${review.author.firstName || ''} ${review.author.secondName || ''}`.trim() : t('Anonymous')}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 8,
+                          marginTop: 5,
+                        }}>
+                        <Star />
+                        <Text
+                          style={[
+                            Typography.f_14_inter_bold,
+                            {color: Colors.black},
+                          ]}>
+                          {review.rating || '-'}
+                        </Text>
+                      </View>
+                    </View>
+                  </View>
                 </View>
               ))
             ) : (
-              <Text style={[Typography.f_14_inter_bold,{color:colors.primary,textAlign:'center'}]}>{t('no_reviews_found')}</Text>
+              <Text style={[Typography.f_14_inter_bold,{alignSelf: 'center', marginTop: 20,color:colors.primary}]}>{t('no_reviews_found')}</Text>
             )}
           </ScrollView>
         </View>
