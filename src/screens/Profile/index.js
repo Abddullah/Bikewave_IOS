@@ -37,6 +37,7 @@ import store from '../../redux/store';
 import { setUserToken } from '../../redux/features/auth/authSlice';
 import { deleteItem } from '../../services/assynsStorage';
 import { removeFCMToken } from '../../utilities/fcmTokenManager';
+import { getReviewsByUserId } from '../../redux/features/main/mainThunks';
 
 const MenuItem = ({ title, onPress }) => (
   <TouchableOpacity
@@ -75,6 +76,10 @@ export default function Profile({ navigation }) {
   const user_id = useSelector(selectAuthUserId);
   const authError = useSelector(selectAuthError);
   const userId = useSelector(selectAuthUserId);
+  const userReviews = useSelector(state => state.main.userReviews);
+
+  console.log(userReviews,'userReviews')
+  const reviewsLoading = useSelector(state => state.main.reviewsLoading);
 
   useEffect(() => {
     dispatch(fetchUserInfo(user_id));
@@ -170,6 +175,11 @@ export default function Profile({ navigation }) {
 
   const otherItems = [{ key: 'report_incident' }];
 
+  useEffect(() => {
+    dispatch(getReviewsByUserId());
+}, [userId, dispatch]);
+
+
   const handleDeleteUser = async () => {
     try {
       const response = await dispatch(deleteUser(user_id));
@@ -195,11 +205,15 @@ export default function Profile({ navigation }) {
     setShowErrorPopup(false);
   };
 
+  const fetchReviews = () => {
+    dispatch(getReviewsByUserId());
+  };
+
   const renderContent = () => {
     if (activeTab === 'about') {
       return (
         <View>
-          <ProfileHeader user={user} />
+          <ProfileHeader user={user} userReviews={userReviews} reviewsLoading={reviewsLoading} fetchReviews={fetchReviews} />
           <ScrollView contentContainerStyle={{ height: heightFlex1 * (Platform.OS === 'ios' ? 5.5 : 4.5) }}>
             <Text style={styles.sectionTitle}>{t('my_garage')}</Text>
             {bikes.length === 0 ? (

@@ -1,4 +1,4 @@
-import React, {useRef} from 'react';
+import React, {useRef, useEffect} from 'react';
 import {
   StyleSheet,
   Text,
@@ -16,12 +16,32 @@ import {CrossBlack, Star} from '../assets/svg';
 import BottomSheet from './BottomSheet';
 import {colors} from '../utilities/constants';
 import {useTranslation} from 'react-i18next';
+import {useDispatch, useSelector} from 'react-redux';
+import {getReviewsByUserId} from '../redux/features/main/mainThunks';
 
 export default function ProfileHeader({user}) {
   const sheetRef = useRef(null);
   const {t} = useTranslation();
+  const dispatch = useDispatch();
+  const userId = useSelector(state => state.auth.user?._id);
+  const userReviews = useSelector(state => state.main.userReviews);
+  const reviewsLoading = useSelector(state => state.main.reviewsLoading);
 
-  //updated
+  useEffect(() => {
+    if (userId) {
+      dispatch(getReviewsByUserId());
+    }
+  }, [userId, dispatch]);
+
+  const handleOpenReviews = () => {
+    if (sheetRef.current) sheetRef.current.open();
+  };
+
+  let averageRating = '0';
+  if (userReviews && userReviews.length > 0) {
+    const avg = userReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / userReviews.length;
+    averageRating = avg === 0 ? '0' : (Math.round(avg * 10) / 10).toString().replace(/\.0$/, '');
+  }
 
   return (
     <>
@@ -42,11 +62,9 @@ export default function ProfileHeader({user}) {
               marginTop: -5,
             }}>
             <Star />
-            <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>
-              4.8
-            </Text>
+            <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>{averageRating}</Text>
             <TouchableOpacity
-              onPress={() => sheetRef.current && sheetRef.current.open()}>
+              onPress={handleOpenReviews}>
               <Text
                 style={[Typography.f_14_extra_bold, {color: Colors.primary}]}>
                 ({t('SeeReviews')})
@@ -69,142 +87,84 @@ export default function ProfileHeader({user}) {
               Typography.f_18_inter_bold,
               {marginBottom: 20, color: Colors.black, alignSelf: 'center'},
             ]}>
-            {t('Reviewabout')} Marcos Marcos
+            {t('Reviewabout')} {user.name}
           </Text>
           <ScrollView showsVerticalScrollIndicator={false}>
-            <View
-              style={{
-                backgroundColor: Colors.white,
-                borderRadius: 12,
-                margin: 5,
-                padding:15,
-                marginBottom: 16,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}>
-              <View style={{flexDirection: 'row', marginBottom: 8}}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} style={{marginRight: 10}} />
-                ))}
-              </View>
-              <Text
-                style={[
-                  Typography.f_16_inter_regular,
-                  {color: Colors.black, marginBottom: 12, lineHeight: 24},
-                ]}>
-                Marcos fue puntual en la recogida y devolución. Cuidó bien la
-                bici y la dejó limpia. Solo faltó un poco de comunicación en la
-                entrega, pero todo bien en general.
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 4,
-                }}>
-                <Image
-                  source={user.avatar}
-                  style={styles.avatarSmall}
-                  resizeMode="contain"
-                />
-                <View>
+            {reviewsLoading ? (
+              <Text style={{alignSelf: 'center', marginTop: 20}}>{t('Loading...')}</Text>
+            ) : userReviews && userReviews.length > 0 ? (
+              userReviews.map((review, idx) => (
+                <View
+                  key={review._id || idx}
+                  style={{
+                    backgroundColor: Colors.white,
+                    borderRadius: 12,
+                    margin: 5,
+                    padding: 15,
+                    shadowColor: '#000',
+                    shadowOffset: {width: 0, height: 2},
+                    shadowOpacity: 0.1,
+                    shadowRadius: 4,
+                    elevation: 3,
+                    marginBottom:idx===userReviews.length-1?40:16
+                  }}>
+                  <View style={{flexDirection: 'row', marginBottom: 8}}>
+                    {[...Array(review.rating || 0)].map((_, i) => (
+                      <Star key={i} style={{marginRight: 2}} />
+                    ))}
+                    {[...Array(5 - (review.rating || 0))].map((_, i) => (
+                      <Star key={i + (review.rating || 0)} style={{marginRight: 2, opacity: 0.3}} />
+                    ))}
+                  </View>
                   <Text
                     style={[
-                      Typography.f_14_inter_semi_bold,
-                      {color: Colors.black, marginRight: 8},
+                      Typography.f_16_inter_regular,
+                      {color: Colors.black, marginBottom: 12, lineHeight: 24},
                     ]}>
-                    Nombre Apellido
+                    {review.comment || review.text || t('No review text')}
                   </Text>
                   <View
                     style={{
                       flexDirection: 'row',
                       alignItems: 'center',
-                      gap: 8,
-                      marginTop: 5,
+                      marginTop: 4,
                     }}>
-                    <Star />
-                    <Text
-                      style={[
-                        Typography.f_14_inter_bold,
-                        {color: Colors.black},
-                      ]}>
-                      4.8
-                    </Text>
+                    <Image
+                      source={review.user && review.user.avatar ? { uri: review.user.avatar } : user.avatar}
+                      style={styles.avatarSmall}
+                      resizeMode="contain"
+                    />
+                    <View>
+                      <Text
+                        style={[
+                          Typography.f_14_inter_semi_bold,
+                          {color: Colors.black, marginRight: 8},
+                        ]}>
+                        {review.author ? `${review.author.firstName || ''} ${review.author.secondName || ''}`.trim() : t('Anonymous')}
+                      </Text>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: 8,
+                          marginTop: 5,
+                        }}>
+                        <Star />
+                        <Text
+                          style={[
+                            Typography.f_14_inter_bold,
+                            {color: Colors.black},
+                          ]}>
+                          {review.rating || '-'}
+                        </Text>
+                      </View>
+                    </View>
                   </View>
                 </View>
-              </View>
-            </View>
-            <View
-              style={{
-                backgroundColor: Colors.white,
-                borderRadius: 12,
-                padding: 16,
-                                margin: 5,
-
-                marginBottom: 16,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-                marginTop: 20,
-                marginBottom: 100,
-              }}>
-              <View style={{flexDirection: 'row', marginBottom: 8}}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} style={{marginRight: 10}} />
-                ))}
-              </View>
-              <Text
-                style={[
-                  Typography.f_16_inter_regular,
-                  {color: Colors.black, marginBottom: 12, lineHeight: 24},
-                ]}>
-                Marcos fue puntual en la recogida y devolución. Cuidó bien la
-                bici y la dejó limpia. Solo faltó un poco de comunicación en la
-                entrega, pero todo bien en general.
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 4,
-                }}>
-                <Image
-                  source={user.avatar}
-                  style={styles.avatarSmall}
-                  resizeMode="contain"
-                />
-                <View>
-                  <Text
-                    style={[
-                      Typography.f_14_inter_semi_bold,
-                      {color: Colors.black, marginRight: 8},
-                    ]}>
-                    Nombre Apellido
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 5,
-                    }}>
-                    <Star />
-                    <Text
-                      style={[
-                        Typography.f_14_inter_bold,
-                        {color: Colors.black},
-                      ]}>
-                      4.8
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
+              ))
+            ) : (
+              <Text style={[Typography.f_14_inter_bold,{alignSelf: 'center', marginTop: 20,color:colors.primary}]}>{t('no_reviews_found')}</Text>
+            )}
           </ScrollView>
         </View>
       </BottomSheet>

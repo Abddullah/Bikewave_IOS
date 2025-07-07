@@ -27,6 +27,7 @@ import { SendMessageNotifications } from '../../utilities/notificationService';
 import { getAllFCMTokens } from '../../utilities/fcmTokenManager';
 import { platform } from '../../utilities';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
+import Toast from 'react-native-toast-message';
 
 export default function Earrings({ navigation }) {
   const [activeTab, setActiveTab] = useState('earrings');
@@ -202,31 +203,16 @@ export default function Earrings({ navigation }) {
     }
   };
 
-  const handleReturn = async (bookingId) => {
+  const handleReturn = async (booking) => {
     try {
-      const result = await dispatch(returnBicycle(bookingId));
-
-      if (
-        (result?.error && Object.keys(result.error).length > 0) ||
-        (result?.payload?.error && Object.keys(result.payload.error).length > 0) ||
-        (result?.payload && result.payload.success === false)
-      ) {
-        const errorMsg =
-          result?.error?.message ||
-          result?.error?.payload?.message ||
-          result?.error?.response?.data?.message ||
-          result?.payload?.error?.message ||
-          t('something_went_wrong');
-
-        setErrorMessage(errorMsg);
-        setPopupAction(null);
-        setShowErrorPopup(true);
+      const result = await dispatch(returnBicycle(booking._id));
+      if (!result.error && (result.payload?.success || result.payload?.status === 'success' || result.payload)) {
+        setReviewBooking(booking);
+      } else {
+        console.log('Return error:', result.error || result);
       }
     } catch (error) {
       console.log('Error in handleReturn:', error);
-      setErrorMessage(error.message || t('something_went_wrong'));
-      setPopupAction(null);
-      setShowErrorPopup(true);
     }
   };
 
@@ -235,24 +221,30 @@ export default function Earrings({ navigation }) {
     setErrorMessage('');
   };
 
-  const handleReviewSubmit = ({ rating, comment }) => {
+  const handleReviewSubmit = async ({ rating, comment }) => {
     if (!reviewBooking) return;
-    dispatch(addReview({
-      bookingId: reviewBooking._id,
-      bicycleId: reviewBooking.bicycle?._id,
-      rating,
-      comment,
-      ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
-    }));
-    setReviewBooking(null);
-    setReviewDismissed(true);
-    setShowReviewSheet(false);
+    try {
+      const res = await dispatch(addReview({
+        bookingId: reviewBooking._id,
+        bicycleId: reviewBooking.bicycle?._id,
+        rating,
+        comment,
+        ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
+      }));
+      if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
+        Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+        setReviewBooking(null); // Only close after success
+      } else {
+        Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      console.error('Review add error:', err);
+    }
   };
 
   const handleReviewClose = () => {
     setReviewBooking(null);
-    setReviewDismissed(true);
-    setShowReviewSheet(false);
   };
 
   const bookingInfo = {
@@ -369,12 +361,10 @@ export default function Earrings({ navigation }) {
                       <View style={styles.buttonsContainer}>
                         {booking.statusId === 3 && (
                           <AppButton
-                            title={returnLoading ? t('loading') : t('return')}
+                            title={t('return')}
                             btnColor={Colors.primary}
                             btnTitleColor={Colors.white}
-                            onPress={() => handleReturn(booking._id)}
-                            disabled={returnLoading}
-                            icon={returnLoading ? <ActivityIndicator color={Colors.white} /> : null}
+                            onPress={() => handleReturn(booking)}
                           />
                         )}
                       </View>
@@ -386,9 +376,9 @@ export default function Earrings({ navigation }) {
           </ScrollView>
           <ReviewBottomSheet
             visible={!!reviewBooking}
+            bookingInfo={reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
-            bookingInfo={reviewBooking}
           />
         </>
       )}

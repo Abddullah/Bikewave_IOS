@@ -62,8 +62,9 @@ import { setFilters } from '../../redux/features/main/mainSlice';
 import { RFValue } from 'react-native-responsive-fontsize';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 import { saveFCMToken } from '../../utilities/fcmTokenManager';
-import { selectAuthUserId } from '../../redux/features/auth/authSelectors';
+import { selectAuthToken, selectAuthUserId } from '../../redux/features/auth/authSelectors';
 import { EnvConfig } from '../../config/envConfig';
+import { colors } from '../../utilities/constants';
 const categories = [
   { id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: { en: 'All', sp: 'Todos' } },
   {
@@ -120,7 +121,10 @@ const Home = React.memo(({ navigation }) => {
   const [showMap, setShowMap] = useState(false);
   const dispatch = useDispatch();
   const bicycles = useSelector(selectBicycles);
-  const userId = useSelector(selectAuthUserId);
+  const userId = useSelector(selectAuthUserId); 
+  const token = useSelector(selectAuthToken); 
+  console.log(userId,'gjfg')
+  console.log(token,'gjfg')
   const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
   const [selectedBike, setSelectedBike] = useState(null);
   const [city, setCity] = useState('');
@@ -337,6 +341,9 @@ const Home = React.memo(({ navigation }) => {
               ref={placesRef}
               placeholder={t('your_city')}
               onPress={handlePlaceSelect}
+              textInputProps={{
+                placeholderTextColor:colors.black
+              }}
               query={{
                 key: EnvConfig.googleMaps.apiKey,
                 language: [DEFAULT_LANGUAGE],
