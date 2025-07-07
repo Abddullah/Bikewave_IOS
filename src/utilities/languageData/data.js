@@ -381,6 +381,7 @@ export const languageData = [
         client: 'cliente',
         bike: 'bici',
       },
+      no_reviews_found: 'No se encontraron reseñas.',
     },
   },
   {
@@ -758,6 +759,7 @@ export const languageData = [
         client: 'client',
         bike: 'bike',
       },
+      no_reviews_found: 'No reviews found.',
     },
   },
 ];

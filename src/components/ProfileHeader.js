@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import Colors from '../utilities/constants/colors';
 import {Typography} from '../utilities/constants/constant.style';
@@ -17,11 +18,14 @@ import BottomSheet from './BottomSheet';
 import {colors} from '../utilities/constants';
 import {useTranslation} from 'react-i18next';
 
-export default function ProfileHeader({user}) {
+export default function ProfileHeader({user, userReviews, reviewsLoading, fetchReviews}) {
   const sheetRef = useRef(null);
   const {t} = useTranslation();
 
-  //updated
+  const handleOpenReviews = () => {
+    if (fetchReviews) fetchReviews();
+    if (sheetRef.current) sheetRef.current.open();
+  };
 
   return (
     <>
@@ -45,8 +49,7 @@ export default function ProfileHeader({user}) {
             <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>
               4.8
             </Text>
-            <TouchableOpacity
-              onPress={() => sheetRef.current && sheetRef.current.open()}>
+            <TouchableOpacity onPress={handleOpenReviews}>
               <Text
                 style={[Typography.f_14_extra_bold, {color: Colors.primary}]}>
                 ({t('SeeReviews')})
@@ -57,7 +60,7 @@ export default function ProfileHeader({user}) {
         </View>
       </View>
       <BottomSheet ref={sheetRef} HEIGHT={400} backgroundColor={colors.white}>
-        <View style={{paddingHorizontal: 15}}>
+        <View style={{paddingHorizontal: 15, paddingTop: 10}}>
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => sheetRef.current && sheetRef.current.close()}
@@ -69,142 +72,31 @@ export default function ProfileHeader({user}) {
               Typography.f_18_inter_bold,
               {marginBottom: 20, color: Colors.black, alignSelf: 'center'},
             ]}>
-            {t('Reviewabout')} Marcos Marcos
+            {t('Reviewabout')} {user.name}
           </Text>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            <View
-              style={{
-                backgroundColor: Colors.white,
-                borderRadius: 12,
-                margin: 5,
-                padding:15,
-                marginBottom: 16,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-              }}>
-              <View style={{flexDirection: 'row', marginBottom: 8}}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} style={{marginRight: 10}} />
-                ))}
-              </View>
-              <Text
-                style={[
-                  Typography.f_16_inter_regular,
-                  {color: Colors.black, marginBottom: 12, lineHeight: 24},
-                ]}>
-                Marcos fue puntual en la recogida y devolución. Cuidó bien la
-                bici y la dejó limpia. Solo faltó un poco de comunicación en la
-                entrega, pero todo bien en general.
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 4,
-                }}>
-                <Image
-                  source={user.avatar}
-                  style={styles.avatarSmall}
-                  resizeMode="contain"
-                />
-                <View>
+          <ScrollView showsVerticalScrollIndicator={false} style={{maxHeight: 300}}>
+            {reviewsLoading ? (
+              <ActivityIndicator color={Colors.primary} />
+            ) : userReviews && userReviews.length > 0 ? (
+              userReviews.map((review, idx) => (
+                <View key={review._id || idx} style={{marginBottom: 16, borderBottomWidth: 1, borderColor: '#eee', paddingBottom: 8}}>
+                  <View style={{flexDirection: 'row', marginBottom: 8}}>
+                    {[...Array(review.rating)].map((_, i) => (
+                      <Star key={i} style={{marginRight: 2}} />
+                    ))}
+                  </View>
                   <Text
                     style={[
-                      Typography.f_14_inter_semi_bold,
-                      {color: Colors.black, marginRight: 8},
+                      Typography.f_16_inter_regular,
+                      {color: Colors.black, marginBottom: 12, lineHeight: 24},
                     ]}>
-                    Nombre Apellido
+                    {review.comment}
                   </Text>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 5,
-                    }}>
-                    <Star />
-                    <Text
-                      style={[
-                        Typography.f_14_inter_bold,
-                        {color: Colors.black},
-                      ]}>
-                      4.8
-                    </Text>
-                  </View>
                 </View>
-              </View>
-            </View>
-            <View
-              style={{
-                backgroundColor: Colors.white,
-                borderRadius: 12,
-                padding: 16,
-                                margin: 5,
-
-                marginBottom: 16,
-                shadowColor: '#000',
-                shadowOffset: {width: 0, height: 2},
-                shadowOpacity: 0.1,
-                shadowRadius: 4,
-                elevation: 3,
-                marginTop: 20,
-                marginBottom: 100,
-              }}>
-              <View style={{flexDirection: 'row', marginBottom: 8}}>
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} style={{marginRight: 10}} />
-                ))}
-              </View>
-              <Text
-                style={[
-                  Typography.f_16_inter_regular,
-                  {color: Colors.black, marginBottom: 12, lineHeight: 24},
-                ]}>
-                Marcos fue puntual en la recogida y devolución. Cuidó bien la
-                bici y la dejó limpia. Solo faltó un poco de comunicación en la
-                entrega, pero todo bien en general.
-              </Text>
-              <View
-                style={{
-                  flexDirection: 'row',
-                  alignItems: 'center',
-                  marginTop: 4,
-                }}>
-                <Image
-                  source={user.avatar}
-                  style={styles.avatarSmall}
-                  resizeMode="contain"
-                />
-                <View>
-                  <Text
-                    style={[
-                      Typography.f_14_inter_semi_bold,
-                      {color: Colors.black, marginRight: 8},
-                    ]}>
-                    Nombre Apellido
-                  </Text>
-                  <View
-                    style={{
-                      flexDirection: 'row',
-                      alignItems: 'center',
-                      gap: 8,
-                      marginTop: 5,
-                    }}>
-                    <Star />
-                    <Text
-                      style={[
-                        Typography.f_14_inter_bold,
-                        {color: Colors.black},
-                      ]}>
-                      4.8
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </View>
+              ))
+            ) : (
+              <Text style={[Typography.f_14_inter_bold,{color:colors.primary,textAlign:'center'}]}>{t('no_reviews_found')}</Text>
+            )}
           </ScrollView>
         </View>
       </BottomSheet>

@@ -20,6 +20,7 @@ import {
   checkAccount,
   createStripeSubscriptionSession,
   checkUserSubscription,
+  getReviewsByUserId,
 } from './mainThunks';
 import { pickupBicycle, returnBicycle } from './pickupReturnThunks';
 
@@ -80,6 +81,8 @@ const initialState = {
     details: null,
     error: null
   },
+  userReviews: [],
+  reviewsLoading: false,
 };
 
 const mainSlice = createSlice({
@@ -423,6 +426,19 @@ const mainSlice = createSlice({
       .addCase(checkUserSubscription.rejected, (state, action) => {
         state.subscriptionStatus.loading = false;
         state.subscriptionStatus.error = action.error.message;
+      });
+
+    // Handle getReviewsByUserId
+    builder
+      .addCase(getReviewsByUserId.pending, (state) => {
+        state.reviewsLoading = true;
+      })
+      .addCase(getReviewsByUserId.fulfilled, (state, action) => {
+        state.reviewsLoading = false;
+        state.userReviews = action.payload;
+      })
+      .addCase(getReviewsByUserId.rejected, (state, action) => {
+        state.reviewsLoading = false;
       });
   },
 });

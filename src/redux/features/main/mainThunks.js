@@ -706,3 +706,28 @@ export const addReview = createAsyncThunk(
     }
   }
 );
+
+// Get reviews by user ID
+export const getReviewsByUserId = createAsyncThunk(
+  'reviews/getByUserId',
+  async (_, { getState }) => {
+    const token = getState().auth.userToken;
+    const userId = getState().auth.user?._id;
+    if (!userId) {
+      throw new Error('User ID not found');
+    }
+    try {
+      const response = await ApiManager.get(`/reviews/getByUser/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to fetch user reviews'));
+      }
+    }
+  }
+);
