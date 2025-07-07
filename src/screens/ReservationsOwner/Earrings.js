@@ -27,6 +27,7 @@ import { SendMessageNotifications } from '../../utilities/notificationService';
 import { getAllFCMTokens } from '../../utilities/fcmTokenManager';
 import { platform } from '../../utilities';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
+import Toast from 'react-native-toast-message';
 
 export default function Earrings({ navigation }) {
   const [activeTab, setActiveTab] = useState('earrings');
@@ -220,27 +221,26 @@ export default function Earrings({ navigation }) {
     setErrorMessage('');
   };
 
-  const handleReviewSubmit = ({ rating, comment }) => {
+  const handleReviewSubmit = async ({ rating, comment }) => {
     if (!reviewBooking) return;
-    console.log('reviewBooking:', reviewBooking);
-    console.log('bookingId:', reviewBooking._id);
-    console.log('bicycleId:', reviewBooking.bicycle?._id);
-    console.log('ownerId:', reviewBooking.ownerId || reviewBooking.bicycle?.ownerId);
-    dispatch(addReview({
-      bookingId: reviewBooking._id,
-      bicycleId: reviewBooking.bicycle?._id,
-      rating,
-      comment,
-      ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
-    }))
-    .then(res => console.log('Review add result:', res))
-    .catch(err => {
+    try {
+      const res = await dispatch(addReview({
+        bookingId: reviewBooking._id,
+        bicycleId: reviewBooking.bicycle?._id,
+        rating,
+        comment,
+        ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
+      }));
+      if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
+        Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+        setReviewBooking(null); // Only close after success
+      } else {
+        Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
       console.error('Review add error:', err);
-      if (err && err.error) console.error('Error details:', err.error);
-      if (err && err.payload) console.error('Payload:', err.payload);
-      if (err && err.error && err.error.message) console.error('Backend error:', err.error.message);
-    });
-    setReviewBooking(null);
+    }
   };
 
   const handleReviewClose = () => {
