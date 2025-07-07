@@ -101,13 +101,12 @@ export default function ProfileHeader({user}) {
                     borderRadius: 12,
                     margin: 5,
                     padding: 15,
-                    marginBottom: 16,
                     shadowColor: '#000',
                     shadowOffset: {width: 0, height: 2},
                     shadowOpacity: 0.1,
                     shadowRadius: 4,
                     elevation: 3,
-                    marginBottom:idx===userReviews.length-1?40:0
+                    marginBottom:idx===userReviews.length-1?40:16
                   }}>
                   <View style={{flexDirection: 'row', marginBottom: 8}}>
                     {[...Array(review.rating || 0)].map((_, i) => (
