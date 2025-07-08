@@ -166,11 +166,16 @@ export const languageData = [
       },
       reservation_details: 'Datos de la reserva',
       payment_proceed: 'Proceder al pago',
+      SerialNumber:'Número del serie',
+      frameNum:'Dónde encontrar mi numero del bastidor',
+      NoFrame:'¿No tienes número de serie? Puedes seguir alquilando tu bici sin problema. Sin seguro, te recomendamos añadir una fianza como medida de seguridad.',
+      insuranceTitle:'El seguro solo aplica si entregas un candado y el usuario lo utiliza al aparcar.',
       offer_bike_component: 'Ofrece tu bicicleta o componente',
+       setPrice:"Define tu precio de alquiler :",
       brand_value: 'Bicicleta de Montaña Pro',
       add_photo_desc: 'Añade un foto de tu bicicleta/componente.',
       set_price_desc:
-        'Establece el precio diario al que deseas alquilar tu bicicleta o componente. No te preocupes por la seguridad: nosotros nos encargamos de proteger tu bicicleta frente a cualquier eventualidad durante el alquiler.',
+        'Establece el precio diario. Nosotros nos encargamos de proteger tu bicicleta durante el alquiler.',
       address_description:
         'Agrega la dirección donde se encuentra tu bicicleta/componente para alquilar.',
       select_brand_model_description:
@@ -394,6 +399,9 @@ export const languageData = [
         bike: 'bici',
       },
       no_reviews_found: 'No se encontraron reseñas.',
+      set_price_info_title: "Define tu precio de alquiler",
+      set_price_info_desc: "Establece el precio diario. Nosotros nos encargamos de proteger tu bicicleta durante el alquiler.",
+      insurance_reminder: "El seguro solo aplica si entregas un candado y el usuario lo utiliza al aparcar.",
     },
   },
   {
@@ -565,11 +573,16 @@ export const languageData = [
       },
       reservation_details: 'Reservation details',
       payment_proceed: 'Proceed to payment',
+       SerialNumber:'Serial number',
+       frameNum:'Where can I find my frame number',
+       NoFrame:`Don't have a serial number? You can still rent out your bike without any problem. Without insurance, we recommend adding a deposit as a security measure.`,
+      insuranceTitle:'The insurance only applies if you provide a lock and the user uses it when parking.',
       offer_bike_component: 'Offer your bicycle or component',
       brand_value: 'Mountain Bike Pro',
+      setPrice:"Set your rental price :",
       add_photo_desc: 'Add a photo of your bike/component.',
       set_price_desc:
-        "Set the daily price at which you want to rent your bike or component. Don't worry about security: we will take care of protecting your bicycle against any eventuality during the rental.",
+        "Set the daily price. We take care of protecting your bike during the rental.",
       address_description:
         'Add the address where your bike/component is for rent.',
       select_brand_model_description:
@@ -784,6 +797,9 @@ export const languageData = [
         bike: 'bike',
       },
       no_reviews_found: 'No reviews found.',
+      set_price_info_title: "Set your rental price",
+      set_price_info_desc: "Set the daily price. We take care of protecting your bike during the rental.",
+      insurance_reminder: "Insurance only applies if you provide a lock and the user uses it when parking.",
     },
   },
 ];

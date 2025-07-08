@@ -128,6 +128,7 @@ export const addBicycle = createAsyncThunk(
       category,
       photo,
       price,
+      serialNum,
       deposit,
       location,
       description,
@@ -148,13 +149,14 @@ export const addBicycle = createAsyncThunk(
     // Generate geohash from latitude and longitude
     const geoHash = geohash.encode(lat, lng);
 
-    console.log({ userId, lng, lat, location, country, city, description, deposit, price, category, brand, model, geoHash }, '________________');
+    console.log({ userId, lng, lat, location, country, city, description, deposit, price, category, brand, model, geoHash,serialNum }, '________________');
 
     let formData = new FormData();
     formData.append('brand', brand);
     formData.append('model', model);
     formData.append('category', category);
     formData.append('price', price);
+    formData.append('serialNum', serialNum);
     formData.append('deposit', deposit && deposit > 0 ? deposit : 0);
     formData.append('description', description);
     formData.append('city', city);

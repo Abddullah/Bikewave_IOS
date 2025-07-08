@@ -16,6 +16,7 @@ import AppTextInput from '../../components/AppTextInput';
 import {Typography} from '../../utilities/constants/constant.style';
 import CheckBox from 'react-native-check-box';
 import {useTranslation} from 'react-i18next';
+import { colors } from '../../utilities/constants';
 
 export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
   const [deposit, setDeposit] = useState(false);
@@ -102,6 +103,10 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
     updateFormData('price', text);
     if (error) setError(''); // Clear error when user types
   };
+  const handleserialNumChange = text => {
+    updateFormData('serialNum', text);
+    if (error) setError(''); // Clear error when user types
+  };
 
   const handleDepositChange = text => {
     updateFormData('deposit', text);
@@ -127,11 +132,19 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
           setCurrentStep={setCurrentStep}
           onBack={onBack}
           steps={steps}
-          desc={`${t('set_price_desc')}`}
+          desc={
+            <Text style={[Typography.f_16_inter_regular,{color:colors.black}]}>
+              <Text style={[Typography.f_16_inter_bold]}>{t('setPrice')}</Text>{' '}
+              {t('set_price_desc')}
+            </Text>
+          }
         />
         <ScrollView showsVerticalScrollIndicator={false}>
           <View style={styles.formWrapper}>
             <View>
+              <Text style={[Typography.f_14_inter_bold,{color:colors.black,lineHeight:22,paddingBottom:20}]}>
+                {t('reminder')}<Text style={[Typography.f14]}> {t('insuranceTitle')}</Text>
+              </Text>
               <Text style={styles.priceLabel}>
                 {t('price_per_day')} <Text style={styles.asterisk}>*</Text>
               </Text>
@@ -141,6 +154,16 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
                 onChangeText={handlePriceChange}
                 keyboardType="numeric"
               />
+              <Text style={[styles.priceLabel,{marginTop:15}]}>
+                {t('SerialNumber')}</Text>
+              <AppTextInput
+                placeholder={'Ej. 12345678'}
+                value={formData.serialNum}
+                onChangeText={handleserialNumChange}
+                keyboardType="numeric"
+              />
+              <Text style={[Typography.f_12_inter_medium,{color:'#A05C7B',marginTop:5}]}>{t('frameNum')}</Text>
+              <Text style={[Typography.f_12_inter_regular,{color:'black',marginTop:10,lineHeight:20}]}>{t('NoFrame')}</Text>
             </View>
             <View style={styles.checkboxWrapper}>
               <CheckBox
@@ -164,7 +187,7 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
                 {error && error.includes('deposit') && (
                   <Text style={styles.errorText}>{error}</Text>
                 )}
-              </> 
+              </>
             )}
 
             <Text
