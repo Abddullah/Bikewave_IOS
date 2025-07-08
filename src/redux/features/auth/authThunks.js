@@ -1,18 +1,25 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import {createAsyncThunk} from '@reduxjs/toolkit';
 import ApiManager from '../../../api/ApiManager';
 import getErrorMessage from '../../../services/errorHandler';
 import axios from 'axios';
-import { EnvConfig } from '../../../config/envConfig';
+import {EnvConfig} from '../../../config/envConfig';
+import {GoogleSignin} from '@react-native-google-signin/google-signin';
+
+GoogleSignin.configure({
+  webClientId:
+    '67869384366-odtikn5gueg3pkn6khoke2kiv98u20lk.apps.googleusercontent.com',
+  offlineAccess: true,
+  forceCodeForRefreshToken: true,
+});
 
 // Login
 export const login = createAsyncThunk(
   'auth/login',
-  async ({ email, password }) => {
+  async ({email, password}) => {
     try {
-      const response = await ApiManager.post('/users/login', { email, password });
+      const response = await ApiManager.post('/users/login', {email, password});
       return response.data;
     } catch (error) {
-      console.log(error, 'error')
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(
           `login-${error.response.status}`,
@@ -28,7 +35,7 @@ export const login = createAsyncThunk(
 // Register
 export const register = createAsyncThunk(
   'auth/register',
-  async ({ email, firstName, secondName, password }) => {
+  async ({email, firstName, secondName, password}) => {
     try {
       const response = await ApiManager.post('/users/', {
         email,
@@ -57,7 +64,7 @@ export const sendEmailAfterRegister = createAsyncThunk(
   'auth/sendEmailAfterRegister',
   async email => {
     try {
-      const response = await ApiManager.post('/users/send-email', { email });
+      const response = await ApiManager.post('/users/send-email', {email});
       return response.data;
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {
@@ -74,7 +81,7 @@ export const forgotPassword = createAsyncThunk(
   'auth/forgotPassword',
   async email => {
     try {
-      const response = await ApiManager.put('/users/forgot-password', { email });
+      const response = await ApiManager.put('/users/forgot-password', {email});
       return response.data;
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {
@@ -92,7 +99,7 @@ export const forgotPassword = createAsyncThunk(
 // change password
 export const changePassword = createAsyncThunk(
   'auth/changePassword',
-  async (newPassword, { getState }) => {
+  async (newPassword, {getState}) => {
     const token = getState().auth.userToken;
     const data = JSON.stringify({
       password: newPassword,
@@ -112,7 +119,6 @@ export const changePassword = createAsyncThunk(
       return response.data;
     } catch (error) {
       if (error.response) {
-        console.error('Error Response:', error.response.data);
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
       } else {
@@ -125,7 +131,7 @@ export const changePassword = createAsyncThunk(
 // fetch approved info
 export const fetchApprovedInfo = createAsyncThunk(
   'auth/fetchApprovedInfo',
-  async (userId, { getState }) => {
+  async (userId, {getState}) => {
     const token = getState().auth.userToken;
     try {
       const response = await ApiManager.get(`/users/${userId}/approvedInfo`, {
@@ -151,10 +157,8 @@ export const fetchUserInfo = createAsyncThunk(
   async userId => {
     try {
       const response = await ApiManager.get(`/users/${userId}`);
-      console.log(response, 'response')
       return response.data;
     } catch (error) {
-      console.log(error, 'error')
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
@@ -168,11 +172,11 @@ export const fetchUserInfo = createAsyncThunk(
 // fetching user bicyles
 export const fetchUserBicycles = createAsyncThunk(
   'auth/fetchUserBicycles',
-  async (_, { getState }) => {
+  async (_, {getState}) => {
     const token = getState().auth.userToken;
     try {
       const response = await ApiManager.get('/users/mybicycles', {
-        headers: { Authorization: `${token}` },
+        headers: {Authorization: `${token}`},
       });
       return response.data;
     } catch (error) {
@@ -188,13 +192,13 @@ export const fetchUserBicycles = createAsyncThunk(
 // update user
 export const updateUser = createAsyncThunk(
   'auth/updateUser',
-  async ({ userId, firstName, secondName, email }, { getState }) => {
+  async ({userId, firstName, secondName, email}, {getState}) => {
     const token = getState().auth.userToken;
     try {
       const response = await ApiManager.patch(
         `/users/${userId}`,
-        { firstName, secondName, email },
-        { headers: { Authorization: `${token}` } },
+        {firstName, secondName, email},
+        {headers: {Authorization: `${token}`}},
       );
       return response.data;
     } catch (error) {
@@ -211,7 +215,7 @@ export const updateUser = createAsyncThunk(
 // Delete User
 export const deleteUser = createAsyncThunk(
   'auth/deleteUser',
-  async (userId, { getState }) => {
+  async (userId, {getState}) => {
     const token = getState().auth.userToken;
     try {
       const response = await ApiManager.delete(`/users/${userId}`, {
@@ -234,7 +238,7 @@ export const deleteUser = createAsyncThunk(
 // send doc approval
 export const sendApprovalImages = createAsyncThunk(
   'users/sendApprovalImages',
-  async (photos, { getState }) => {
+  async (photos, {getState}) => {
     const token = getState().auth.userToken;
     const userId = getState().auth.user?.id;
 
@@ -271,6 +275,54 @@ export const sendApprovalImages = createAsyncThunk(
       } else {
         throw new Error(getErrorMessage('Failed to upload images'));
       }
+    }
+  },
+);
+
+export const googleSignIn = createAsyncThunk(
+  'auth/googleSignIn',
+  async (_, {rejectWithValue}) => {
+    try {
+      let signInResult;
+      let tokens;
+      try {
+        signInResult = await GoogleSignin.signIn();
+        tokens = await GoogleSignin.getTokens();
+      } catch (error) {
+        throw error;
+      }
+      const access_token = tokens?.accessToken;
+      if (!access_token) {
+        throw new Error('No accessToken received from Google');
+      }
+      try {
+        const response = await axios.post(
+          'https://nfsd-bikewave-frontend.onrender.com/api/auth/google-login',
+          {access_token},
+        );
+        console.log(response, 'response');
+        return response.data;
+      } catch (apiError) {
+        let message = 'Google login API failed';
+        if (
+          apiError.response &&
+          apiError.response.data &&
+          apiError.response.data.msg
+        ) {
+          message = apiError.response.data.msg;
+        } else if (apiError.message) {
+          message = apiError.message;
+        }
+        return rejectWithValue(message);
+      }
+    } catch (error) {
+      let message = 'Google Sign-In failed';
+      if (error.response && error.response.data && error.response.data.msg) {
+        message = error.response.data.msg;
+      } else if (error.message) {
+        message = error.message;
+      }
+      return rejectWithValue(message);
     }
   },
 );

@@ -40,11 +40,11 @@ const AppNavigator = React.forwardRef((props, ref) => {
     const checkAuth = async () => {
       try {
         const userData = await getItem('userToken');
-        const token=JSON.parse(userData).token
-        userData.token=token
         if (userData) {
-        await dispatch(setUserToken(token));
-         await dispatch(setUser(JSON.parse(userData)));
+          const parsed = JSON.parse(userData);
+          const token = parsed.token;
+          await dispatch(setUserToken(token));
+          await dispatch(setUser(parsed));
           setInitialRoute('Tabs');
         } else {
           setInitialRoute('Splash');
