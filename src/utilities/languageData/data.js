@@ -402,6 +402,15 @@ export const languageData = [
       set_price_info_title: "Define tu precio de alquiler",
       set_price_info_desc: "Establece el precio diario. Nosotros nos encargamos de proteger tu bicicleta durante el alquiler.",
       insurance_reminder: "El seguro solo aplica si entregas un candado y el usuario lo utiliza al aparcar.",
+      frameNum_modal_title: "¿Dónde encontrar el número de serie de tu bicicleta?",
+      frameNum_modal_1: "El número de serie suele estar grabado en el cuadro de la bicicleta. Puede encontrarse en los siguientes lugares:",
+      frameNum_modal_bullets: [
+        "Base del cuadro, justo debajo del pedalier (juego de bielas)",
+        "Debajo del juego de bielas",
+        "Tubo del sillín, en la parte inferior o trasera",
+        "Debajo de la batería, si es una bicicleta eléctrica"
+      ],
+      frameNum_modal_btn: "Entendido",
     },
   },
   {
@@ -800,6 +809,15 @@ export const languageData = [
       set_price_info_title: "Set your rental price",
       set_price_info_desc: "Set the daily price. We take care of protecting your bike during the rental.",
       insurance_reminder: "Insurance only applies if you provide a lock and the user uses it when parking.",
+      frameNum_modal_title: "Where can I find my bike's serial number?",
+      frameNum_modal_1: "The serial number is usually engraved on the bike frame. You can find it in the following places:",
+      frameNum_modal_bullets: [
+        "Frame base, just below the crankset (bottom bracket)",
+        "Under the crankset",
+        "Seat tube, at the bottom or rear",
+        "Under the battery, if it's an electric bike"
+      ],
+      frameNum_modal_btn: "Got it",
     },
   },
 ];
