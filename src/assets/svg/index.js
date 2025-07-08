@@ -74,3 +74,5 @@ export {default as TickGreenWithBG} from './TickGreenWithBG.svg';
 export {default as PrevGray} from './PrevGray.svg';
 export {default as Bike} from './Bike.svg';
 export {default as DropUp} from './DropUp.svg';
+export { default as Google } from "./google.svg";
+export { default as Apple } from "./apple.svg";

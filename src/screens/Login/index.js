@@ -6,13 +6,14 @@ import {
   Keyboard,
   TouchableWithoutFeedback,
   ActivityIndicator,
+  TouchableOpacity,
 } from 'react-native';
 import Colors from '../../utilities/constants/colors';
 
 import { Typography } from '../../utilities/constants/constant.style';
 import AppStatusBar from '../../components/AppStatusBar';
 import AppTextInput from '../../components/AppTextInput';
-import { login } from '../../redux/features/auth/authThunks';
+import { login, googleSignIn } from '../../redux/features/auth/authThunks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectAuthLoading,
@@ -20,7 +21,7 @@ import {
   selectAuthUserId,
 } from '../../redux/features/auth/authSelectors';
 import AppButton from '../../components/AppButton';
-import { Eye, EyeOff, Cross, Tick } from '../../assets/svg';
+import { Eye, EyeOff, Cross, Tick, Google, Apple } from '../../assets/svg';
 import PopUp from '../../components/PopUp';
 import { useTranslation } from 'react-i18next';
 import { Formik } from 'formik';
@@ -60,6 +61,21 @@ export default function Login({ navigation }) {
       }
     } catch (e) {
       console.log('ERR', e.message);
+      setShowErrorPopup(true);
+    }
+  };
+
+  const handleGoogleSignIn = async () => {
+    try {
+      const response = await dispatch(googleSignIn());
+      if (response?.payload?.success || response?.payload?.token) {
+        const userId = response?.payload?.userId;
+        if (userId) await saveFCMToken(userId);
+        navigation.replace('Tabs');
+      } else {
+        setShowErrorPopup(true);
+      }
+    } catch (e) {
       setShowErrorPopup(true);
     }
   };
@@ -162,6 +178,48 @@ export default function Login({ navigation }) {
                 {t('register')}
               </Text>
             </Text>
+              <View
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    gap: 10,
+                    marginTop: 20,
+                  }}
+                >
+                  {Platform.OS === "ios" ? (
+                    <View
+                      style={{
+                        height: 50,
+                        width: 50,
+                        borderRadius: 50,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderWidth: 1.5,
+                        borderColor: Colors.primary,
+                        backgroundColor: Colors.white,
+                      }}
+                    >
+                      <Apple />
+                    </View>
+                  ) : null}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    onPress={handleGoogleSignIn}
+                    style={{
+                      height: 50,
+                      width: 50,
+                      borderRadius: 50,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      borderWidth: 1.5,
+                      borderColor: Colors.primary,
+                      backgroundColor: Colors.white,
+                    }}
+                  >
+                    <Google />
+                  </TouchableOpacity>
+                </View>
           </View>
         )}
       </View>

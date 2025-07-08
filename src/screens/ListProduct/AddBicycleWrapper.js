@@ -65,6 +65,7 @@ export const AddBicycleWrapper = () => {
     photo: null,
     price: '',
     deposit: '',
+    serialNum:'',
     myUserId: user_id,
   });
   console.log(formData, 'formData');
@@ -227,6 +228,7 @@ export const AddBicycleWrapper = () => {
                       photo: null,
                       price: '',
                       deposit: '',
+                      serialNum:'',
                       myUserId: user_id,
                     })
                     dispatch(fetchUserInfo(user_id));

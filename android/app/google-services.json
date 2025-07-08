@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "67869384366",
+    "project_id": "bikewave-daef9",
+    "storage_bucket": "bikewave-daef9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:67869384366:android:d6caab1733d290aa9b973f",
+        "android_client_info": {
+          "package_name": "com.bikewave"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "67869384366-oesath8lor3mq1rt4kblhm62ptst4r0h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bikewave",
+            "certificate_hash": "5b1bbed348fcb685d7360fd2ffc16145da03d775"
+          }
+        },
+        {
+          "client_id": "67869384366-odtikn5gueg3pkn6khoke2kiv98u20lk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAoMcg-0Mk5Ly00cuqIrURq-4CDsbr-Vg8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "109555746079823751232",
+              "client_type": 3
+            },
+            {
+              "client_id": "67869384366-4vqdg2hjeochkm0j13u0lt8jljcip7j4.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.Bikewave",
+                "app_store_id": "6746553116"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
