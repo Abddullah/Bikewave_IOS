@@ -23,7 +23,8 @@ export const EnvConfig = {
     url: SOCKET_URL,
   },
   api: {
-    baseUrl: BASE_URL,
+    baseUrl: BASE_URL
+    ,
   },
   stripe: {
     baseUrl: STRIPE_API_BASE_URL,

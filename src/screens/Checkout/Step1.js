@@ -1,23 +1,33 @@
 import React from 'react';
-import { View, StyleSheet, Text, ScrollView, ActivityIndicator } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Text,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import AppButton from '../../components/AppButton';
 import Colors from '../../utilities/constants/colors';
 import AppStatusBar from '../../components/AppStatusBar';
 
-import { CheckoutHeader } from '../../components/CheckoutHeader';
+import {CheckoutHeader} from '../../components/CheckoutHeader';
 import ProductCardDetails from '../../components/ProductCardDetails';
-import { Typography } from '../../utilities/constants/constant.style';
+import {Typography} from '../../utilities/constants/constant.style';
 import DropShadow from 'react-native-drop-shadow';
-import { Reserve } from '../../assets/svg';
-import { useTranslation } from 'react-i18next';
-import { useDispatch, useSelector } from 'react-redux';
-import { bookBicycle } from '../../redux/features/main/mainThunks';
-import { selectBookingLoading, selectBookingError } from '../../redux/features/main/mainSelectors';
+import {Reserve} from '../../assets/svg';
+import {useTranslation} from 'react-i18next';
+import {useDispatch, useSelector} from 'react-redux';
+import {bookBicycle} from '../../redux/features/main/mainThunks';
+import {
+  selectBookingLoading,
+  selectBookingError,
+} from '../../redux/features/main/mainSelectors';
+import {colors} from '../../utilities/constants';
 
-export const Step1 = ({ navigation, route }) => {
-  const { t } = useTranslation();
+export const Step1 = ({navigation, route}) => {
+  const {t, i18n} = useTranslation();
   const dispatch = useDispatch();
-  const { bicycle, selectedDateRange, totalPrice } = route.params;
+  const {bicycle, selectedDateRange, totalPrice} = route.params;
   const bookingLoading = useSelector(selectBookingLoading);
   const bookingError = useSelector(selectBookingError);
 
@@ -35,40 +45,85 @@ export const Step1 = ({ navigation, route }) => {
     const timeDiff = endDate.getTime() - startDate.getTime();
     return Math.ceil(timeDiff / (1000 * 60 * 60 * 24)) + 1;
   };
-   
+
   const days = calculateDays();
   const basePrice = bicycle.price * days;
-  const insuranceFee = 4.20;
+  const insuranceFee = 4.2;
   const serviceFee = 4;
 
-  const formatDate = (dateString) => {
+  const formatDate = dateString => {
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
+      day: 'numeric',
     });
   };
 
   const handlePaymentProceed = async () => {
     try {
-      const bookingRes = await dispatch(bookBicycle({
-        bicycleId: bicycle._id,
-        dateFrom: selectedDateRange.startDate,
-        dateEnd: selectedDateRange.endDate,
-        price: totalPrice.replace('€', '')
-      }));
+      const bookingRes = await dispatch(
+        bookBicycle({
+          bicycleId: bicycle._id,
+          dateFrom: selectedDateRange.startDate,
+          dateEnd: selectedDateRange.endDate,
+          price: totalPrice.replace('€', ''),
+        }),
+      );
 
       if (bookingRes.payload) {
         navigation.navigate('Step2', {
           bicycle,
           selectedDateRange,
-          totalPrice
+          totalPrice,
         });
       }
     } catch (error) {
       console.error('Booking error:', error);
     }
+  };
+
+  const getHighlightedRentTitle = () => {
+    const rentTitle = t('rentTitle');
+    const lang = i18n.language;
+    const highlightWord = lang === 'sp' ? 'candado' : 'lock';
+
+    if (!rentTitle.includes(highlightWord)) {
+      return (
+        <Text
+          style={[
+            Typography.f_14_roboto_medium,
+            {
+              color: colors.black,
+              paddingHorizontal: 20,
+              paddingBottom: 35,
+              lineHeight: 22,
+            },
+          ]}>
+          <Text style={[Typography.f_14_inter_bold]}>{t('reminder')}</Text>{' '}
+          {rentTitle}
+        </Text>
+      );
+    }
+
+    const parts = rentTitle.split(highlightWord);
+    return (
+      <Text
+        style={[
+          Typography.f_14_roboto_medium,
+          {
+            color: colors.black,
+            paddingHorizontal: 20,
+            paddingBottom: 35,
+            lineHeight: 22,
+          },
+        ]}>
+        <Text style={[Typography.f_14_inter_bold]}>{t('reminder')}</Text>{' '}
+        {parts[0]}
+        <Text style={[Typography.f_14_inter_bold,{color:'red'}]}>{highlightWord}</Text>
+        {parts[1]}
+      </Text>
+    );
   };
 
   return (
@@ -84,19 +139,31 @@ export const Step1 = ({ navigation, route }) => {
               brand={bicycle?.brand}
               productId={bicycle?._id}
               model={bicycle?.model}
-              location={bicycle?.location?`${bicycle?.location?.city}, ${bicycle?.location?.country}`:bicycle?.city+', '+bicycle?.country}
+              location={
+                bicycle?.location
+                  ? `${bicycle?.location?.city}, ${bicycle?.location?.country}`
+                  : bicycle?.city + ', ' + bicycle?.country
+              }
               rating={bicycle?.rating}
-              photo={{ uri: bicycle?.photo?.replace(/\.avif$/, '.jpg') || bicycle?.photo }}
+              photo={{
+                uri:
+                  bicycle?.photo?.replace(/\.avif$/, '.jpg') || bicycle?.photo,
+              }}
             />
           }
         />
+        {getHighlightedRentTitle()}
         <View style={styles.dateSectionContainer}>
           <Text style={styles.sectionTitle}>{t('dates')}</Text>
           <DropShadow style={styles.dateCardShadow}>
             <View style={styles.dateCardContainer}>
-              <Text style={styles.dateLabel}>{formatDate(selectedDateRange?.startDate)}</Text>
+              <Text style={styles.dateLabel}>
+                {formatDate(selectedDateRange?.startDate)}
+              </Text>
               <Reserve />
-              <Text style={styles.dateLabel}>{formatDate(selectedDateRange?.endDate)}</Text>
+              <Text style={styles.dateLabel}>
+                {formatDate(selectedDateRange?.endDate)}
+              </Text>
             </View>
           </DropShadow>
         </View>
@@ -105,7 +172,9 @@ export const Step1 = ({ navigation, route }) => {
           <DropShadow style={styles.priceCardShadow}>
             <View style={styles.priceCardContainer}>
               <View style={styles.priceRow}>
-                <Text style={styles.priceLabel}>{bicycle?.price}€ x {days} {t('day')}(s)</Text>
+                <Text style={styles.priceLabel}>
+                  {bicycle?.price}€ x {days} {t('day')}(s)
+                </Text>
                 <Text style={styles.priceValue}>{`${basePrice}€`}</Text>
               </View>
               <View style={styles.priceRow}>
@@ -127,7 +196,13 @@ export const Step1 = ({ navigation, route }) => {
           </DropShadow>
         </View>
         <AppButton
-          title={bookingLoading ? <ActivityIndicator color={Colors.white} /> : t('payment_proceed')}
+          title={
+            bookingLoading ? (
+              <ActivityIndicator color={Colors.white} />
+            ) : (
+              t('payment_proceed')
+            )
+          }
           btnColor={Colors.primary}
           btnTitleColor={Colors.white}
           style={styles.paymentButton}
@@ -145,12 +220,12 @@ const styles = StyleSheet.create({
   },
   paymentButton: {
     margin: 20,
-    marginTop: Platform.OS === 'ios' ? 20 : 60 ,
+    marginTop: Platform.OS === 'ios' ? 20 : 60,
   },
   dateSectionContainer: {
     gap: 15,
     marginHorizontal: 25,
-    marginTop: -10
+    marginTop: -10,
   },
   sectionTitle: {
     ...Typography.f_20_inter_semi_bold,

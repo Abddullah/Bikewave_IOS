@@ -11,6 +11,7 @@ import {
   updateUser,
   deleteUser,
   sendApprovalImages,
+  googleSignIn,
 } from './authThunks';
 import { setItem } from '../../../services/assynsStorage';
 
@@ -190,6 +191,21 @@ const authSlice = createSlice({
     builder.addCase(sendApprovalImages.rejected, (state, action) => {
       state.sendApprovalLoading = false;
       state.error = action.error.message;
+    });
+
+    // Google Sign-In
+    builder.addCase(googleSignIn.pending, state => {
+      state.auth_loading = true;
+      state.error = null;
+    });
+    builder.addCase(googleSignIn.fulfilled, (state, action) => {
+      state.auth_loading = false;
+      state.user = action.payload.userToAdd || action.payload;
+      state.userToken = action.payload.token;
+    });
+    builder.addCase(googleSignIn.rejected, (state, action) => {
+      state.auth_loading = false;
+      state.error = action.payload || action.error.message;
     });
   },
 });
