@@ -120,7 +120,7 @@ export const Step1 = ({navigation, route}) => {
         ]}>
         <Text style={[Typography.f_14_inter_bold]}>{t('reminder')}</Text>{' '}
         {parts[0]}
-        <Text style={{color: 'red'}}>{highlightWord}</Text>
+        <Text style={[Typography.f_14_inter_bold,{color:'red'}]}>{highlightWord}</Text>
         {parts[1]}
       </Text>
     );
