@@ -46,16 +46,16 @@ export default function Login({ navigation }) {
       .min(6, t('password_min_length'))
       .required(t('password_required')),
   });
-  console.log(EnvConfig,'_____EnvConfig_____ ');
+  // console.log(EnvConfig,'_____EnvConfig_____ ');
 
   const handleLogin = async values => {
     const { email, password } = values;
     try {
       const response = await dispatch(login({ email, password }));
-       if (response?.payload?.success) {
+      if (response?.payload?.success) {
         if (userId) await saveFCMToken(userId);
-    navigation.replace('Tabs');
-    // setShowSuccessPopup(true);
+        navigation.replace('Tabs');
+        // setShowSuccessPopup(true);
       } else {
         setShowErrorPopup(true);
       }
@@ -68,14 +68,17 @@ export default function Login({ navigation }) {
   const handleGoogleSignIn = async () => {
     try {
       const response = await dispatch(googleSignIn());
-      if (response?.payload?.success || response?.payload?.token) {
-        const userId = response?.payload?.userId;
+      if (response?.payload.status == 200) {
+        const userId = response?.payload?.data?.user?._id;
+        console.log(userId, 'userId');
         if (userId) await saveFCMToken(userId);
         navigation.replace('Tabs');
       } else {
+        console.log(response, 'response');
         setShowErrorPopup(true);
       }
     } catch (e) {
+      console.log(e, 'error');
       setShowErrorPopup(true);
     }
   };
@@ -119,7 +122,7 @@ export default function Login({ navigation }) {
                 password: '',
                 // email: 'arina@gmail.com',
                 // password: '222222',
-            
+
               }}
               validationSchema={validationSchema}
               onSubmit={handleLogin}
@@ -178,48 +181,48 @@ export default function Login({ navigation }) {
                 {t('register')}
               </Text>
             </Text>
-              <View
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 10,
+                marginTop: 20,
+              }}
+            >
+              {Platform.OS === "ios" ? (
+                <View
                   style={{
-                    flexDirection: "row",
-                    alignItems: "center",
+                    height: 50,
+                    width: 50,
+                    borderRadius: 50,
                     justifyContent: "center",
-                    gap: 10,
-                    marginTop: 20,
+                    alignItems: "center",
+                    borderWidth: 1.5,
+                    borderColor: Colors.primary,
+                    backgroundColor: Colors.white,
                   }}
                 >
-                  {Platform.OS === "ios" ? (
-                    <View
-                      style={{
-                        height: 50,
-                        width: 50,
-                        borderRadius: 50,
-                        justifyContent: "center",
-                        alignItems: "center",
-                        borderWidth: 1.5,
-                        borderColor: Colors.primary,
-                        backgroundColor: Colors.white,
-                      }}
-                    >
-                      <Apple />
-                    </View>
-                  ) : null}
-                  <TouchableOpacity
-                    activeOpacity={0.8}
-                    onPress={handleGoogleSignIn}
-                    style={{
-                      height: 50,
-                      width: 50,
-                      borderRadius: 50,
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      borderWidth: 1.5,
-                      borderColor: Colors.primary,
-                      backgroundColor: Colors.white,
-                    }}
-                  >
-                    <Google />
-                  </TouchableOpacity>
+                  <Apple />
                 </View>
+              ) : null}
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={handleGoogleSignIn}
+                style={{
+                  height: 50,
+                  width: 50,
+                  borderRadius: 50,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  borderWidth: 1.5,
+                  borderColor: Colors.primary,
+                  backgroundColor: Colors.white,
+                }}
+              >
+                <Google />
+              </TouchableOpacity>
+            </View>
           </View>
         )}
       </View>

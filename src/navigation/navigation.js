@@ -43,7 +43,7 @@ const AppNavigator = React.forwardRef((props, ref) => {
         if (userData) {
           const parsed = JSON.parse(userData);
           const token = parsed.token;
-          await dispatch(setUserToken(token));
+           await dispatch(setUserToken(token));
           await dispatch(setUser(parsed));
           setInitialRoute('Tabs');
         } else {

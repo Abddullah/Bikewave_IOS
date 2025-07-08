@@ -40,6 +40,7 @@ const authSlice = createSlice({
     },
     setUser(state, action) {
       state.user = action.payload;
+      // console.log(action.payload, ' action.payload')
       state.user.id = action.payload.userId;
       state.user.name = action.payload.userName;
     },
@@ -200,8 +201,21 @@ const authSlice = createSlice({
     });
     builder.addCase(googleSignIn.fulfilled, (state, action) => {
       state.auth_loading = false;
-      state.user = action.payload.userToAdd || action.payload;
-      state.userToken = action.payload.token;
+      const { user, token } = action.payload.data;
+      state.user = {
+        id: user._id,
+        name: `${user.firstName} ${user.secondName}`,
+        email: user.email,
+      };
+      const data = {
+        id: user._id,
+        userId: user._id,
+        name: `${user.firstName} ${user.secondName}`,
+        email: user.email,
+      };
+      state.userToken = token;
+      const obj = { ...action.payload.data.user, ...data, token }
+      setItem('userToken', JSON.stringify(obj));
     });
     builder.addCase(googleSignIn.rejected, (state, action) => {
       state.auth_loading = false;

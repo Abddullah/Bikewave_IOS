@@ -12,7 +12,7 @@
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		13B07FC11A68108700A75B9A /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 13B07FB71A68108700A75B9A /* main.m */; };
 		6132EF182BDFF13200BBE14D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 6132EF172BDFF13200BBE14D /* PrivacyInfo.xcprivacy */; };
-		7A6C39A92DEC287200D38E3F /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7A6C39A82DEC287200D38E3F /* GoogleService-Info.plist */; };
+		7A6376B12E1D88B800CC9EF8 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 7A6376B02E1D88B800CC9EF8 /* GoogleService-Info.plist */; };
 		7ADEE0132DEC5DCE00D1FE2C /* Inter_18pt-BlackItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ADEDFF52DEC5DCC00D1FE2C /* Inter_18pt-BlackItalic.ttf */; };
 		7ADEE0142DEC5DCE00D1FE2C /* Roboto-LightItalic.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ADEDFF62DEC5DCC00D1FE2C /* Roboto-LightItalic.ttf */; };
 		7ADEE0152DEC5DCE00D1FE2C /* Roboto-Black.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7ADEDFF72DEC5DCC00D1FE2C /* Roboto-Black.ttf */; };
@@ -74,7 +74,7 @@
 		5B7EB9410499542E8C5724F5 /* Pods-Bikewave-BikewaveTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Bikewave-BikewaveTests.debug.xcconfig"; path = "Target Support Files/Pods-Bikewave-BikewaveTests/Pods-Bikewave-BikewaveTests.debug.xcconfig"; sourceTree = "<group>"; };
 		6132EF172BDFF13200BBE14D /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = Bikewave/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		7A17FC522DEDFDB3001C5311 /* Bikewave.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = Bikewave.entitlements; path = Bikewave/Bikewave.entitlements; sourceTree = "<group>"; };
-		7A6C39A82DEC287200D38E3F /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		7A6376B02E1D88B800CC9EF8 /* GoogleService-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		7ADEDFF52DEC5DCC00D1FE2C /* Inter_18pt-BlackItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Inter_18pt-BlackItalic.ttf"; path = "../src/assets/fonts/Inter_18pt-BlackItalic.ttf"; sourceTree = "<group>"; };
 		7ADEDFF62DEC5DCC00D1FE2C /* Roboto-LightItalic.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Roboto-LightItalic.ttf"; path = "../src/assets/fonts/Roboto-LightItalic.ttf"; sourceTree = "<group>"; };
 		7ADEDFF72DEC5DCC00D1FE2C /* Roboto-Black.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Roboto-Black.ttf"; path = "../src/assets/fonts/Roboto-Black.ttf"; sourceTree = "<group>"; };
@@ -212,8 +212,8 @@
 				7ADEDFFD2DEC5DCD00D1FE2C /* Roboto-Regular.ttf */,
 				7ADEE0102DEC5DCD00D1FE2C /* Roboto-Thin.ttf */,
 				7ADEE0052DEC5DCD00D1FE2C /* Roboto-ThinItalic.ttf */,
-				7A6C39A82DEC287200D38E3F /* GoogleService-Info.plist */,
 				6132EF172BDFF13200BBE14D /* PrivacyInfo.xcprivacy */,
+				7A6376B02E1D88B800CC9EF8 /* GoogleService-Info.plist */,
 				13B07FAE1A68108700A75B9A /* Bikewave */,
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				00E356EF1AD99517003FC87E /* BikewaveTests */,
@@ -366,12 +366,12 @@
 				7ADEE02A2DEC5DCE00D1FE2C /* Inter_18pt-Light.ttf in Resources */,
 				7ADEE02B2DEC5DCE00D1FE2C /* Roboto-BlackItalic.ttf in Resources */,
 				7ADEE02C2DEC5DCE00D1FE2C /* Inter_18pt-BoldItalic.ttf in Resources */,
+				7A6376B12E1D88B800CC9EF8 /* GoogleService-Info.plist in Resources */,
 				7ADEE02D2DEC5DCE00D1FE2C /* Inter_18pt-SemiBoldItalic.ttf in Resources */,
 				7ADEE02E2DEC5DCE00D1FE2C /* Roboto-Thin.ttf in Resources */,
 				7ADEE02F2DEC5DCE00D1FE2C /* Inter_18pt-MediumItalic.ttf in Resources */,
 				7ADEE0302DEC5DCE00D1FE2C /* Roboto-MediumItalic.ttf in Resources */,
 				6132EF182BDFF13200BBE14D /* PrivacyInfo.xcprivacy in Resources */,
-				7A6C39A92DEC287200D38E3F /* GoogleService-Info.plist in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
@@ -747,10 +747,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = false;
@@ -829,10 +826,7 @@
 					"-DFOLLY_USE_LIBCPP=1",
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 				);
-				OTHER_LDFLAGS = (
-					"$(inherited)",
-					" ",
-				);
+				OTHER_LDFLAGS = "$(inherited)  ";
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = false;
