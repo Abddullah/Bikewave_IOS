@@ -4,6 +4,11 @@ import getErrorMessage from '../../../services/errorHandler';
 import axios from 'axios';
 import { EnvConfig } from '../../../config/envConfig';
 import { GoogleSignin } from '@react-native-google-signin/google-signin';
+// import { appleAuth } from '@invertase/react-native-apple-authentication';
+// import { AppleAuthProvider } from 'firebase/auth';
+import { AppleAuthProvider, getAuth, signInWithCredential } from '@react-native-firebase/auth';
+import { appleAuth } from '@invertase/react-native-apple-authentication';
+
 
 GoogleSignin.configure({
   webClientId:
@@ -316,6 +321,79 @@ export const googleSignIn = createAsyncThunk(
       }
     } catch (error) {
       let message = 'Google Sign-In failed';
+      if (error.response && error.response.data && error.response.data.msg) {
+        message = error.response.data.msg;
+      } else if (error.message) {
+        message = error.message;
+      }
+      return rejectWithValue(message);
+    }
+  },
+);
+
+export const appleSignIn = createAsyncThunk(
+  'auth/appleSignIn',
+  async (_, { rejectWithValue }) => {
+    try {
+      const appleAuthRequestResponse = await appleAuth.performRequest({
+        requestedOperation: appleAuth.Operation.LOGIN,
+        // As per the FAQ of react-native-apple-authentication, the name should come first in the following array.
+        // See: https://github.com/invertase/react-native-apple-authentication#faqs
+        requestedScopes: [appleAuth.Scope.FULL_NAME, appleAuth.Scope.EMAIL],
+      });
+      console.log(appleAuthRequestResponse, 'appleAuthRequestResponse');
+      // Ensure Apple returned a user identityToken
+      if (!appleAuthRequestResponse.identityToken) {
+        throw new Error('Apple Sign-In failed - no identify token returned');
+      }
+      
+      // Create a Firebase credential from the response
+      const { identityToken, nonce, fullName, email } = appleAuthRequestResponse;
+      console.log(identityToken, 'identityToken');
+      
+      // Extract user information
+      let firstName = '';
+      let lastName = '';
+      
+      if (fullName) {
+        firstName = fullName.givenName || '';
+        lastName = fullName.familyName || '';
+        console.log('Apple Full Name:', fullName);
+        console.log('First Name:', firstName);
+        console.log('Last Name:', lastName);
+      }
+      
+      // Send the data to your backend API
+      try {
+        const response = await axios.post(
+          // 'https://nfsd-bikewave-backend.onrender.com/api/auth/apple-login',
+          'http://192.168.100.12:4000/api/auth/apple-login',
+          { 
+            identityToken,
+            email,
+            firstName, 
+            lastName,
+            appleId: appleAuthRequestResponse.user // This is the Apple user identifier
+          },
+        );
+        console.log('Apple login API response:', response.data);
+        return response;
+      } catch (apiError) {
+        let message = 'Apple login API failed';
+        if (
+          apiError.response &&
+          apiError.response.data &&
+          apiError.response.data.msg
+        ) {
+          message = apiError.response.data.msg;
+        } else if (apiError.message) {
+          message = apiError.message;
+        }
+        return rejectWithValue(message);
+      }
+    } catch (error) {
+      console.log(error, 'error');
+      let message = 'Apple Sign-In failed';
       if (error.response && error.response.data && error.response.data.msg) {
         message = error.response.data.msg;
       } else if (error.message) {

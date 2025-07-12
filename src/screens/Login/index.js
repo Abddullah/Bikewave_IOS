@@ -7,13 +7,14 @@ import {
   TouchableWithoutFeedback,
   ActivityIndicator,
   TouchableOpacity,
+  Platform,
 } from 'react-native';
 import Colors from '../../utilities/constants/colors';
 
 import { Typography } from '../../utilities/constants/constant.style';
 import AppStatusBar from '../../components/AppStatusBar';
 import AppTextInput from '../../components/AppTextInput';
-import { login, googleSignIn } from '../../redux/features/auth/authThunks';
+import { login, googleSignIn, appleSignIn } from '../../redux/features/auth/authThunks';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   selectAuthLoading,
@@ -79,6 +80,21 @@ export default function Login({ navigation }) {
       }
     } catch (e) {
       console.log(e, 'error');
+      setShowErrorPopup(true);
+    }
+  };
+
+  const handleAppleSignIn = async () => {
+    try {
+      const response = await dispatch(appleSignIn());
+      if (response?.payload?.status === 200) {
+        const userId = response?.payload?.data?.user?._id;
+        if (userId) await saveFCMToken(userId);
+        navigation.replace('Tabs');
+      } else {
+        setShowErrorPopup(true);
+      }
+    } catch (e) {
       setShowErrorPopup(true);
     }
   };
@@ -191,7 +207,9 @@ export default function Login({ navigation }) {
               }}
             >
               {Platform.OS === "ios" ? (
-                <View
+                <TouchableOpacity
+                  activeOpacity={0.8}
+                  onPress={handleAppleSignIn}
                   style={{
                     height: 50,
                     width: 50,
@@ -204,7 +222,7 @@ export default function Login({ navigation }) {
                   }}
                 >
                   <Apple />
-                </View>
+                </TouchableOpacity>
               ) : null}
               <TouchableOpacity
                 activeOpacity={0.8}
