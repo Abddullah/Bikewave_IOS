@@ -161,6 +161,8 @@ export default function Profile({ navigation }) {
       onPress: async () => {
         try {
           await removeFCMToken(userId);
+          // Remove Stripe account ID from AsyncStorage
+          await deleteItem('stripeAccountId');
           const token = await deleteItem('userToken');
           if (token) {
             store.dispatch(setUserToken(``));
