@@ -145,7 +145,11 @@ export const Step5 = ({formData, updateFormData, onBack, onNext}) => {
             </Text>
           }
         />
-        <ScrollView showsVerticalScrollIndicator={false}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{flexGrow: 1, paddingBottom: 40}}
+          keyboardShouldPersistTaps="handled"
+        >
           <View style={styles.formWrapper}>
             <View>
               <Text

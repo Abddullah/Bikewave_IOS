@@ -17,6 +17,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {
   createAccount,
   checkAccount,
+  validateUser,
 } from '../../redux/features/main/mainThunks';
 import {
   selectMainLoading,
@@ -29,25 +30,61 @@ import {
 } from '../../redux/features/auth/authSelectors';
 import {fetchUserInfo} from '../../redux/features/auth/authThunks';
 import {EnvConfig} from '../../config/envConfig';
+import {getItem, setItem} from '../../services/assynsStorage';
 
-export default function PaymentPreferences({navigation}) {
+export default function PaymentPreferences({navigation, route}) {
   const {t} = useTranslation();
   const dispatch = useDispatch();
   const user_id = useSelector(selectAuthUserId);
   const {accountId} = useSelector(selectUserDetails);
   const loading = useSelector(selectMainLoading);
   const accountStatus = useSelector(selectAccountStatus);
-
   const accountStatusLoading = useSelector(selectAccountStatusLoading);
-  useEffect(() => {
-    if (accountId) {
-      dispatch(checkAccount()).catch(error => {
-        console.log('Error checking account status:', error);
-      });
-    }
-  }, [accountId, dispatch]);
-  console.log('accountStatus', accountStatus);
+  
+  // Check if user came from the listing flow
+  const fromListing = route.params?.fromListing || false;
 
+  useEffect(() => {
+    const fetchAndValidateAccount = async () => {
+      try {
+        // Try to get account ID from AsyncStorage first
+        const storedAccountId = await getItem('stripeAccountId');
+        
+        // If we have a stored account ID or one from Redux, check and validate
+        if (storedAccountId || accountId) {
+          const accountToUse = storedAccountId || accountId;
+          
+          // If we have an account ID from storage but not in Redux, validate it
+          if (storedAccountId && !accountId) {
+            try {
+              await dispatch(validateUser(storedAccountId));
+            } catch (validationError) {
+              console.error('Error validating stored account ID:', validationError);
+            }
+          }
+          
+          // Check account status
+          dispatch(checkAccount()).catch(error => {
+            console.log('Error checking account status:', error);
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching account data:', error);
+      }
+    };
+    
+    fetchAndValidateAccount();
+  }, [accountId, dispatch]);
+
+  // If account status changes to completed and user came from listing, navigate back
+  useEffect(() => {
+    console.log(fromListing , accountStatus?.accountCompleted, 'accountStatus',accountStatus)
+    if (fromListing && accountStatus?.accountCompleted) {
+      // navigation.goBack();
+    }
+  }, [accountStatus, fromListing, navigation]);
+
+ 
   const handleSetupAccount = async () => {
     try {
       // First create the account
@@ -56,10 +93,21 @@ export default function PaymentPreferences({navigation}) {
         accountResult = await dispatch(createAccount());
       }
       // If account creation was successful, get the account ID
-      console.log(accountResult, 'accountResult',accountId);
-      if (accountId || accountResult.payload.account) {
-        const updatedAccountId = accountId || accountResult.payload.account;
+      console.log(accountResult?.payload?.account, 'accountResult',accountId);
+      if (accountId || (accountResult?.payload?.account)) {
+        const updatedAccountId = accountId || accountResult?.payload?.account;
         console.log(updatedAccountId, 'updatedAccountId');
+        
+        // Save account ID to AsyncStorage
+        await setItem('stripeAccountId', updatedAccountId);
+        
+        // Validate the user account after creation
+        try {
+          await dispatch(validateUser(updatedAccountId));
+        } catch (validationError) {
+          console.error('Error validating user account:', validationError);
+        }
+        
         try {
           // Create account link for onboarding
           const response = await fetch(
@@ -107,10 +155,24 @@ export default function PaymentPreferences({navigation}) {
 
                   // Check account status after user returns
                   await dispatch(checkAccount());
+                  
+                  // Also validate the user account
+                  try {
+                    await dispatch(validateUser(updatedAccountId));
+                  } catch (validationError) {
+                    console.error('Error validating user account after return:', validationError);
+                  }
 
                   // Check again after 10 seconds to ensure we get the updated status
                   setTimeout(async () => {
                     await dispatch(checkAccount());
+                    
+                    // Validate again after 10 seconds
+                    try {
+                      await dispatch(validateUser(updatedAccountId));
+                    } catch (validationError) {
+                      console.error('Error validating user account after delay:', validationError);
+                    }
                   }, 10000);
                 }
               };
@@ -119,7 +181,12 @@ export default function PaymentPreferences({navigation}) {
               const subscription = Linking.addEventListener('url', handleUrl);
 
               // Set a timeout to clean up the listener after a reasonable time
-              setTimeout(() => {
+              setTimeout(async () => {
+                try {
+                  await dispatch(validateUser(updatedAccountId));
+                } catch (validationError) {
+                  console.error('Error validating user account:', validationError);
+                }
                 subscription.remove();
               }, 120000); // Clean up after 2 minutes
             } else {

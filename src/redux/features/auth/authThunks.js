@@ -366,8 +366,8 @@ export const appleSignIn = createAsyncThunk(
       // Send the data to your backend API
       try {
         const response = await axios.post(
-          // 'https://nfsd-bikewave-backend.onrender.com/api/auth/apple-login',
-          'http://192.168.100.12:4000/api/auth/apple-login',
+          // 'http://192.168.100.12:4000/api/auth/apple-login',
+          'https://nfsd-bikewave-backend.onrender.com/api/auth/apple-login',
           { 
             identityToken,
             email,
