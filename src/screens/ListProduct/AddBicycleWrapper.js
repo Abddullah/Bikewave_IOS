@@ -7,7 +7,7 @@ import { Step4 } from './Step4';
 import { Step5 } from './Step5';
 import { Step6 } from './Step6';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { addBicycle, getAllBicycles } from '../../redux/features/main/mainThunks';
+import { addBicycle,   getAllBicycles } from '../../redux/features/main/mainThunks';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import PopUp from '../../components/PopUp';
@@ -77,12 +77,17 @@ export const AddBicycleWrapper = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleNextStep = async () => {
+    try {
     const approvalRes = await dispatch(fetchApprovedInfo(user_id));
-    console.log(approvalRes, 'approvalRes')
+ 
     if (approvalRes.payload.isApproved) {
       setCurrentStep(currentStep + 1);
     } else {
       setShowApprovalPopup(true);
+      }
+    } catch (error) {
+      console.error('Error checking approval status:', error);
+      setShowErrorPopup(true);
     }
   };
   const handleBackStep = () => {

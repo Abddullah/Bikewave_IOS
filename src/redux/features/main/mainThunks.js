@@ -32,7 +32,7 @@ export const getAllBicycles = createAsyncThunk(
       maxPrice: filters.maxPrice,
     };
     try {
-      console.log(payload,'payload')
+      console.log(payload, 'payload')
       const response = await ApiManager.post('/bicycles', payload);
       // console.log(response, 'responseresponseresponse')
       return response.data;
@@ -149,8 +149,7 @@ export const addBicycle = createAsyncThunk(
     // Generate geohash from latitude and longitude
     const geoHash = geohash.encode(lat, lng);
 
-    console.log({ userId, lng, lat, location, country, city, description, deposit, price, category, brand, model, geoHash,serialNum }, '________________');
-
+ 
     let formData = new FormData();
     formData.append('brand', brand);
     formData.append('model', model);
@@ -601,20 +600,22 @@ export const cancelPayment = createAsyncThunk(
 // Check account status
 export const checkAccount = createAsyncThunk(
   'transactions/checkAccount',
-  async (_, { getState }) => {
+  async (data, { getState }) => {
     const token = getState().auth.userToken;
     const { accountId } = getState().auth.userDetails;
-
-    if (!accountId) {
+    const accountIdClone = accountId || data;
+    if (!accountIdClone) {
       throw new Error('Account ID not found');
     }
 
     try {
       const response = await axios.get(
-        `${EnvConfig.api.baseUrl}/transactions/check-account/${accountId}`,
+        `${EnvConfig.api.baseUrl}/transactions/check-account/${accountIdClone}`,
         { headers: { Authorization: `${token}` } },
       );
+      console.log(response.data, 'response.data')
       return response.data;
+
     } catch (error) {
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
@@ -691,7 +692,7 @@ export const addReview = createAsyncThunk(
   'reviews/add',
   async ({ bookingId, bicycleId, rating, comment, ownerId }, { getState }) => {
     const token = getState().auth.userToken;
-    console.log(token,'tolen')
+    console.log(token, 'tolen')
     try {
       const response = await ApiManager.post(
         '/reviews',
@@ -715,9 +716,9 @@ export const getReviewsByUserId = createAsyncThunk(
   'reviews/getByUserId',
   async (_, { getState }) => {
     const token = getState().auth.userToken;
-    console.log(token,'token')
+    console.log(token, 'token')
     const userId = getState().auth.user.id;
-    console.log(userId,'userId')
+    console.log(userId, 'userId')
     if (!userId) {
       throw new Error('User ID not found');
     }
@@ -733,6 +734,24 @@ export const getReviewsByUserId = createAsyncThunk(
       } else {
         throw new Error(getErrorMessage('Failed to fetch user reviews'));
       }
+    }
+  }
+);
+
+export const validateUser = createAsyncThunk(
+  'main/validateUser',
+  async (accountId, { getState, rejectWithValue }) => {
+    try {
+      const token = getState().auth.userToken;
+      const res = await ApiManager.post(
+        '/transactions/validate-user',
+        { accountId },
+        { headers: { Authorization: `${token}` } }
+      );
+      console.log(res.data, 'validateUser')
+      return res.data;
+    } catch (err) {
+      return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
