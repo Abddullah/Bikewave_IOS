@@ -123,7 +123,7 @@ export default function Product({ navigation, route }) {
   }, [productId, user_id]);
 
   const handleReservePress = async () => {
-    if (!approvedInfo) {
+     if (!approvedInfo||!approvedInfo.isApproved) {
       const approvalRes = await dispatch(fetchApprovedInfo(user_id));
       if (
         approvalRes &&
@@ -186,8 +186,7 @@ export default function Product({ navigation, route }) {
     }
   }, [favorites]);
 
-console.log(route?.params,'route?.params')
-  const handleChatPress = async () => {
+   const handleChatPress = async () => {
     if (!route?.params?.ownerId) {
       alert('Chat can\'t be initialized because owner ID is missing');
       return;

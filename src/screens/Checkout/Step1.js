@@ -70,6 +70,7 @@ export const Step1 = ({navigation, route}) => {
           price: totalPrice.replace('€', ''),
         }),
       );
+      console.log(bookingRes, 'bookingRes');
 
       if (bookingRes.payload) {
         navigation.navigate('Step2', {
