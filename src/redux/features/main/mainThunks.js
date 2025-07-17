@@ -7,6 +7,7 @@ import { SendMessageNotifications } from '../../../utilities/notificationService
 import { t } from 'i18next';
 import { EnvConfig } from '../../../config/envConfig';
 import geohash from 'ngeohash';
+import { fetchUserInfo } from '../auth/authThunks';
 
 // Get all bicycles
 export const getAllBicycles = createAsyncThunk(
@@ -602,7 +603,7 @@ export const cancelPayment = createAsyncThunk(
 // Check account status
 export const checkAccount = createAsyncThunk(
   'transactions/checkAccount',
-  async (data, { getState }) => {
+  async (data, { getState, dispatch }) => {
     const token = getState().auth.userToken;
     const { accountId } = getState().auth.userDetails;
     const accountIdClone = accountId || data;
@@ -616,6 +617,13 @@ export const checkAccount = createAsyncThunk(
         { headers: { Authorization: `${token}` } },
       );
       console.log(response.data, 'response.data')
+      
+      // Update user info to ensure we have the latest account details
+      const userId = getState().auth.userId;
+      if (userId) {
+        dispatch(fetchUserInfo(userId));
+      }
+      
       return response.data;
 
     } catch (error) {

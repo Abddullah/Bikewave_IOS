@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useState, useCallback} from 'react';
 import {
   StyleSheet,
   Text,
@@ -6,6 +6,8 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Linking,
+  RefreshControl,
+  ScrollView,
 } from 'react-native';
 import AppStatusBar from '../../components/AppStatusBar';
 import Colors from '../../utilities/constants/colors';
@@ -31,48 +33,72 @@ import {
 import {fetchUserInfo} from '../../redux/features/auth/authThunks';
 import {EnvConfig} from '../../config/envConfig';
 import {getItem, setItem} from '../../services/assynsStorage';
+import { useFocusEffect } from '@react-navigation/native';
+import { i18n } from '../../i18n';
 
 export default function PaymentPreferences({navigation, route}) {
-  const {t} = useTranslation();
+  const {t, i18n} = useTranslation();
   const dispatch = useDispatch();
   const user_id = useSelector(selectAuthUserId);
   const {accountId} = useSelector(selectUserDetails);
   const loading = useSelector(selectMainLoading);
   const accountStatus = useSelector(selectAccountStatus);
   const accountStatusLoading = useSelector(selectAccountStatusLoading);
+  const [refreshing, setRefreshing] = useState(false);
   
   // Check if user came from the listing flow
   const fromListing = route.params?.fromListing || false;
 
-  useEffect(() => {
-    const fetchAndValidateAccount = async () => {
-      try {
-        // Try to get account ID from AsyncStorage first
-        const storedAccountId = await getItem('stripeAccountId');
+  const fetchAndValidateAccount = async () => {
+    try {
+      // Try to get account ID from AsyncStorage first
+      const storedAccountId = await getItem('stripeAccountId');
+      
+      // If we have a stored account ID or one from Redux, check and validate
+      if (storedAccountId || accountId) {
+        const accountToUse = storedAccountId || accountId;
         
-        // If we have a stored account ID or one from Redux, check and validate
-        if (storedAccountId || accountId) {
-          const accountToUse = storedAccountId || accountId;
-          
-          // If we have an account ID from storage but not in Redux, validate it
-          if (storedAccountId && !accountId) {
-            try {
-              await dispatch(validateUser(storedAccountId));
-            } catch (validationError) {
-              console.error('Error validating stored account ID:', validationError);
-            }
+        // If we have an account ID from storage but not in Redux, validate it
+        if (storedAccountId && !accountId) {
+          try {
+            await dispatch(validateUser(storedAccountId));
+          } catch (validationError) {
+            console.error('Error validating stored account ID:', validationError);
           }
-          
-          // Check account status
-          dispatch(checkAccount()).catch(error => {
-            console.log('Error checking account status:', error);
-          });
         }
-      } catch (error) {
-        console.error('Error fetching account data:', error);
+        
+        // Check account status
+        await dispatch(checkAccount(accountToUse)).catch(error => {
+          console.log('Error checking account status:', error);
+        });
+        
+        // Refresh user info to ensure we have the latest account details
+        await dispatch(fetchUserInfo(user_id));
       }
-    };
-    
+      return true;
+    } catch (error) {
+      console.error('Error fetching account data:', error);
+      return false;
+    }
+  };
+
+  // Refresh account status when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      console.log('Screen focused, refreshing account status');
+      setRefreshing(true);
+      fetchAndValidateAccount().finally(() => {
+        setRefreshing(false);
+      });
+      
+      return () => {
+        // Cleanup function when screen loses focus
+        console.log('Screen unfocused');
+      };
+    }, [])  // Empty dependency array to ensure it runs every time the screen comes into focus
+  );
+
+  useEffect(() => {
     fetchAndValidateAccount();
   }, [accountId, dispatch]);
 
@@ -84,6 +110,14 @@ export default function PaymentPreferences({navigation, route}) {
     }
   }, [accountStatus, fromListing, navigation]);
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchAndValidateAccount();
+    } finally {
+      setRefreshing(false);
+    }
+  }, []);
  
   const handleSetupAccount = async () => {
     try {
@@ -154,7 +188,7 @@ export default function PaymentPreferences({navigation, route}) {
                   await new Promise(resolve => setTimeout(resolve, 5000));
 
                   // Check account status after user returns
-                  await dispatch(checkAccount());
+                  await dispatch(checkAccount(updatedAccountId));
                   
                   // Also validate the user account
                   try {
@@ -163,9 +197,15 @@ export default function PaymentPreferences({navigation, route}) {
                     console.error('Error validating user account after return:', validationError);
                   }
 
+                  // Refresh user info
+                  await dispatch(fetchUserInfo(user_id));
+                  
+                  // Force a UI refresh
+                  onRefresh();
+
                   // Check again after 10 seconds to ensure we get the updated status
                   setTimeout(async () => {
-                    await dispatch(checkAccount());
+                    await dispatch(checkAccount(updatedAccountId));
                     
                     // Validate again after 10 seconds
                     try {
@@ -173,6 +213,12 @@ export default function PaymentPreferences({navigation, route}) {
                     } catch (validationError) {
                       console.error('Error validating user account after delay:', validationError);
                     }
+                    
+                    // Refresh user info again
+                    await dispatch(fetchUserInfo(user_id));
+                    
+                    // Force another UI refresh
+                    onRefresh();
                   }, 10000);
                 }
               };
@@ -184,6 +230,7 @@ export default function PaymentPreferences({navigation, route}) {
               setTimeout(async () => {
                 try {
                   await dispatch(validateUser(updatedAccountId));
+                  await dispatch(fetchUserInfo(user_id));
                 } catch (validationError) {
                   console.error('Error validating user account:', validationError);
                 }
@@ -235,54 +282,63 @@ export default function PaymentPreferences({navigation, route}) {
         <Text style={[Typography.f_20_inter_semi_bold, styles.headerTitleText]}>
           {t('payment_preferences')}
         </Text>
-        <Text />
-      </View>
-      <View style={styles.shadowWrapper}>
-        <View style={styles.cardWrapper}>
-          <Text style={[Typography.f_18_inter_semi_bold, styles.cardTitleText]}>
-            {t('payment_placeholder')}
-          </Text>
-          <Text style={[Typography.f_16_inter_regular, styles.cardMessageText]}>
-            {t('bike_rental_message')}
-          </Text>
-          {accountId ? (
-            <>
-              {/* <Text
-                style={[Typography.f_16_inter_semi_bold, styles.accountIdText]}>
-                {t('your_account_id_is')}: {accountId}
-              </Text> */}
-              {accountStatusLoading ? (
-                <ActivityIndicator
-                  color={Colors.primary}
-                  style={styles.statusIndicator}
-                />
-              ) : accountStatus?.accountCompleted ? (
-                <Text
-                  style={[
-                    Typography.f_16_inter_semi_bold,
-                    styles.statusText,
-                    styles.completedText,
-                  ]}>
-                  {t('account_completed')}
-                </Text>
-              ) : (
-                <Text
-                  style={[
-                    Typography.f_16_inter_semi_bold,
-                    styles.statusText,
-                    styles.pendingText,
-                  ]}>
-                  {t('account_pending')}
-                </Text>
-              )}
-            </>
+        <TouchableOpacity onPress={onRefresh} disabled={refreshing}>
+          {refreshing ? (
+            <ActivityIndicator size="small" color={Colors.white} />
           ) : (
-            <Text style={[Typography.f_16_inter_regular, styles.noAccountText]}>
-              {t('no_account_setup')}
+            <Text style={[Typography.f_14_inter_regular, styles.refreshText]}>
+              {i18n.language === 'sp' ? 'Actualizar' : 'Refresh'}
             </Text>
           )}
-        </View>
+        </TouchableOpacity>
       </View>
+     
+        <View style={styles.shadowWrapper}>
+          <View style={styles.cardWrapper}>
+            <Text style={[Typography.f_18_inter_semi_bold, styles.cardTitleText]}>
+              {t('payment_placeholder')}
+            </Text>
+            <Text style={[Typography.f_16_inter_regular, styles.cardMessageText]}>
+              {t('bike_rental_message')}
+            </Text>
+            {accountId ? (
+              <>
+                {/* <Text
+                  style={[Typography.f_16_inter_semi_bold, styles.accountIdText]}>
+                  {t('your_account_id_is')}: {accountId}
+                </Text> */}
+                {accountStatusLoading ? (
+                  <ActivityIndicator
+                    color={Colors.primary}
+                    style={styles.statusIndicator}
+                  />
+                ) : accountStatus?.accountCompleted ? (
+                  <Text
+                    style={[
+                      Typography.f_16_inter_semi_bold,
+                      styles.statusText,
+                      styles.completedText,
+                    ]}>
+                    {t('account_completed')}
+                  </Text>
+                ) : (
+                  <Text
+                    style={[
+                      Typography.f_16_inter_semi_bold,
+                      styles.statusText,
+                      styles.pendingText,
+                    ]}>
+                    {t('account_pending')}
+                  </Text>
+                )}
+              </>
+            ) : (
+              <Text style={[Typography.f_16_inter_regular, styles.noAccountText]}>
+                {t('no_account_setup')}
+              </Text>
+            )}
+          </View>
+        </View>
       <View style={styles.footerContainer}>
         <Text
           style={[
@@ -331,6 +387,9 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: Colors.white,
   },
+  scrollContent: {
+    // flexGrow: 1,
+  },
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -344,6 +403,10 @@ const styles = StyleSheet.create({
   },
   headerTitleText: {
     color: Colors.white,
+  },
+  refreshText: {
+    color: Colors.white,
+    textDecorationLine: 'underline',
   },
   shadowWrapper: {
     shadowColor: '#000',
@@ -387,8 +450,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   footerContainer: {
-    flex: 1,
     justifyContent: 'flex-end',
+    flex: 1,
   },
   setupAccountButton: {
     marginHorizontal: 15,
