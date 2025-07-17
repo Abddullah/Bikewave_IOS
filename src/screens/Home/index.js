@@ -65,6 +65,7 @@ import { saveFCMToken } from '../../utilities/fcmTokenManager';
 import { selectAuthToken, selectAuthUserId } from '../../redux/features/auth/authSelectors';
 import { EnvConfig } from '../../config/envConfig';
 import { colors } from '../../utilities/constants';
+import { fetchUserInfo } from '../../redux/features/auth/authThunks';
 const categories = [
   { id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: { en: 'All', sp: 'Todos' } },
   {
@@ -121,10 +122,10 @@ const Home = React.memo(({ navigation }) => {
   const [showMap, setShowMap] = useState(false);
   const dispatch = useDispatch();
   const bicycles = useSelector(selectBicycles);
-  const userId = useSelector(selectAuthUserId); 
-  const token = useSelector(selectAuthToken); 
-  console.log(userId,'gjfg')
-  console.log(token,'gjfg')
+  const userId = useSelector(selectAuthUserId);
+  const token = useSelector(selectAuthToken);
+  console.log(userId, 'gjfg')
+  console.log(token, 'gjfg')
   const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
   const [selectedBike, setSelectedBike] = useState(null);
   const [city, setCity] = useState('');
@@ -202,6 +203,7 @@ const Home = React.memo(({ navigation }) => {
 
   useEffect(() => {
     if (userId) {
+      dispatch(fetchUserInfo(userId));
       saveFCMToken(userId);
     }
   }, [userId]);
@@ -342,7 +344,7 @@ const Home = React.memo(({ navigation }) => {
               placeholder={t('your_city')}
               onPress={handlePlaceSelect}
               textInputProps={{
-                placeholderTextColor:colors.black
+                placeholderTextColor: colors.black
               }}
               query={{
                 key: EnvConfig.googleMaps.apiKey,

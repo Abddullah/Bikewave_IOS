@@ -182,8 +182,10 @@ export const addBicycle = createAsyncThunk(
           'Content-Type': 'multipart/form-data',
         },
       });
+      console.log(response, 'response-------');
       return response.data;
     } catch (error) {
+      console.log(error, 'error-------');
       if (error.response && error.response.data && error.response.data.msg) {
         if (
           error.response.data.msg ==

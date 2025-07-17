@@ -7,7 +7,7 @@ import { Step4 } from './Step4';
 import { Step5 } from './Step5';
 import { Step6 } from './Step6';
 import { launchImageLibrary } from 'react-native-image-picker';
-import { addBicycle,   getAllBicycles } from '../../redux/features/main/mainThunks';
+import { addBicycle, getAllBicycles, checkAccount, validateUser } from '../../redux/features/main/mainThunks';
 import { useNavigation } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import PopUp from '../../components/PopUp';
@@ -16,28 +16,68 @@ import { t } from 'i18next';
 import { selectMainError } from '../../redux/features/main/mainSelectors';
 import { selectApprovalStatus, selectUserDetails, selectAuthUserId } from '../../redux/features/auth/authSelectors';
 import { fetchApprovedInfo, fetchUserInfo } from '../../redux/features/auth/authThunks';
+import { getItem } from '../../services/assynsStorage';
 
 export const AddBicycleWrapper = () => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
+  const [showAccountSetupPopup, setShowAccountSetupPopup] = useState(false);
+  const [showAccountIncompletePopup, setShowAccountIncompletePopup] = useState(false);
   const approvalStatus = useSelector(selectUserDetails)?.isApproved;
-  console.log(approvalStatus, 'approvalStatus');
+  const userDetails = useSelector(selectUserDetails);
   const user_id = useSelector(selectAuthUserId);
 
   useEffect(() => {
     dispatch(fetchUserInfo(user_id));
-  }, [user_id, dispatch]);
+    setTimeout(() => {
+      checkUserAccount();
+    }, 0);
+  }, [user_id,userDetails?.accountId, dispatch]);
 
-  // useEffect(() => {
-  //   if (approvalStatus === false) {
-  //     setShowApprovalPopup(true);
-  //   }
-  // }, [approvalStatus]);
+  // Check if user has a Stripe account before showing the form
+  const checkUserAccount = async () => {
+    try {
+      // Try to get account ID from AsyncStorage first
+      const storedAccountId = await getItem('stripeAccountId');
+      // If we don't have a stored account ID or one from Redux, show account setup popup
+       if (!storedAccountId && !userDetails?.accountId) {
+        setShowAccountSetupPopup(true);
+        return;
+      }else{
+        setShowAccountSetupPopup(false);
+      }
+      
+      // If we have an account ID, check its status
+      const accountToUse = userDetails?.accountId || storedAccountId;
+      
+      // Check account status
+      const response = await dispatch(checkAccount(accountToUse)).catch(error => {
+        console.log('Error checking account status:', error);
+      });
+       
+      // If account is not completed, show incomplete popup
+      if (!response?.payload?.accountCompleted) {
+        setShowAccountIncompletePopup(true);
+      }
+    } catch (error) {
+      console.error('Error checking account:', error);
+    }
+  };
 
   const handleApprovalPopupClose = () => {
     navigation.navigate('MyDocuments');
     setShowApprovalPopup(false);
+  };
+
+  const handleAccountSetupPress = () => {
+    setShowAccountSetupPopup(false);
+    navigation.navigate('PaymentPreferences', { fromListing: true });
+  };
+
+  const handleAccountIncompletePress = () => {
+    setShowAccountIncompletePopup(false);
+    navigation.navigate('PaymentPreferences', { fromListing: true });
   };
 
   const [formData, setFormData] = useState({
@@ -68,8 +108,7 @@ export const AddBicycleWrapper = () => {
     serialNum:'',
     myUserId: user_id,
   });
-  console.log(formData, 'formData');
-
+ 
   const [currentStep, setCurrentStep] = useState(1);
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [showErrorPopup, setShowErrorPopup] = useState(false);
@@ -78,15 +117,36 @@ export const AddBicycleWrapper = () => {
 
   const handleNextStep = async () => {
     try {
-    const approvalRes = await dispatch(fetchApprovedInfo(user_id));
- 
-    if (approvalRes.payload.isApproved) {
-      setCurrentStep(currentStep + 1);
-    } else {
-      setShowApprovalPopup(true);
+      // First check if user has a valid Stripe account
+      const storedAccountId = await getItem('stripeAccountId');
+      const accountToUse = storedAccountId || userDetails?.accountId;
+      
+      // If no account ID, show account setup popup
+      if (!accountToUse) {
+        setShowAccountSetupPopup(true);
+        return;
       }
+      
+      // Check account status
+      const accountResponse = await dispatch(checkAccount(accountToUse)).catch(error => {
+        console.log('Error checking account status:', error);
+      });
+      
+      // If account is not completed, show incomplete popup
+      if (!accountResponse?.payload?.accountCompleted) {
+        setShowAccountIncompletePopup(true);
+        return;
+      }
+      
+      // Then check approval status
+      // const approvalRes = await dispatch(fetchApprovedInfo(user_id));
+      setCurrentStep(currentStep + 1);
+      // if (approvalRes.payload.isApproved) {
+      // } else {
+      //   setShowApprovalPopup(true);
+      // }
     } catch (error) {
-      console.error('Error checking approval status:', error);
+      console.error('Error checking status:', error);
       setShowErrorPopup(true);
     }
   };
@@ -215,8 +275,8 @@ export const AddBicycleWrapper = () => {
               if (isSubmitting) return;
               try {
                 setIsSubmitting(true);
-                const approvalRes = await dispatch(fetchApprovedInfo(user_id));
-                if (approvalRes.payload.isApproved) {
+                // const approvalRes = await dispatch(fetchApprovedInfo(user_id));
+                // if (approvalRes.payload.isApproved) {
                   const response = await dispatch(addBicycle(formData));
                   if (response?.payload?.success) {
                     setCurrentStep(1)
@@ -242,9 +302,9 @@ export const AddBicycleWrapper = () => {
                   } else {
                     setShowErrorPopup(true);
                   }
-                } else {
-                  setShowErrorPopup(true);
-                }
+                // } else {
+                //   setShowErrorPopup(true);
+                // }
               } catch (error) {
                 console.log('Error adding bicycle:', error);
               } finally {
@@ -261,7 +321,25 @@ export const AddBicycleWrapper = () => {
 
   return (
     <View style={{ flex: 1 }}>
-      {showApprovalPopup ? (
+      {showAccountSetupPopup ? (
+        <PopUp
+          icon={<Cross />}
+          title={t('account_setup_required') || 'Account Setup Required'}
+          description={t('account_setup_message') || 'You need to set up your payment account before listing a bicycle'}
+          buttonTitle={t('setup_now') || 'Setup Now'}
+          iconPress={() => setShowAccountSetupPopup(false)}
+          onButtonPress={handleAccountSetupPress}
+        />
+      ) : showAccountIncompletePopup ? (
+        <PopUp
+          icon={<Cross />}
+          title={t('account_incomplete') || 'Account Setup Incomplete'}
+          description={t('complete_account_setup_message') || 'Please complete your account setup before listing a bicycle'}
+          buttonTitle={t('complete_setup') || 'Complete Setup'}
+          iconPress={() => setShowAccountIncompletePopup(false)}
+          onButtonPress={handleAccountIncompletePress}
+        />
+      ) : showApprovalPopup ? (
         <PopUp
           icon={<Cross />}
           title={t('approval_required')}

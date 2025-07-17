@@ -12,7 +12,11 @@ prepare_react_native_project!
 # Firebase needs static frameworks now
 use_frameworks! :linkage => :static
 $RNFirebaseAsStaticFramework = true
-
+# Force Firebase pods to same version
+pod 'Firebase/Core', $FirebaseSDKVersion
+pod 'Firebase/Auth', $FirebaseSDKVersion
+pod 'Firebase/Firestore', $FirebaseSDKVersion
+pod 'Firebase/Messaging', $FirebaseSDKVersion
 # 🚫 Disable Flipper — it's not compatible with use_frameworks
 # flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
 
