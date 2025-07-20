@@ -56,6 +56,8 @@ import {
   Calendar,
   CalendarWhite,
   Star,
+  Cross,
+  Tick,
 } from '../../assets/svg';
 import {
   selectMainLoading,
@@ -64,6 +66,7 @@ import {
 import axios from 'axios';
 import { createChat, getAllChats, getOneChat } from '../../redux/features/chat/chatThunks';
 import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
+import PopUp from '../../components/PopUp';
 
 export default function Product({ navigation, route }) {
   const refRBSheet = useRef();
@@ -83,6 +86,7 @@ export default function Product({ navigation, route }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [datePickerModalVisible, setDatePickerModalVisible] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
+  const [showApprovalPopup, setShowApprovalPopup] = useState(false);
 
   const isOwner = user_id === ownerId;
 
@@ -122,8 +126,14 @@ export default function Product({ navigation, route }) {
     dispatch(fetchUserInfo(user_id));
   }, [productId, user_id]);
 
+  const handleApprovalPopupClose = () => {
+    refRBSheet?.current?.close();
+    setShowApprovalPopup(false);
+    navigation.navigate('MyDocuments');
+  };
+
   const handleReservePress = async () => {
-     if (!approvedInfo||!approvedInfo.isApproved) {
+    if (user_id) {
       const approvalRes = await dispatch(fetchApprovedInfo(user_id));
       if (
         approvalRes &&
@@ -151,8 +161,8 @@ export default function Product({ navigation, route }) {
           await refRBSheet.current.close();
         }
       } else {
-        await navigation.navigate('MyDocuments');
-        await refRBSheet.current.close();
+        // Show popup instead of directly navigating
+        setShowApprovalPopup(true);
       }
     } else {
       await dispatch(createAccountSession(account));
@@ -186,7 +196,7 @@ export default function Product({ navigation, route }) {
     }
   }, [favorites]);
 
-   const handleChatPress = async () => {
+  const handleChatPress = async () => {
     if (!route?.params?.ownerId) {
       alert('Chat can\'t be initialized because owner ID is missing');
       return;
@@ -205,7 +215,17 @@ export default function Product({ navigation, route }) {
   return (
     <View style={styles.container}>
       <AppStatusBar backgroundColor={Colors.white} barStyle="dark-content" />
-      {bicycle && (
+      {showApprovalPopup && (
+        <PopUp
+          icon={<Cross />}
+          title={t('approval_required')}
+          description={t('approval_required_msg')}
+          iconPress={handleApprovalPopupClose}
+          onButtonPress={handleApprovalPopupClose}
+          buttonTitle={t('upload_documents')}
+        />
+      )}
+      {bicycle && !showApprovalPopup && (
         <>
           <View>
             <Modal visible={modalVisible} transparent={true}>
@@ -384,14 +404,14 @@ export default function Product({ navigation, route }) {
             </View>
             <View style={styles.reserveButtonContainer}>
               <SafeAreaView>
-              <AppButton
-                title={
-                  auth_loading ? (
-                    <ActivityIndicator color={Colors.primary} />
-                  ) : (
-                    t('reserve')
-                  )
-                }
+                <AppButton
+                  title={
+                    auth_loading ? (
+                      <ActivityIndicator color={Colors.primary} />
+                    ) : (
+                      t('reserve')
+                    )
+                  }
                   btnColor={Colors.white}
                   btnTitleColor={Colors.primary}
                   onPress={handleReservePress}
@@ -472,7 +492,7 @@ const styles = StyleSheet.create({
     ...Typography.f_18_inter_regular,
     color: Colors.black,
     // marginTop: 5,
-    
+
   },
   sizeText: {
     ...Typography.f_18_inter_regular,

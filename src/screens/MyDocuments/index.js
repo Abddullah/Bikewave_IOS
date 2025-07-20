@@ -18,9 +18,10 @@ import AppButton from '../../components/AppButton';
 import { useTranslation } from 'react-i18next';
 import { launchImageLibrary } from 'react-native-image-picker';
 import { useDispatch, useSelector } from 'react-redux';
-import { sendApprovalImages } from '../../redux/features/auth/authThunks';
+import { fetchApprovedInfo, sendApprovalImages } from '../../redux/features/auth/authThunks';
 import {
   selectApprovalStatus,
+  selectAuthUserId,
   selectSendApprovalLoading,
 } from '../../redux/features/auth/authSelectors';
 
@@ -31,6 +32,7 @@ export default function MyDocuments({ navigation }) {
   const approvalStatus = useSelector(selectApprovalStatus);
   const [frontIdImage, setFrontIdImage] = useState(null);
   const [backIdImage, setBackIdImage] = useState(null);
+  const user_id = useSelector(selectAuthUserId);
 
   const selectImage = side => {
     launchImageLibrary(
@@ -61,8 +63,10 @@ export default function MyDocuments({ navigation }) {
       { uri: frontIdImage.uri, type: 'image/jpeg', name: 'front_id.jpg' },
       { uri: backIdImage.uri, type: 'image/jpeg', name: 'back_id.jpg' },
     ];
+    const approvalRes = await dispatch(fetchApprovedInfo(user_id));
 
-    if (!approvalStatus) {
+    console.log(approvalRes ,'approvalStatus', approvalRes.payload.isApproved==null);
+    if (!approvalStatus||approvalRes.payload.isApproved==null) {
       const res = await dispatch(sendApprovalImages(photos));
       // const approvalRes = await dispatch(fetchApprovedInfo(user_id));
       // console.log(res, '-------res', approvalRes);

@@ -1,4 +1,4 @@
-import {Text} from 'react-native';
+import { Text } from 'react-native';
 
 export const languageData = [
   {
@@ -166,12 +166,12 @@ export const languageData = [
       },
       reservation_details: 'Datos de la reserva',
       payment_proceed: 'Proceder al pago',
-      SerialNumber:'Número del serie',
-      frameNum:'Dónde encontrar mi numero del bastidor',
-      NoFrame:'¿No tienes número de serie? Puedes seguir alquilando tu bici sin problema. Sin seguro, te recomendamos añadir una fianza como medida de seguridad.',
-      insuranceTitle:'El seguro solo aplica si entregas un candado y el usuario lo utiliza al aparcar.',
+      SerialNumber: 'Número del serie',
+      frameNum: 'Dónde encontrar mi numero del bastidor',
+      NoFrame: '¿No tienes número de serie? Puedes seguir alquilando tu bici sin problema. Sin seguro, te recomendamos añadir una fianza como medida de seguridad.',
+      insuranceTitle: 'El seguro solo aplica si entregas un candado y el usuario lo utiliza al aparcar.',
       offer_bike_component: 'Ofrece tu bicicleta o componente',
-       setPrice:"Define tu precio de alquiler :",
+      setPrice: "Define tu precio de alquiler :",
       brand_value: 'Bicicleta de Montaña Pro',
       add_photo_desc: 'Añade un foto de tu bicicleta/componente.',
       set_price_desc:
@@ -374,8 +374,7 @@ export const languageData = [
           'Tu solicitud de reserva ha sido rechazada por el propietario',
       },
       approval_required: 'Aprobación Requerida',
-      approval_required_msg:
-        'Para publicar una bicicleta, primero debes ser aprobado. Por favor, sube tus documentos para la verificación.',
+      approval_required_msg: "Para completar la reserva, necesitamos que subas una foto de tu documento de identidad.",
       upload_documents: 'Subir Documentos',
       payment_setup_required:
         'Se requiere configuración de pago para recibir pagos. Por favor, configure sus preferencias de pago primero.',
@@ -594,13 +593,13 @@ export const languageData = [
       },
       reservation_details: 'Reservation details',
       payment_proceed: 'Proceed to payment',
-       SerialNumber:'Serial number',
-       frameNum:'Where can I find my frame number',
-       NoFrame:`Don't have a serial number? You can still rent out your bike without any problem. Without insurance, we recommend adding a deposit as a security measure.`,
-      insuranceTitle:'The insurance only applies if you provide a lock and the user uses it when parking.',
+      SerialNumber: 'Serial number',
+      frameNum: 'Where can I find my frame number',
+      NoFrame: `Don't have a serial number? You can still rent out your bike without any problem. Without insurance, we recommend adding a deposit as a security measure.`,
+      insuranceTitle: 'The insurance only applies if you provide a lock and the user uses it when parking.',
       offer_bike_component: 'Offer your bicycle or component',
       brand_value: 'Mountain Bike Pro',
-      setPrice:"Set your rental price :",
+      setPrice: "Set your rental price :",
       add_photo_desc: 'Add a photo of your bike/component.',
       set_price_desc:
         "Set the daily price. We take care of protecting your bike during the rental.",
@@ -794,7 +793,7 @@ export const languageData = [
       },
       approval_required: 'Approval Required',
       approval_required_msg:
-        'To post a bike, you need to be approved first. Please upload your documents for verification.',
+        'To complete the reservation, we need you to upload a photo of your ID document.',
       upload_documents: 'Upload Documents',
       payment_setup_required:
         'Payment setup is required to receive payments. Please set up your payment preferences first.',
