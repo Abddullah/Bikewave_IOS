@@ -769,6 +769,27 @@ export const getBicycleReviews = createAsyncThunk(
   }
 );
 
+// Check if a booking has a review
+export const checkBookingReview = createAsyncThunk(
+  'reviews/checkBookingReview',
+  async (bookingId, { getState }) => {
+    const token = getState().auth.userToken;
+    try {
+      const response = await ApiManager.get(`/reviews/getByBooking/${bookingId}`, {
+        headers: { Authorization: token },
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to check booking review'));
+      }
+    }
+  }
+);
+
 export const validateUser = createAsyncThunk(
   'main/validateUser',
   async (accountId, { getState, rejectWithValue }) => {

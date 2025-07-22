@@ -226,7 +226,11 @@ export default function Earrings({ navigation }) {
     try {
       const result = await dispatch(returnBicycle(booking._id));
       if (!result.error && (result.payload?.success || result.payload?.status === 'success' || result.payload)) {
-        setReviewBooking(booking);
+        setReviewBooking({
+          ...booking,
+          bikeName: booking.bicycle?.brand + ' ' + booking.bicycle?.model,
+          clientName: booking.user?.firstName + ' ' + booking.user?.secondName
+        });
         setModalState(true);
       } else {
         console.log('Return error:', result.error || result);
@@ -255,6 +259,8 @@ export default function Earrings({ navigation }) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
         setReviewBooking(null);
         setModalState(false);
+        // Store the modal state to prevent showing it again
+        await setItem(MODAL_STATE_KEY, true);
       } else {
         Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
       }
@@ -401,6 +407,7 @@ export default function Earrings({ navigation }) {
             bookingInfo={reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
+            isClientReview={false}
           />
         </>
       )}

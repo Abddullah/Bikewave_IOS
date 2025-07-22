@@ -12,27 +12,56 @@ const Star = ({ filled, onPress }) => (
   </TouchableOpacity>
 );
 
-export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingInfo }) {
+export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingInfo, isClientReview }) {
   const { t, i18n } = useTranslation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
 
+  // If bookingInfo is null, don't render
+  if (!visible || !bookingInfo) return null;
+
   const bike = bookingInfo?.bikeName || t('review.bike');
   const client = bookingInfo?.clientName || t('review.client');
-
+  const owner = bookingInfo?.ownerName || t('owner');
   function renderDesc() {
-    if (i18n.language === 'sp') {
+    // Client reviewing a bike/owner
+    if (isClientReview) {
+      if (i18n.language === 'sp') {
+        return (
+          <Text style={styles.desc}>
+            Has alquilado la bicicleta <Text style={Typography.f_14_inter_bold}>{bike}</Text> de <Text style={Typography.f_14_inter_bold}>{owner}</Text>. Tu valoración ayudará a otros usuarios a tomar decisiones sobre sus alquileres.
+          </Text>
+        );
+      }
       return (
         <Text style={styles.desc}>
-          Tu bicicleta <Text style={Typography.f_14_inter_bold}>{bike}</Text> ha sido devuelta por <Text style={Typography.f_14_inter_bold}>{client}</Text>. Tu valoración ayudará a otros propietarios a tomar decisiones sobre sus alquileres.
+          You have rented the bike <Text style={Typography.f_14_inter_bold}>{bike}</Text> from <Text style={Typography.f_14_inter_bold}>{owner}</Text>. Your rating will help other users make decisions about their rentals.
+        </Text>
+      );
+    } 
+    // Owner reviewing a client
+    else {
+      if (i18n.language === 'sp') {
+        return (
+          <Text style={styles.desc}>
+            Tu bicicleta <Text style={Typography.f_14_inter_bold}>{bike}</Text> ha sido devuelta por <Text style={Typography.f_14_inter_bold}>{client}</Text>. Tu valoración ayudará a otros propietarios a tomar decisiones sobre sus alquileres.
+          </Text>
+        );
+      }
+      return (
+        <Text style={styles.desc}>
+          Your bike <Text style={Typography.f_14_inter_bold}>{bike}</Text> has been returned by <Text style={Typography.f_14_inter_bold}>{client}</Text>. Your rating will help other owners make decisions about their rentals.
         </Text>
       );
     }
-    return (
-      <Text style={styles.desc}>
-        Your bike <Text style={Typography.f_14_inter_bold}>{bike}</Text> has been returned by <Text style={Typography.f_14_inter_bold}>{client}</Text>. Your rating will help other owners make decisions about their rentals.
-      </Text>
-    );
+  }
+
+  function renderTitle() {
+    if (isClientReview) {
+      return t('review.how_was_experience_client', { owner: bookingInfo?.ownerName || t('owner') });
+    } else {
+      return t('review.how_was_experience', { client: bookingInfo?.clientName || t('review.client') });
+    }
   }
 
   if (!visible) return null;
@@ -50,7 +79,7 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
             <CrossBlack/>
           </TouchableOpacity>
           <Text style={styles.title}>
-            {t('review.how_was_experience', { client: bookingInfo?.clientName || t('review.client') })}
+            {renderTitle()}
           </Text>
           {renderDesc()}
           <View style={styles.starsRow}>

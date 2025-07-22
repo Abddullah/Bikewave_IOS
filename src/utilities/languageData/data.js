@@ -401,6 +401,7 @@ export const languageData = [
       validate_account: 'Validar Cuenta',
       review: {
         how_was_experience: '¿Cómo fue tu experiencia con {{client}}?',
+        how_was_experience_client: '¿Cómo fue tu experiencia con la bicicleta de {{owner}}?',
         bike_returned:
           'Tu bicicleta {{bike}} ha sido devuelta por {{client}}. Tu valoración ayudará a otros propietarios a tomar decisiones sobre sus alquileres.',
         comment_placeholder: 'Comentario',
@@ -824,6 +825,7 @@ export const languageData = [
       validate_account: 'Validate Account',
       review: {
         how_was_experience: 'How was your experience with {{client}}?',
+        how_was_experience_client: 'How was your experience with the bike of {{owner}}?',
         bike_returned:
           'Your bike {{bike}} has been returned by {{client}}. Your rating will help other owners make decisions about their rentals.',
         comment_placeholder: 'Comment',

@@ -53,6 +53,10 @@ import {
   getAllBicycles,
   getBicyclesNearCity,
   getFavorites,
+  getBookingsAsClient,
+  checkBookingReview,
+  addReview,
+  getBookingsAsOwner,
 } from '../../redux/features/main/mainThunks';
 import { selectBicycles } from '../../redux/features/main/mainSelectors';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
@@ -66,6 +70,12 @@ import { selectAuthToken, selectAuthUserId } from '../../redux/features/auth/aut
 import { EnvConfig } from '../../config/envConfig';
 import { colors } from '../../utilities/constants';
 import { fetchUserInfo } from '../../redux/features/auth/authThunks';
+import ReviewBottomSheet from '../../components/ReviewBottomSheet';
+import Toast from 'react-native-toast-message';
+import { getItem, setItem } from '../../services/assynsStorage';
+
+const MODAL_STATE_KEY = 'modalState_Home_Review';
+
 const categories = [
   { id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: { en: 'All', sp: 'Todos' } },
   {
@@ -124,8 +134,7 @@ const Home = React.memo(({ navigation }) => {
   const bicycles = useSelector(selectBicycles);
   const userId = useSelector(selectAuthUserId);
   const token = useSelector(selectAuthToken);
-  console.log(userId, 'gjfg')
-  console.log(token, 'gjfg')
+  const clientBookings = useSelector((state) => state.main.clientBookings);
   const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
   const [selectedBike, setSelectedBike] = useState(null);
   const [city, setCity] = useState('');
@@ -134,6 +143,11 @@ const Home = React.memo(({ navigation }) => {
   const currentLanguage = i18n.language === 'sp' ? 'sp' : 'en';
   const regionTimeout = useRef(null);
   const [markers, setMarkers] = useState([]);
+  const [isClientReview, setIsClientReview] = useState(false);
+  // Review modal state
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [bookingToReview, setBookingToReview] = useState(null);
+  const [reviewModalState, setReviewModalState] = useState(false);
   const [mapRegion, setMapRegion] = useState({
     latitude: 40.41347712579202,
     longitude: -3.706052240765947,
@@ -332,6 +346,133 @@ const Home = React.memo(({ navigation }) => {
     },
     [bicycles],
   );
+
+  // Check for completed bookings without reviews
+  useEffect(() => {
+    const checkBookingsForReview = async () => {
+      if (!userId || !token) return;
+
+      try {
+        // Get stored modal state to avoid showing the modal if user dismissed it
+        const storedModalState = await getItem(MODAL_STATE_KEY, false);
+        if (!!storedModalState) return;
+
+        // First check client bookings
+        const clientBookingsResult = await dispatch(getBookingsAsClient()).unwrap()
+          .then(async (bookings) => {
+            if (!bookings || bookings.length === 0) return false;
+
+            // Find completed bookings (status 4)
+            const completedBookings = bookings.filter(booking => booking.statusId === 4);
+
+            // Check each completed booking for reviews
+            for (const booking of completedBookings) {
+              try {
+                const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+                // If user hasn't reviewed yet
+                const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+                if (!userHasReviewed) {
+                  // Make sure we have all the necessary information
+                  if (booking.bicycle.ownerId === userId) {
+                    setIsClientReview(false);
+                  } else {
+                    setIsClientReview(true);
+                  }
+                  if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                    setBookingToReview({
+                      ...booking,
+                      bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                      ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
+                    });
+                    setReviewModalState(true);
+                    return true; // Found a booking to review
+                  }
+                }
+              } catch (error) {
+                console.error('Error checking booking review:', error);
+              }
+            }
+            return false; // No client bookings to review
+          });
+
+        // If we already found a client booking to review, don't check owner bookings
+        if (clientBookingsResult) return;
+
+        // Check owner bookings if no client bookings need review
+        await dispatch(getBookingsAsOwner()).unwrap()
+          .then(async (bookings) => {
+            if (!bookings || bookings.length === 0) return;
+
+            // Find completed bookings (status 4)
+            const completedBookings = bookings.filter(booking => booking.statusId === 4);
+
+            // Check each completed booking for reviews
+            for (const booking of completedBookings) {
+              try {
+                const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+                // If user hasn't reviewed yet
+                const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+                if (!userHasReviewed) {
+                  setIsClientReview(false); // Owner is reviewing client
+                  if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                    setBookingToReview({
+                      ...booking,
+                      bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                      clientName: booking.owner?.firstName + ' ' + booking.owner?.secondName || 'User'
+                    });
+                    setReviewModalState(true);
+                    break;
+                  }
+                }
+              } catch (error) {
+                console.error('Error checking owner booking review:', error);
+              }
+            }
+          });
+      } catch (error) {
+        console.error('Error checking bookings for review:', error);
+      }
+    };
+    if (userId && token) {
+      checkBookingsForReview();
+    }
+  }, [userId, token, dispatch]);
+
+  // Handle review submission
+  const handleReviewSubmit = async ({ rating, comment }) => {
+    if (!bookingToReview) return;
+
+    try {
+      const res = await dispatch(addReview({
+        bookingId: bookingToReview._id,
+        bicycleId: bookingToReview.bicycle?._id,
+        rating,
+        comment,
+        ownerId: bookingToReview.bicycle?.ownerId || bookingToReview.ownerId,
+      }));
+
+      if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
+        Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+        setBookingToReview(null);
+        setReviewModalState(false);
+        // Update stored modal state to prevent showing the modal again
+        await setItem(MODAL_STATE_KEY, true);
+      } else {
+        Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      console.error('Review add error:', err);
+    }
+  };
+
+  // Handle review modal close
+  const handleReviewClose = async () => {
+    setBookingToReview(null);
+    setReviewModalState(false);
+    // Store the modal state to prevent showing it again
+    await setItem(MODAL_STATE_KEY, true);
+  };
 
   return (
     <View style={styles.container}>
@@ -552,6 +693,19 @@ const Home = React.memo(({ navigation }) => {
           />
         </View>
       )}
+
+      {/* Review Bottom Sheet */}
+      <ReviewBottomSheet
+        visible={reviewModalState}
+        bookingInfo={{
+          bikeName: bookingToReview?.bicycle?.brand + ' ' + bookingToReview?.bicycle?.model,
+          ownerName: bookingToReview?.bicycle?.owner?.firstName + ' ' + bookingToReview?.bicycle?.owner?.secondName,
+          clientName: bookingToReview?.clientName
+        }}
+        isClientReview={isClientReview}
+        onClose={handleReviewClose}
+        onSubmit={handleReviewSubmit}
+      />
     </View>
   );
 });
