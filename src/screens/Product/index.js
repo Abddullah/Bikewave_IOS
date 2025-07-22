@@ -332,7 +332,8 @@ export default function Product({ navigation, route }) {
               </View>
             </View>
             <ScrollView
-              contentContainerStyle={styles.contentContainer}
+              // contentContainerStyle={styles.contentContainer}
+              contentContainerStyle={{ paddingBottom: !isOwner ? Platform.OS === 'ios' ? 80 : 30 : 0 }}
               style={styles.overFlowContainer}>
               <Text style={styles.descriptionText}>{bicycle.desc}</Text>
               <View style={styles.ownerChatContainer}>

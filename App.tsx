@@ -80,7 +80,7 @@ function App() {
   // For iOS, we need separate styling for the bottom inset
   const isIOS = Platform.OS === 'ios';
   const isProduct = currentRouteName === 'Product';
-
+  console.log(currentRouteName, '------------');
   return (
     <I18nextProvider i18n={i18n}>
       <NativeBaseProvider>

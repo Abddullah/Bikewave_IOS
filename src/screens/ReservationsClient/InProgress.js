@@ -22,11 +22,18 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { pickupBicycle, } from '../../redux/features/main/pickupReturnThunks';
-import { getBookingsAsClient } from '../../redux/features/main/mainThunks';
+import { getBookingsAsClient, checkBookingReview, addReview } from '../../redux/features/main/mainThunks';
 import BottomSheet from '../../components/BottomSheet';
 import ProductCard from '../../components/ProductCard';
 import Images from '../../assets/images';
 import DateRangePickerModal from '../../components/DateRangePickerModal';
+import ReviewBottomSheet from '../../components/ReviewBottomSheet';
+import Toast from 'react-native-toast-message';
+import { getItem, setItem } from '../../services/assynsStorage';
+import { selectAuthUserId } from '../../redux/features/auth/authSelectors';
+
+// Key for storing dismissed booking IDs
+const DISMISSED_BOOKINGS_KEY = 'dismissed_review_bookings_inprogress';
 
 export default function InProgress({ navigation }) {
   const { t } = useTranslation();
@@ -36,15 +43,126 @@ export default function InProgress({ navigation }) {
   const [dateRangeModalVisible, setDateRangeModalVisible] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const refRBSheet = useRef();
+  
+  // Review modal state
+  const [isClientReview, setIsClientReview] = useState(true);
+  const [bookingToReview, setBookingToReview] = useState(null);
+  const [reviewModalState, setReviewModalState] = useState(false);
 
   const dispatch = useDispatch();
   const clientBookings = useSelector(state => state.main.clientBookings);
   const clientBookingsLoading = useSelector(state => state.main.clientBookingsLoading);
   const pickupLoading = useSelector(state => state.main.pickupLoading);
+  const userId = useSelector(selectAuthUserId);
 
   useEffect(() => {
     dispatch(getBookingsAsClient());
   }, [dispatch]);
+
+  // Check for completed bookings without reviews
+  useEffect(() => {
+    const checkBookingsForReview = async () => {
+      if (!userId) return;
+
+      try {
+        // Get list of dismissed booking IDs
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+
+        // Check client bookings for reviews
+        if (clientBookings && clientBookings.length > 0) {
+          // Find completed bookings (status 4)
+          const completedBookings = clientBookings.filter(booking => booking.statusId === 4);
+
+          // Check each completed booking for reviews
+          for (const booking of completedBookings) {
+            try {
+              // Skip if this booking has been dismissed
+              if (dismissedBookings.includes(booking._id)) {
+                continue;
+              }
+
+              const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+              // If user hasn't reviewed yet
+              const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+              if (!userHasReviewed) {
+                // Make sure we have all the necessary information
+                if (booking.bicycle.ownerId === userId) {
+                  setIsClientReview(false);
+                } else {
+                  setIsClientReview(true);
+                }
+                if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                  setBookingToReview({
+                    ...booking,
+                    bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                    ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
+                  });
+                  setReviewModalState(true);
+                  break;
+                }
+              }
+            } catch (error) {
+              console.error('Error checking booking review:', error);
+            }
+          }
+        }
+      } catch (error) {
+        console.error('Error checking bookings for review:', error);
+      }
+    };
+
+    if (userId && activeTab === 'past' && clientBookings) {
+      checkBookingsForReview();
+    }
+  }, [userId, clientBookings, activeTab, dispatch]);
+
+  // Handle review submission
+  const handleReviewSubmit = async ({ rating, comment }) => {
+    if (!bookingToReview) return;
+
+    try {
+      const res = await dispatch(addReview({
+        bookingId: bookingToReview._id,
+        bicycleId: bookingToReview.bicycle?._id,
+        rating,
+        comment,
+        ownerId: bookingToReview.bicycle?.ownerId || bookingToReview.ownerId,
+      }));
+
+      if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
+        Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+        
+        // Add this booking ID to the dismissed list since it's been reviewed
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        dismissedBookings.push(bookingToReview._id);
+        await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+        
+        setBookingToReview(null);
+        setReviewModalState(false);
+      } else {
+        Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      }
+    } catch (err) {
+      Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
+      console.error('Review add error:', err);
+    }
+  };
+
+  // Handle review modal close
+  const handleReviewClose = async () => {
+    if (bookingToReview && bookingToReview._id) {
+      // Add this booking ID to the dismissed list
+      const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+      const dismissedBookings = JSON.parse(dismissedBookingsJson);
+      dismissedBookings.push(bookingToReview._id);
+      await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+    }
+    
+    setBookingToReview(null);
+    setReviewModalState(false);
+  };
 
   // Filter bookings based on tab
   const filteredBookings = clientBookings?.filter(booking => {
@@ -244,6 +362,19 @@ export default function InProgress({ navigation }) {
         onClose={() => setDateRangeModalVisible(false)}
         onSelectRange={handleSelectDateRange}
         existingBookings={[]}
+      />
+
+      {/* Review Bottom Sheet */}
+      <ReviewBottomSheet
+        visible={reviewModalState}
+        bookingInfo={{
+          bikeName: bookingToReview?.bicycle?.brand + ' ' + bookingToReview?.bicycle?.model,
+          ownerName: bookingToReview?.bicycle?.owner?.firstName + ' ' + bookingToReview?.bicycle?.owner?.secondName,
+          clientName: bookingToReview?.clientName
+        }}
+        isClientReview={isClientReview}
+        onClose={handleReviewClose}
+        onSubmit={handleReviewSubmit}
       />
     </View>
   );
