@@ -179,7 +179,7 @@ export default function Profile({ navigation }) {
 
   useEffect(() => {
     dispatch(getReviewsByUserId());
-}, [userId, dispatch]);
+}, [userId, dispatch,activeTab]);
 
 
   const handleDeleteUser = async () => {

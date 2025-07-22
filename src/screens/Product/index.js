@@ -85,7 +85,7 @@ export default function Product({ navigation, route }) {
   const clientSec = useSelector(selectClientSecret);
   const token = useSelector(selectAuthToken);
   const userDetails = useSelector(selectUserDetails);
-  const bicycleReviews = useSelector(selectBicycleReviews).filter(review => review.author._id !== user_id);
+  const bicycleReviews = useSelector(selectBicycleReviews).filter(review => review?.author?._id !== user_id);
   const bicycleReviewsLoading = useSelector(selectBicycleReviewsLoading);
 
   const [modalVisible, setModalVisible] = useState(false);
