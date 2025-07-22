@@ -6,6 +6,7 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Platform,
 } from 'react-native';
 import Colors from '../utilities/constants/colors';
 import {Typography} from '../utilities/constants/constant.style';
@@ -74,7 +75,7 @@ export default function ProfileHeader({user}) {
           <Text style={styles.userBio}>{user.bio[DEFAULT_LANGUAGE]}</Text>
         </View>
       </View>
-      <BottomSheet ref={sheetRef} HEIGHT={400} backgroundColor={colors.white}>
+      <BottomSheet ref={sheetRef}  HEIGHT={400} backgroundColor={colors.white}>
         <View style={{paddingHorizontal: 15}}>
           <TouchableOpacity
             activeOpacity={0.8}
@@ -89,7 +90,10 @@ export default function ProfileHeader({user}) {
             ]}>
             {t('Reviewabout')} {user.name}
           </Text>
-          <ScrollView showsVerticalScrollIndicator={false}>
+          <ScrollView 
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: Platform.OS === 'ios' ? 30 : 20 }}
+          >
             {reviewsLoading ? (
               <Text style={{alignSelf: 'center', marginTop: 20}}>{t('Loading...')}</Text>
             ) : userReviews && userReviews.length > 0 ? (

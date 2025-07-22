@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Colors from '../utilities/constants/colors';
 import { CrossBlack } from '../assets/svg';
@@ -106,6 +106,8 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
           <TouchableOpacity style={styles.notNowBtn} onPress={onClose}>
             <Text style={styles.notNowText}>{t('review.not_now')}</Text>
           </TouchableOpacity>
+          {/* Add extra padding for iOS */}
+          {Platform.OS === 'ios' && <View style={{ height: 34 }} />}
         </View>
       </View>
     </Modal>

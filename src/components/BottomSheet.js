@@ -1,9 +1,12 @@
-import React, {forwardRef} from 'react';
-import {View} from 'react-native';
+import React, { forwardRef } from 'react';
+import { View, Platform } from 'react-native';
 import RBSheet from 'react-native-raw-bottom-sheet';
 import Colors from '../utilities/constants/colors';
 
-const BottomSheet = forwardRef(({children, HEIGHT,backgroundColor,...props}, ref) => {
+const BottomSheet = forwardRef(({ children, HEIGHT, backgroundColor, ...props }, ref) => {
+  // Add extra height for iOS to account for home indicator
+  const iosExtraHeight = Platform.OS === 'ios' ? 34 : 0;
+
   return (
     <RBSheet
       ref={ref}
@@ -15,21 +18,25 @@ const BottomSheet = forwardRef(({children, HEIGHT,backgroundColor,...props}, ref
           backgroundColor: 'transparent',
         },
         draggableIcon: {
-          backgroundColor: Colors.white,
           width: 35,
           height: 3,
         },
         container: {
           borderTopLeftRadius: 20,
           borderTopRightRadius: 20,
-          backgroundColor:backgroundColor|| Colors.primary,
-          borderWidth:1,
-          borderColor:Colors.white,
+          backgroundColor: backgroundColor || Colors.primary,
+          borderWidth: 3,
+          borderColor: Colors.light_gray,
         },
       }}
-      height={HEIGHT || 365}
+      height={(HEIGHT || 365) + iosExtraHeight}
       {...props}>
-      <View style={{flex: 1}}>{children}</View>
+      <View style={{
+        flex: 1,
+        paddingBottom: iosExtraHeight
+      }}>
+        {children}
+      </View>
     </RBSheet>
   );
 });
