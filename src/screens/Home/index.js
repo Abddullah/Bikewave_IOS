@@ -74,7 +74,8 @@ import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 import Toast from 'react-native-toast-message';
 import { getItem, setItem } from '../../services/assynsStorage';
 
-const MODAL_STATE_KEY = 'modalState_Home_Review';
+// Key for storing dismissed booking IDs
+const DISMISSED_BOOKINGS_KEY = 'dismissed_review_bookings';
 
 const categories = [
   { id: 1, icon: AllGray, iconBlack: All, iconGreen: AllGreen, label: { en: 'All', sp: 'Todos' } },
@@ -353,9 +354,9 @@ const Home = React.memo(({ navigation }) => {
       if (!userId || !token) return;
 
       try {
-        // Get stored modal state to avoid showing the modal if user dismissed it
-        const storedModalState = await getItem(MODAL_STATE_KEY, false);
-        if (!!storedModalState) return;
+        // Get list of dismissed booking IDs
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
 
         // First check client bookings
         const clientBookingsResult = await dispatch(getBookingsAsClient()).unwrap()
@@ -368,6 +369,11 @@ const Home = React.memo(({ navigation }) => {
             // Check each completed booking for reviews
             for (const booking of completedBookings) {
               try {
+                // Skip if this booking has been dismissed
+                if (dismissedBookings.includes(booking._id)) {
+                  continue;
+                }
+
                 const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
                 // If user hasn't reviewed yet
                 const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
@@ -409,8 +415,14 @@ const Home = React.memo(({ navigation }) => {
             // Check each completed booking for reviews
             for (const booking of completedBookings) {
               try {
+                // Skip if this booking has been dismissed
+                if (dismissedBookings.includes(booking._id)) {
+                  continue;
+                }
+
                 const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
                 // If user hasn't reviewed yet
+
                 const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
                 if (!userHasReviewed) {
                   setIsClientReview(false); // Owner is reviewing client
@@ -438,6 +450,9 @@ const Home = React.memo(({ navigation }) => {
     }
   }, [userId, token, dispatch]);
 
+  // Remove the effect that updates AsyncStorage based on reviewModalState
+  // since we now track dismissed bookings by ID
+
   // Handle review submission
   const handleReviewSubmit = async ({ rating, comment }) => {
     if (!bookingToReview) return;
@@ -453,10 +468,15 @@ const Home = React.memo(({ navigation }) => {
 
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+
+        // Add this booking ID to the dismissed list since it's been reviewed
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        dismissedBookings.push(bookingToReview._id);
+        await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+
         setBookingToReview(null);
         setReviewModalState(false);
-        // Update stored modal state to prevent showing the modal again
-        await setItem(MODAL_STATE_KEY, true);
       } else {
         Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
       }
@@ -468,10 +488,16 @@ const Home = React.memo(({ navigation }) => {
 
   // Handle review modal close
   const handleReviewClose = async () => {
+    if (bookingToReview && bookingToReview._id) {
+      // Add this booking ID to the dismissed list
+      const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+      const dismissedBookings = JSON.parse(dismissedBookingsJson);
+      dismissedBookings.push(bookingToReview._id);
+      await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+    }
+
     setBookingToReview(null);
     setReviewModalState(false);
-    // Store the modal state to prevent showing it again
-    await setItem(MODAL_STATE_KEY, true);
   };
 
   return (
