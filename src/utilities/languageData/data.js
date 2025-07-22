@@ -422,6 +422,10 @@ export const languageData = [
         "Debajo de la batería, si es una bicicleta eléctrica"
       ],
       frameNum_modal_btn: "Entendido",
+      reviews_about_this_bicycle: "Reseñas sobre esta bicicleta",
+      no_reviews_yet: "Aún no hay reseñas para esta bicicleta",
+      anonymous: "Anónimo",
+      Loading: "Cargando...",
     },
   },
   {
@@ -841,6 +845,10 @@ export const languageData = [
         "Under the battery, if it's an electric bike"
       ],
       frameNum_modal_btn: "Got it",
+      reviews_about_this_bicycle: "Reviews about this bicycle",
+      no_reviews_yet: "No reviews yet for this bicycle",
+      anonymous: "Anonymous",
+      Loading: "Loading...",
     },
   },
 ];

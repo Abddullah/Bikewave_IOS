@@ -55,3 +55,6 @@ export const selectCreateBikeImage = (state) => state.main.createBikeImage;
 
 export const selectSubscriptionStatus = (state) => state.main.subscriptionStatus;
 
+export const selectBicycleReviews = (state) => state.main.bicycleReviews;
+export const selectBicycleReviewsLoading = (state) => state.main.bicycleReviewsLoading;
+

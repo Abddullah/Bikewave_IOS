@@ -16,6 +16,7 @@ import {
   getBicycleById,
   getFavorites,
   updateFavorites,
+  getBicycleReviews,
 } from '../../redux/features/main/mainThunks';
 import { useTranslation } from 'react-i18next';
 import Images from '../../assets/images';
@@ -47,6 +48,8 @@ import {
   selectAccount,
   selectClientSecret,
   selectFavorites,
+  selectBicycleReviews,
+  selectBicycleReviewsLoading,
 } from '../../redux/features/main/mainSelectors';
 import {
   HeartFill,
@@ -82,6 +85,8 @@ export default function Product({ navigation, route }) {
   const clientSec = useSelector(selectClientSecret);
   const token = useSelector(selectAuthToken);
   const userDetails = useSelector(selectUserDetails);
+  const bicycleReviews = useSelector(selectBicycleReviews);
+  const bicycleReviewsLoading = useSelector(selectBicycleReviewsLoading);
 
   const [modalVisible, setModalVisible] = useState(false);
   const [datePickerModalVisible, setDatePickerModalVisible] = useState(false);
@@ -124,7 +129,8 @@ export default function Product({ navigation, route }) {
   useEffect(() => {
     dispatch(getBicycleById(productId));
     dispatch(fetchUserInfo(user_id));
-  }, [productId, user_id]);
+    dispatch(getBicycleReviews(productId));
+  }, [productId, user_id, dispatch]);
 
   const handleApprovalPopupClose = () => {
     refRBSheet?.current?.close();
@@ -211,6 +217,15 @@ export default function Product({ navigation, route }) {
       },
     });
   };
+
+  // Calculate average rating
+  const calculateAverageRating = () => {
+    if (!bicycleReviews || bicycleReviews.length === 0) return 0;
+    const sum = bicycleReviews.reduce((acc, review) => acc + review.rating, 0);
+    return (sum / bicycleReviews.length).toFixed(1);
+  };
+
+  const averageRating = calculateAverageRating();
 
   return (
     <View style={styles.container}>
@@ -307,8 +322,12 @@ export default function Product({ navigation, route }) {
                   </View>
                 </View>
                 <View style={styles.ratingContainer}>
-                  {/* <Star />
-                    <Text style={styles.ratingText}>4.5</Text> */}
+                  {bicycleReviews && bicycleReviews.length > 0 && (
+                    <>
+                      <Star />
+                      <Text style={styles.ratingText}>{averageRating}</Text>
+                    </>
+                  )}
                 </View>
               </View>
             </View>
@@ -347,6 +366,57 @@ export default function Product({ navigation, route }) {
                     </Text>
                   </TouchableOpacity>
                 </View>
+              </View>
+
+              {/* Reviews Section */}
+              <View style={styles.reviewsSection}>
+                <Text style={styles.reviewsTitle}>{t('reviews_about_this_bicycle')}</Text>
+
+                {bicycleReviewsLoading ? (
+                  <ActivityIndicator color={Colors.primary} style={styles.reviewsLoading} />
+                ) : bicycleReviews && bicycleReviews.length > 0 ? (
+                  <View style={styles.reviewsList}>
+                    {bicycleReviews.map((review, index) => {
+                      return (
+                        <View key={review._id || index} style={styles.reviewItem}>
+                          <View style={styles.reviewHeader}>
+                            <View style={styles.starRating}>
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  style={{
+                                    marginRight: 2,
+                                    opacity: i < review.rating ? 1 : 0.5
+                                  }}
+                                />
+                              ))}
+                            </View>
+                          </View>
+                          <Text style={styles.reviewText}>{review.text}</Text>
+                          <View style={styles.reviewAuthor}>
+                            <Image
+                              source={review.author?.avatar ? { uri: review.author.avatar } : Images.profile}
+                              style={styles.reviewAuthorImage}
+                            />
+                            <View style={{gap:2}}>
+                              <Text style={styles.reviewAuthorName}>
+                                {review.author ? `${review.author.firstName || ''} ${review.author.secondName || ''}`.trim() : t('anonymous')}
+                              </Text>
+                              <View style={styles.ratingWrapper}>
+                                <Star />
+                                <Text style={styles.reviewAuthorName}>
+                                  {review.rating}
+                                </Text>
+                              </View>
+                            </View>
+                          </View>
+                        </View>
+                      )
+                    })}
+                  </View>
+                ) : (
+                  <Text style={styles.noReviews}>{t('no_reviews_yet')}</Text>
+                )}
               </View>
             </ScrollView>
           </View>
@@ -653,7 +723,7 @@ const styles = StyleSheet.create({
     color: Colors.white,
   },
   contentContainer: {
-    paddingBottom: 30,
+    paddingBottom: Platform.OS === 'ios' ? 80 : 50,
   },
   overFlowContainer: {
     height: (screenResolution.screenHeight / 10) * 3.5,
@@ -678,5 +748,77 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
     padding: 10,
+  },
+  reviewsSection: {
+    paddingHorizontal: 15,
+    paddingVertical: 15,
+    borderTopWidth: 1,
+    borderTopColor: Colors.platinum,
+    marginTop: 10,
+  },
+  reviewsTitle: {
+    ...Typography.f_20_inter_bold,
+    color: Colors.black,
+    marginBottom: 15,
+  },
+  reviewsLoading: {
+    marginVertical: 20,
+  },
+  reviewsList: {
+    gap: 15,
+  },
+  reviewItem: {
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    padding: 15,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  reviewHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  starRating: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  reviewText: {
+    ...Typography.f_16_inter_regular,
+    color: Colors.black,
+    marginBottom: 12,
+    lineHeight: 24,
+  },
+  reviewAuthor: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  reviewAuthorImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 5,
+    marginRight: 12,
+  },
+  reviewAuthorName: {
+    ...Typography.f_14_inter_semi_bold,
+    color: Colors.black,
+  },
+  noReviews: {
+    ...Typography.f_16_inter_regular,
+    color: Colors.gray,
+    textAlign: 'center',
+    marginVertical: 20,
+  },
+  ratingWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
   },
 });

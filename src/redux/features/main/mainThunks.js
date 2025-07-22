@@ -748,6 +748,27 @@ export const getReviewsByUserId = createAsyncThunk(
   }
 );
 
+// Get reviews by bicycle ID
+export const getBicycleReviews = createAsyncThunk(
+  'reviews/getByBicycleId',
+  async (bicycleId, { getState }) => {
+    const token = getState().auth.userToken;
+    try {
+      const response = await ApiManager.get(`/reviews/getByBicycle/${bicycleId}`, {
+        headers: { Authorization: token },
+      });
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to fetch bicycle reviews'));
+      }
+    }
+  }
+);
+
 export const validateUser = createAsyncThunk(
   'main/validateUser',
   async (accountId, { getState, rejectWithValue }) => {

@@ -21,6 +21,7 @@ import {
   createStripeSubscriptionSession,
   checkUserSubscription,
   getReviewsByUserId,
+  getBicycleReviews,
 } from './mainThunks';
 import { pickupBicycle, returnBicycle } from './pickupReturnThunks';
 
@@ -83,6 +84,8 @@ const initialState = {
   },
   userReviews: [],
   reviewsLoading: false,
+  bicycleReviews: [],
+  bicycleReviewsLoading: false,
 };
 
 const mainSlice = createSlice({
@@ -439,6 +442,19 @@ const mainSlice = createSlice({
       })
       .addCase(getReviewsByUserId.rejected, (state, action) => {
         state.reviewsLoading = false;
+      });
+
+    // Handle getBicycleReviews
+    builder
+      .addCase(getBicycleReviews.pending, (state) => {
+        state.bicycleReviewsLoading = true;
+      })
+      .addCase(getBicycleReviews.fulfilled, (state, action) => {
+        state.bicycleReviewsLoading = false;
+        state.bicycleReviews = action.payload;
+      })
+      .addCase(getBicycleReviews.rejected, (state, action) => {
+        state.bicycleReviewsLoading = false;
       });
   },
 });
