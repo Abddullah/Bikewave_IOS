@@ -85,7 +85,7 @@ export default function Product({ navigation, route }) {
   const clientSec = useSelector(selectClientSecret);
   const token = useSelector(selectAuthToken);
   const userDetails = useSelector(selectUserDetails);
-  const bicycleReviews = useSelector(selectBicycleReviews);
+  const bicycleReviews = useSelector(selectBicycleReviews).filter(review => review.author._id !== user_id);
   const bicycleReviewsLoading = useSelector(selectBicycleReviewsLoading);
 
   const [modalVisible, setModalVisible] = useState(false);
@@ -398,7 +398,7 @@ export default function Product({ navigation, route }) {
                               source={review.author?.avatar ? { uri: review.author.avatar } : Images.profile}
                               style={styles.reviewAuthorImage}
                             />
-                            <View style={{gap:2}}>
+                            <View style={{ gap: 2 }}>
                               <Text style={styles.reviewAuthorName}>
                                 {review.author ? `${review.author.firstName || ''} ${review.author.secondName || ''}`.trim() : t('anonymous')}
                               </Text>
