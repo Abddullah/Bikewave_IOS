@@ -50,7 +50,7 @@ export default function Earrings({ navigation }) {
   const returnLoading = useSelector((state) => state.main.returnLoading);
    useEffect(() => {
     dispatch(getBookingsAsOwner());
-  }, [dispatch, returnStatus]);
+  }, [dispatch, returnStatus,activeTab]);
 
   useEffect(() => {
     if (!reviewDismissed) {

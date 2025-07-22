@@ -57,7 +57,7 @@ export default function InProgress({ navigation }) {
 
   useEffect(() => {
     dispatch(getBookingsAsClient());
-  }, [dispatch]);
+  }, [dispatch,activeTab]);
 
   // Check for completed bookings without reviews
   useEffect(() => {
@@ -112,7 +112,7 @@ export default function InProgress({ navigation }) {
       }
     };
 
-    if (userId && activeTab === 'past' && clientBookings) {
+    if (userId && clientBookings) {
       checkBookingsForReview();
     }
   }, [userId, clientBookings, activeTab, dispatch]);
