@@ -329,12 +329,16 @@ export default function Earrings({ navigation }) {
       // Update the booking to not show the review modal again
       await dispatch(updateBookingReviewModalShown({
         bookingId: reviewBooking._id,
-        isOwnerReviewModalShown: false
+        ...(isClientReview 
+          ? { isClientReviewModalShown: false } 
+          : { isOwnerReviewModalShown: false })
       }));
     }
     
-    setReviewBooking(null);
-    setModalState(false);
+    setTimeout(() => {
+      setReviewBooking(null);
+      setModalState(false);
+    }, 3000);
   };
 
   const bookingInfo = {

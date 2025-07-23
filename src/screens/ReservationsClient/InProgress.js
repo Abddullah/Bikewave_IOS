@@ -143,12 +143,16 @@ export default function InProgress({ navigation }) {
       // Update the booking to not show the review modal again
       await dispatch(updateBookingReviewModalShown({
         bookingId: bookingToReview._id,
-        isClientReviewModalShown: false
+        ...(isClientReview 
+          ? { isClientReviewModalShown: false } 
+          : { isOwnerReviewModalShown: false })
       }));
     }
     
-    setBookingToReview(null);
-    setReviewModalState(false);
+    setTimeout(() => {
+      setBookingToReview(null);
+      setReviewModalState(false);
+    }, 3000);
   };
 
   // Filter bookings based on tab
