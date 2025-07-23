@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Platform } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Platform, ActivityIndicator } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Colors from '../utilities/constants/colors';
 import { CrossBlack } from '../assets/svg';
@@ -16,9 +16,16 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
   const { t, i18n } = useTranslation();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState('');
+  const [isClosing, setIsClosing] = useState(false);
 
   // If bookingInfo is null, don't render
   if (!visible || !bookingInfo) return null;
+
+  const handleClose = async () => {
+    setIsClosing(true);
+    await onClose();
+    setIsClosing(false);
+  };
 
   const bike = bookingInfo?.bikeName || t('review.bike');
   const client = bookingInfo?.clientName || t('review.client');
@@ -71,11 +78,11 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}
+      onRequestClose={handleClose}
     >
       <View style={styles.overlay}>
         <View style={styles.sheet}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose} disabled={isClosing}>
             <CrossBlack/>
           </TouchableOpacity>
           <Text style={styles.title}>
@@ -99,12 +106,20 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
           <TouchableOpacity
             style={[styles.submitBtn, { backgroundColor: Colors.primary, opacity: rating ? 1 : 0.5 }]}
             onPress={() => rating && onSubmit({ rating, comment })}
-            disabled={!rating}
+            disabled={!rating || isClosing}
           >
             <Text style={styles.submitText}>{t('review.submit')}</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.notNowBtn} onPress={onClose}>
-            <Text style={styles.notNowText}>{t('review.not_now')}</Text>
+          <TouchableOpacity 
+            style={styles.notNowBtn} 
+            onPress={handleClose}
+            disabled={isClosing}
+          >
+            {isClosing ? (
+              <ActivityIndicator color={Colors.primary} size="small" />
+            ) : (
+              <Text style={styles.notNowText}>{t('review.not_now')}</Text>
+            )}
           </TouchableOpacity>
           {/* Add extra padding for iOS */}
           {Platform.OS === 'ios' && <View style={{ height: 34 }} />}

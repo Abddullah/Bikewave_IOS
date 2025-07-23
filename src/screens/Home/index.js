@@ -403,7 +403,7 @@ const Home = React.memo(({ navigation }) => {
           for (const booking of completedBookings) {
             try {
               const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
- 
+
               // If user hasn't reviewed yet  
               const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
               if (!userHasReviewed) {
@@ -479,8 +479,6 @@ const Home = React.memo(({ navigation }) => {
 
   // Handle review modal close
   const handleReviewClose = async () => {
-    setBookingToReview(null);
-    setReviewModalState(false);
     if (bookingToReview && bookingToReview._id) {
       // Update the booking to not show the review modal again
       // Use the appropriate flag based on whether it's a client or owner review
@@ -490,8 +488,11 @@ const Home = React.memo(({ navigation }) => {
           ? { isClientReviewModalShown: false } 
           : { isOwnerReviewModalShown: false })
       }));
-
-     }
+    }
+    setTimeout(() => {
+      setBookingToReview(null);
+      setReviewModalState(false);
+    }, 3000);
 
   };
 

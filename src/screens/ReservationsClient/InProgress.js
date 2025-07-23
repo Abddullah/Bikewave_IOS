@@ -29,11 +29,7 @@ import Images from '../../assets/images';
 import DateRangePickerModal from '../../components/DateRangePickerModal';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 import Toast from 'react-native-toast-message';
-import { getItem, setItem } from '../../services/assynsStorage';
 import { selectAuthUserId } from '../../redux/features/auth/authSelectors';
-
-// Key for storing dismissed booking IDs
-const DISMISSED_BOOKINGS_KEY = 'dismissed_review_bookings_inprogress';
 
 export default function InProgress({ navigation }) {
   const { t } = useTranslation();
@@ -65,10 +61,6 @@ export default function InProgress({ navigation }) {
       if (!userId) return;
 
       try {
-        // Get list of dismissed booking IDs
-        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-        const dismissedBookings = JSON.parse(dismissedBookingsJson);
-
         // Check client bookings for reviews
         if (clientBookings && clientBookings.length > 0) {
           // Find completed bookings (status 4)
@@ -77,16 +69,11 @@ export default function InProgress({ navigation }) {
           // Check each completed booking for reviews
           for (const booking of completedBookings) {
             try {
-              // Skip if this booking has been dismissed
-              if (dismissedBookings.includes(booking._id)) {
-                continue;
-              }
-
               const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
               // If user hasn't reviewed yet
               const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
               if (!userHasReviewed) {
-                // Check if isReviewModalShown property exists and is true
+                // Check if isClientReviewModalShown property exists and is true
                 // If the property doesn't exist, we'll still show the modal for backward compatibility
                 const shouldShowReviewModal = booking.isClientReviewModalShown === undefined || booking.isClientReviewModalShown === true;
                 
@@ -139,12 +126,6 @@ export default function InProgress({ navigation }) {
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
         
-        // Add this booking ID to the dismissed list since it's been reviewed
-        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-        const dismissedBookings = JSON.parse(dismissedBookingsJson);
-        dismissedBookings.push(bookingToReview._id);
-        await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
-        
         setBookingToReview(null);
         setReviewModalState(false);
       } else {
@@ -162,14 +143,8 @@ export default function InProgress({ navigation }) {
       // Update the booking to not show the review modal again
       await dispatch(updateBookingReviewModalShown({
         bookingId: bookingToReview._id,
-        isReviewModalShown: false
+        isClientReviewModalShown: false
       }));
-      
-      // Add this booking ID to the dismissed list
-      const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-      const dismissedBookings = JSON.parse(dismissedBookingsJson);
-      dismissedBookings.push(bookingToReview._id);
-      await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
     }
     
     setBookingToReview(null);

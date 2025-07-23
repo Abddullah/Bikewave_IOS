@@ -818,8 +818,10 @@ export const updateBookingReviewModalShown = createAsyncThunk(
         payload,
         { headers: { Authorization: token } }
       );
+      console.log(response.data, 'response.data');
       return response.data;
     } catch (error) {
+      console.log(error, 'error');
       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
