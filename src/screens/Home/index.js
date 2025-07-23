@@ -459,13 +459,6 @@ const Home = React.memo(({ navigation }) => {
 
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
-
-        // Add this booking ID to the dismissed list since it's been reviewed
-        // const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-        // const dismissedBookings = JSON.parse(dismissedBookingsJson);
-        // dismissedBookings.push(bookingToReview._id);
-        // await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
-
         setBookingToReview(null);
         setReviewModalState(false);
       } else {
