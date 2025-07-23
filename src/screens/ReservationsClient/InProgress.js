@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { pickupBicycle, } from '../../redux/features/main/pickupReturnThunks';
-import { getBookingsAsClient, checkBookingReview, addReview } from '../../redux/features/main/mainThunks';
+import { getBookingsAsClient, checkBookingReview, addReview, updateBookingReviewModalShown } from '../../redux/features/main/mainThunks';
 import BottomSheet from '../../components/BottomSheet';
 import ProductCard from '../../components/ProductCard';
 import Images from '../../assets/images';
@@ -86,20 +86,26 @@ export default function InProgress({ navigation }) {
               // If user hasn't reviewed yet
               const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
               if (!userHasReviewed) {
-                // Make sure we have all the necessary information
-                if (booking.bicycle.ownerId === userId) {
-                  setIsClientReview(false);
-                } else {
-                  setIsClientReview(true);
-                }
-                if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
-                  setBookingToReview({
-                    ...booking,
-                    bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
-                    ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
-                  });
-                  setReviewModalState(true);
-                  break;
+                // Check if isReviewModalShown property exists and is true
+                // If the property doesn't exist, we'll still show the modal for backward compatibility
+                const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+                
+                if (shouldShowReviewModal) {
+                  // Make sure we have all the necessary information
+                  if (booking.bicycle.ownerId === userId) {
+                    setIsClientReview(false);
+                  } else {
+                    setIsClientReview(true);
+                  }
+                  if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                    setBookingToReview({
+                      ...booking,
+                      bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                      ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
+                    });
+                    setReviewModalState(true);
+                    break;
+                  }
                 }
               }
             } catch (error) {
@@ -153,6 +159,12 @@ export default function InProgress({ navigation }) {
   // Handle review modal close
   const handleReviewClose = async () => {
     if (bookingToReview && bookingToReview._id) {
+      // Update the booking to not show the review modal again
+      await dispatch(updateBookingReviewModalShown({
+        bookingId: bookingToReview._id,
+        isReviewModalShown: false
+      }));
+      
       // Add this booking ID to the dismissed list
       const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
       const dismissedBookings = JSON.parse(dismissedBookingsJson);

@@ -19,7 +19,7 @@ import AppButton from '../../components/AppButton';
 import ReservationCard from '../../components/ReservationCard';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount, addReview, checkBookingReview } from '../../redux/features/main/mainThunks';
+import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount, addReview, checkBookingReview, updateBookingReviewModalShown } from '../../redux/features/main/mainThunks';
 import { returnBicycle } from '../../redux/features/main/pickupReturnThunks';
 import moment from 'moment';
 import PopUp from '../../components/PopUp';
@@ -105,17 +105,23 @@ export default function Earrings({ navigation }) {
             // If user hasn't reviewed yet
             const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
             if (!userHasReviewed) {
-              // Make sure we have all the necessary information
-              if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
-                // For owner reviewing client
-                setIsClientReview(false);
-                setReviewBooking({
-                  ...booking,
-                  bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
-                  clientName: booking.user?.firstName + ' ' + booking.user?.secondName || 'User'
-                });
-                setModalState(true);
-                break;
+              // Check if isReviewModalShown property exists and is true
+              // If the property doesn't exist, we'll still show the modal for backward compatibility
+              const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+              
+              if (shouldShowReviewModal) {
+                // Make sure we have all the necessary information
+                if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                  // For owner reviewing client
+                  setIsClientReview(false);
+                  setReviewBooking({
+                    ...booking,
+                    bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                    clientName: booking.user?.firstName + ' ' + booking.user?.secondName || 'User'
+                  });
+                  setModalState(true);
+                  break;
+                }
               }
             }
           } catch (error) {
@@ -336,6 +342,12 @@ export default function Earrings({ navigation }) {
 
   const handleReviewClose = async () => {
     if (reviewBooking && reviewBooking._id) {
+      // Update the booking to not show the review modal again
+      await dispatch(updateBookingReviewModalShown({
+        bookingId: reviewBooking._id,
+        isReviewModalShown: false
+      }));
+      
       // Add this booking ID to the dismissed list
       const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
       const dismissedBookings = JSON.parse(dismissedBookingsJson);

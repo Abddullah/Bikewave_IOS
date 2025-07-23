@@ -62,16 +62,16 @@ export const Step1 = ({navigation, route}) => {
 
   const handlePaymentProceed = async () => {
     try {
-      const bookingRes = await dispatch(
-        bookBicycle({
-          bicycleId: bicycle._id,
-          dateFrom: selectedDateRange.startDate,
-          dateEnd: selectedDateRange.endDate,
-          price: totalPrice.replace('€', ''),
-        }),
+      const obj={
+        bicycleId: bicycle._id,
+        dateFrom: selectedDateRange.startDate,
+        dateEnd: selectedDateRange.endDate,
+        price: totalPrice.replace('€', ''),
+      }
+       const bookingRes = await dispatch(
+        bookBicycle(obj),
       );
-      console.log(bookingRes, 'bookingRes');
-
+ 
       if (bookingRes.payload) {
         navigation.navigate('Step2', {
           bicycle,

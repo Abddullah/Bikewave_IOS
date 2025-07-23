@@ -22,6 +22,7 @@ import {
   checkUserSubscription,
   getReviewsByUserId,
   getBicycleReviews,
+  updateBookingReviewModalShown,
 } from './mainThunks';
 import { pickupBicycle, returnBicycle } from './pickupReturnThunks';
 
@@ -455,6 +456,32 @@ const mainSlice = createSlice({
       })
       .addCase(getBicycleReviews.rejected, (state, action) => {
         state.bicycleReviewsLoading = false;
+      });
+
+    // Handle updateBookingReviewModalShown
+    builder
+      .addCase(updateBookingReviewModalShown.pending, (state) => {
+        // No need to set loading state for this operation
+      })
+      .addCase(updateBookingReviewModalShown.fulfilled, (state, action) => {
+        // Update the booking in state if it exists
+        if (state.clientBookings.length > 0) {
+          state.clientBookings = state.clientBookings.map(booking => 
+            booking._id === action.payload.bookingId 
+              ? { ...booking, isReviewModalShown: action.payload.isReviewModalShown } 
+              : booking
+          );
+        }
+        if (state.ownerBookings.length > 0) {
+          state.ownerBookings = state.ownerBookings.map(booking => 
+            booking._id === action.payload.bookingId 
+              ? { ...booking, isReviewModalShown: action.payload.isReviewModalShown } 
+              : booking
+          );
+        }
+      })
+      .addCase(updateBookingReviewModalShown.rejected, (state, action) => {
+        // No need to handle errors for this operation in the UI
       });
   },
 });

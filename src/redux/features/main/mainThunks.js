@@ -15,8 +15,7 @@ export const getAllBicycles = createAsyncThunk(
   async ({ category }, { getState }) => {
     const { filters } = getState().main;
     let location = null;
-    // console.log(filters, 'filters')
-    if (filters?.location?.cityName) {
+     if (filters?.location?.cityName) {
       const geoHash = filters.location.lat && filters.location.lng
         ? geohash.encode(filters.location.lat, filters.location.lng)
         : null;
@@ -33,13 +32,10 @@ export const getAllBicycles = createAsyncThunk(
       maxPrice: filters.maxPrice,
     };
     try {
-      console.log(payload, 'payload')
-      const response = await ApiManager.post('/bicycles', payload);
-      // console.log(response, 'responseresponseresponse')
-      return response.data;
+       const response = await ApiManager.post('/bicycles', payload);
+       return response.data;
     } catch (error) {
-      console.log(error, 'errorerrorerror')
-      if (error.response && error.response.data && error.response.data.msg) {
+       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
       } else {
@@ -150,7 +146,7 @@ export const addBicycle = createAsyncThunk(
     // Generate geohash from latitude and longitude
     const geoHash = geohash.encode(lat, lng);
 
- 
+
     let formData = new FormData();
     formData.append('brand', brand);
     formData.append('model', model);
@@ -183,11 +179,9 @@ export const addBicycle = createAsyncThunk(
           'Content-Type': 'multipart/form-data',
         },
       });
-      console.log(response, 'response-------');
-      return response.data;
+       return response.data;
     } catch (error) {
-      console.log(error, 'error-------');
-      if (error.response && error.response.data && error.response.data.msg) {
+       if (error.response && error.response.data && error.response.data.msg) {
         if (
           error.response.data.msg ==
           'Solo las cuentas premium pueden crear mas de dos bicicletas'
@@ -371,6 +365,7 @@ export const bookBicycle = createAsyncThunk(
   async ({ bicycleId, dateFrom, dateEnd, price }, { getState }) => {
     const token = getState().auth.userToken;
     try {
+ 
       const response = await ApiManager.put(
         '/bookings/startBooking/',
         {
@@ -385,9 +380,9 @@ export const bookBicycle = createAsyncThunk(
           },
         },
       );
-      return response.data;
+       return response.data;
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.msg) {
+       if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
       } else {
@@ -616,14 +611,13 @@ export const checkAccount = createAsyncThunk(
         `${EnvConfig.api.baseUrl}/transactions/check-account/${accountIdClone}`,
         { headers: { Authorization: `${token}` } },
       );
-      console.log(response.data, 'response.data')
-      
+ 
       // Update user info to ensure we have the latest account details
       const userId = getState().auth.userId;
       if (userId) {
         dispatch(fetchUserInfo(userId));
       }
-      
+
       return response.data;
 
     } catch (error) {
@@ -702,8 +696,7 @@ export const addReview = createAsyncThunk(
   'reviews/add',
   async ({ bookingId, bicycleId, rating, comment, ownerId }, { getState }) => {
     const token = getState().auth.userToken;
-    console.log(token, 'tolen')
-    try {
+     try {
       const response = await ApiManager.post(
         '/reviews',
         { bookingId, bicycleId, rating, comment, ownerId },
@@ -726,10 +719,8 @@ export const getReviewsByUserId = createAsyncThunk(
   'reviews/getByUserId',
   async (_, { getState }) => {
     const token = getState().auth.userToken;
-    console.log(token, 'token')
-    const userId = getState().auth.user.id;
-    console.log(userId, 'userId')
-    if (!userId) {
+     const userId = getState().auth.user.id;
+     if (!userId) {
       throw new Error('User ID not found');
     }
     try {
@@ -800,10 +791,32 @@ export const validateUser = createAsyncThunk(
         { accountId },
         { headers: { Authorization: `${token}` } }
       );
-      console.log(res.data, 'validateUser')
-      return res.data;
+       return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
+    }
+  }
+);
+
+// Update booking isReviewModalShown property
+export const updateBookingReviewModalShown = createAsyncThunk(
+  'bookings/updateReviewModalShown',
+  async ({ bookingId, isReviewModalShown }, { getState }) => {
+    const token = getState().auth.userToken;
+    try {
+      const response = await ApiManager.patch(
+        `/bookings/updateBooking/`,
+        { bookingId, isReviewModalShown },
+        { headers: { Authorization: token } }
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to update booking review modal status'));
+      }
     }
   }
 );

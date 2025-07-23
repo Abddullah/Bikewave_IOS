@@ -57,6 +57,7 @@ import {
   checkBookingReview,
   addReview,
   getBookingsAsOwner,
+  updateBookingReviewModalShown,
 } from '../../redux/features/main/mainThunks';
 import { selectBicycles } from '../../redux/features/main/mainSelectors';
 import MapView, { PROVIDER_GOOGLE, Marker } from 'react-native-maps';
@@ -136,6 +137,7 @@ const Home = React.memo(({ navigation }) => {
   const userId = useSelector(selectAuthUserId);
   const token = useSelector(selectAuthToken);
   const clientBookings = useSelector((state) => state.main.clientBookings);
+  const ownerBookings = useSelector((state) => state.main.ownerBookings);
   const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
   const [selectedBike, setSelectedBike] = useState(null);
   const [city, setCity] = useState('');
@@ -347,37 +349,32 @@ const Home = React.memo(({ navigation }) => {
     },
     [bicycles],
   );
-
+  useEffect(() => {
+    dispatch(getBookingsAsOwner());
+    dispatch(getBookingsAsClient());
+  }, [dispatch]);
   // Check for completed bookings without reviews
   useEffect(() => {
     const checkBookingsForReview = async () => {
       if (!userId || !token) return;
 
       try {
-        // Get list of dismissed booking IDs
-        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        // Use clientBookings state instead of API call
+        if (clientBookings && clientBookings.length > 0) {
+          // Find completed bookings (status 4)
+          const completedBookings = clientBookings.filter(booking => booking.statusId === 4);
+          // Check each completed booking for reviews
+          for (const booking of completedBookings) {
+            try {
+              const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+              // If user hasn't reviewed yet
+              const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+              if (!userHasReviewed) {
+                // Check if isReviewModalShown property exists and is true
+                // If the property doesn't exist, we'll still show the modal for backward compatibility
+                 const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
 
-        // First check client bookings
-        const clientBookingsResult = await dispatch(getBookingsAsClient()).unwrap()
-          .then(async (bookings) => {
-            if (!bookings || bookings.length === 0) return false;
-
-            // Find completed bookings (status 4)
-            const completedBookings = bookings.filter(booking => booking.statusId === 4);
-
-            // Check each completed booking for reviews
-            for (const booking of completedBookings) {
-              try {
-                // Skip if this booking has been dismissed
-                if (dismissedBookings.includes(booking._id)) {
-                  continue;
-                }
-
-                const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
-                // If user hasn't reviewed yet
-                const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
-                if (!userHasReviewed) {
+                if (shouldShowReviewModal) {
                   // Make sure we have all the necessary information
                   if (booking.bicycle.ownerId === userId) {
                     setIsClientReview(false);
@@ -391,40 +388,39 @@ const Home = React.memo(({ navigation }) => {
                       ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
                     });
                     setReviewModalState(true);
-                    return true; // Found a booking to review
+                    return; // Found a booking to review
                   }
                 }
-              } catch (error) {
-                console.error('Error checking booking review:', error);
               }
+            } catch (error) {
+              console.error('Error checking booking review:', error);
             }
-            return false; // No client bookings to review
-          });
+          }
+        }
 
-        // If we already found a client booking to review, don't check owner bookings
-        if (clientBookingsResult) return;
+        // Use ownerBookings state if no client bookings need review
+        if (ownerBookings && ownerBookings.length > 0) {
+          // Find completed bookings (status 4)
+          const completedBookings = ownerBookings.filter(booking => booking.statusId === 4);
 
-        // Check owner bookings if no client bookings need review
-        await dispatch(getBookingsAsOwner()).unwrap()
-          .then(async (bookings) => {
-            if (!bookings || bookings.length === 0) return;
+          // Check each completed booking for reviews
+          for (const booking of completedBookings) {
+            try {
+              // Skip if this booking has been dismissed
+              // if (dismissedBookings && dismissedBookings.includes(booking._id)) {
+              //   continue;
+              // }
 
-            // Find completed bookings (status 4)
-            const completedBookings = bookings.filter(booking => booking.statusId === 4);
+              const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+ 
+              // If user hasn't reviewed yet  
+              const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+              if (!userHasReviewed) {
+                // Check if isReviewModalShown property exists and is true
+                // If the property doesn't exist, we'll still show the modal for backward compatibility
+                const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
 
-            // Check each completed booking for reviews
-            for (const booking of completedBookings) {
-              try {
-                // Skip if this booking has been dismissed
-                if (dismissedBookings.includes(booking._id)) {
-                  continue;
-                }
-
-                const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
-                // If user hasn't reviewed yet
-
-                const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
-                if (!userHasReviewed) {
+                if (shouldShowReviewModal) {
                   setIsClientReview(false); // Owner is reviewing client
                   if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
                     setBookingToReview({
@@ -436,19 +432,23 @@ const Home = React.memo(({ navigation }) => {
                     break;
                   }
                 }
-              } catch (error) {
-                console.error('Error checking owner booking review:', error);
               }
+            } catch (error) {
+              console.error('Error checking owner booking review:', error);
             }
-          });
+          }
+        }
       } catch (error) {
         console.error('Error checking bookings for review:', error);
       }
     };
+
     if (userId && token) {
-      checkBookingsForReview();
+      if (ownerBookings.length > 0 || clientBookings.length > 0) {
+        checkBookingsForReview();
+      }
     }
-  }, [userId, token, dispatch]);
+  }, [userId, token, dispatch, ownerBookings, clientBookings]);
 
   // Remove the effect that updates AsyncStorage based on reviewModalState
   // since we now track dismissed bookings by ID
@@ -470,10 +470,10 @@ const Home = React.memo(({ navigation }) => {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
 
         // Add this booking ID to the dismissed list since it's been reviewed
-        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-        const dismissedBookings = JSON.parse(dismissedBookingsJson);
-        dismissedBookings.push(bookingToReview._id);
-        await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+        // const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        // const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        // dismissedBookings.push(bookingToReview._id);
+        // await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
 
         setBookingToReview(null);
         setReviewModalState(false);
@@ -489,11 +489,17 @@ const Home = React.memo(({ navigation }) => {
   // Handle review modal close
   const handleReviewClose = async () => {
     if (bookingToReview && bookingToReview._id) {
+      // Update the booking to not show the review modal again
+      await dispatch(updateBookingReviewModalShown({
+        bookingId: bookingToReview._id,
+        isReviewModalShown: false
+      }));
+
       // Add this booking ID to the dismissed list
-      const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-      const dismissedBookings = JSON.parse(dismissedBookingsJson);
-      dismissedBookings.push(bookingToReview._id);
-      await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+      // const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+      // const dismissedBookings = JSON.parse(dismissedBookingsJson);
+      // dismissedBookings.push(bookingToReview._id);
+      // await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
     }
 
     setBookingToReview(null);
