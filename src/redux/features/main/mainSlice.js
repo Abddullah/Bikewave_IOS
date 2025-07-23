@@ -13,6 +13,7 @@ import {
   bookBicycle,
   confirmBooking,
   setInvoiceAddress,
+  updateBooking,
   getBookingsAsClient,
   getBookingsAsOwner,
   confirmPayment,
@@ -52,6 +53,9 @@ const initialState = {
   invoiceAddress: null,
   invoiceLoading: false,
   invoiceError: null,
+  updateBookingDetails: null,
+  updateBookingLoading: false,
+  updateBookingError: null,
   clientBookings: [],
   ownerBookings: [],
   clientBookingsLoading: false,
@@ -275,6 +279,21 @@ const mainSlice = createSlice({
       .addCase(setInvoiceAddress.rejected, (state, action) => {
         state.invoiceLoading = false;
         state.invoiceError = action.error.message;
+      });
+
+    // Handle update booking states
+    builder
+      .addCase(updateBooking.pending, (state) => {
+        state.updateBookingLoading = true;
+        state.updateBookingError = null;
+      })
+      .addCase(updateBooking.fulfilled, (state, action) => {
+        state.updateBookingLoading = false;
+        state.updateBookingDetails = action.payload;
+      })
+      .addCase(updateBooking.rejected, (state, action) => {
+        state.updateBookingLoading = false;
+        state.updateBookingError = action.error.message;
       });
 
     // Handle client bookings states

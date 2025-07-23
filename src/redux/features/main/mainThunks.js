@@ -494,6 +494,36 @@ export const setInvoiceAddress = createAsyncThunk(
   },
 );
 
+// Update booking information
+export const updateBooking = createAsyncThunk(
+  'bookings/updateBooking',
+  async ({ bookingId, info }, { getState }) => {
+    const token = getState().auth.userToken;
+    try {
+      const response = await ApiManager.patch(
+        '/bookings/updateBooking/',
+        {
+          bookingId,
+          info,
+        },
+        {
+          headers: {
+            Authorization: `${token}`,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      if (error.response && error.response.data && error.response.data.msg) {
+        const customMessage = await getErrorMessage(error.response.status);
+        throw new Error(customMessage);
+      } else {
+        throw new Error(getErrorMessage('Failed to update booking information'));
+      }
+    }
+  },
+);
+
 // Get bookings as client
 export const getBookingsAsClient = createAsyncThunk(
   'bookings/fetchAsClient',

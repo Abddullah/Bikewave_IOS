@@ -375,13 +375,13 @@ const Home = React.memo(({ navigation }) => {
                 const shouldShowReviewModal = booking.isClientReviewModalShown === undefined || booking.isClientReviewModalShown === true;
 
                 if (shouldShowReviewModal) {
-                  // Make sure we have all the necessary information
+                   // Make sure we have all the necessary information
                   if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
                     setIsClientReview(true);
                     setBookingToReview({
                       ...booking,
                       bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
-                      ownerName: booking.bicycle.owner?.firstName + ' ' + booking.bicycle.owner?.secondName || 'Owner'
+                      ownerName: booking.userName || 'Owner'
                     });
                     setReviewModalState(true);
                     return; // Found a booking to review
@@ -417,7 +417,7 @@ const Home = React.memo(({ navigation }) => {
                     setBookingToReview({
                       ...booking,
                       bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
-                      clientName: booking.owner?.firstName + ' ' + booking.owner?.secondName || 'User'
+                      clientName: booking.userName || 'User'
                     });
                     setReviewModalState(true);
                     break;
@@ -714,8 +714,8 @@ const Home = React.memo(({ navigation }) => {
         visible={reviewModalState}
         bookingInfo={{
           bikeName: bookingToReview?.bicycle?.brand + ' ' + bookingToReview?.bicycle?.model,
-          ownerName: bookingToReview?.bicycle?.owner?.firstName + ' ' + bookingToReview?.bicycle?.owner?.secondName,
-          clientName: bookingToReview?.clientName
+          ownerName: bookingToReview?.userName,
+          clientName: bookingToReview?.userName
         }}
         isClientReview={isClientReview}
         onClose={handleReviewClose}

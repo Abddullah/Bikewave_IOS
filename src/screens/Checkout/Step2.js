@@ -161,21 +161,10 @@ export const Step2 = ({navigation, route}) => {
       // Check if form data has changed
       const isDataChanged = await hasFormDataChanged();
       
-      if (!isDataChanged) {
-        // If data hasn't changed, navigate directly without API call
-        navigation.navigate('Step3', {
-          bicycleId: bicycle._id,
-          dateFrom: selectedDateRange.startDate,
-          dateEnd: selectedDateRange.endDate,
-          price: totalPrice.replace('€', '')
-        });
-        return;
-      }
-
-      // If data has changed, proceed with API call
-      await dispatch(setInvoiceAddress({
-        name: formData.firstName,
-        surname: formData.lastName,
+      // Prepare billing info to pass to next screen
+      const billingInfo = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
         street: formData.streetNumber,
         door: formData.door,
         postCode: formData.zip,
@@ -183,7 +172,22 @@ export const Step2 = ({navigation, route}) => {
         country: formData.country,
         emailBuyer: formData.email,
         phoneBuyer: formData.telephone
-      }));
+      };
+      
+      if (!isDataChanged) {
+        // If data hasn't changed, navigate directly without API call
+        navigation.navigate('Step3', {
+          bicycleId: bicycle._id,
+          dateFrom: selectedDateRange.startDate,
+          dateEnd: selectedDateRange.endDate,
+          price: totalPrice.replace('€', ''),
+          billingInfo: billingInfo
+        });
+        return;
+      }
+
+      // If data has changed, proceed with API call
+      await dispatch(setInvoiceAddress(billingInfo));
 
       // Save address to AsyncStorage after successful API call
       try {
@@ -207,7 +211,8 @@ export const Step2 = ({navigation, route}) => {
         bicycleId: bicycle._id,
         dateFrom: selectedDateRange.startDate,
         dateEnd: selectedDateRange.endDate,
-        price: totalPrice.replace('€', '')
+        price: totalPrice.replace('€', ''),
+        billingInfo: billingInfo
       });
     } catch (error) {
       console.error('Invoice address error:', error);

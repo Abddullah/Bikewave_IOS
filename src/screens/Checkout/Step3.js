@@ -22,7 +22,7 @@ import { useStripe } from '@stripe/stripe-react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { selectBookingDetails } from '../../redux/features/main/mainSelectors';
 import { CardField, useStripe as useStripeHook } from '@stripe/stripe-react-native';
-import { confirmBooking } from '../../redux/features/main/mainThunks';
+import { confirmBooking, updateBooking } from '../../redux/features/main/mainThunks';
 
 export const Step3 = ({ navigation, route }) => {
   const [formData, setFormData] = useState({
@@ -70,6 +70,25 @@ export const Step3 = ({ navigation, route }) => {
 
       try {
         setLoading(true);
+        
+        // Get billing info from route params
+        const billingInfo = route.params?.billingInfo;
+        
+        if (billingInfo) {
+          // First update the booking with user information
+          try {
+            await dispatch(updateBooking({
+              bookingId: bookingDetails.bookingId,
+              info: billingInfo
+            })).unwrap();
+          } catch (error) {
+            setErrorMessage(t('errors.booking_update_failed'));
+            setShowError(true);
+            setLoading(false);
+            return;
+          }
+        }
+        
         const { error, paymentIntent } = await confirmPayment(
           bookingDetails.client_secret,
           {
