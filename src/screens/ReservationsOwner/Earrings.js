@@ -19,7 +19,7 @@ import AppButton from '../../components/AppButton';
 import ReservationCard from '../../components/ReservationCard';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
-import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount, addReview } from '../../redux/features/main/mainThunks';
+import { confirmPayment, getBookingsAsOwner, cancelPayment, checkAccount, addReview, checkBookingReview } from '../../redux/features/main/mainThunks';
 import { returnBicycle } from '../../redux/features/main/pickupReturnThunks';
 import moment from 'moment';
 import PopUp from '../../components/PopUp';
@@ -29,7 +29,10 @@ import { platform } from '../../utilities';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 import Toast from 'react-native-toast-message';
 import { getItem, setItem } from '../../services/assynsStorage';
+import { selectAuthUserId } from '../../redux/features/auth/authSelectors';
 
+// Key for storing dismissed booking IDs
+const DISMISSED_BOOKINGS_KEY = 'dismissed_review_bookings_earrings';
 const MODAL_STATE_KEY = 'modalState_Earrings';
 
 export default function Earrings({ navigation }) {
@@ -43,14 +46,17 @@ export default function Earrings({ navigation }) {
   const [reviewDismissed, setReviewDismissed] = useState(false);
   const [modalState, setModalState] = useState(false);
   const [reviewBooking, setReviewBooking] = useState(null);
+  const [isClientReview, setIsClientReview] = useState(false);
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const bookings = useSelector((state) => state.main.ownerBookings);
   const returnStatus = useSelector((state) => state.main.returnBicycleStatus);
   const returnLoading = useSelector((state) => state.main.returnLoading);
-   useEffect(() => {
+  const userId = useSelector(selectAuthUserId);
+  
+  useEffect(() => {
     dispatch(getBookingsAsOwner());
-  }, [dispatch, returnStatus,activeTab]);
+  }, [dispatch, returnStatus, activeTab]);
 
   useEffect(() => {
     if (!reviewDismissed) {
@@ -72,6 +78,59 @@ export default function Earrings({ navigation }) {
       await setItem(MODAL_STATE_KEY, modalState);
     })();
   }, [modalState]);
+
+  // Check for completed bookings without reviews
+  useEffect(() => {
+    const checkBookingsForReview = async () => {
+      if (!userId || !bookings || bookings.length === 0) return;
+
+      try {
+        // Get list of dismissed booking IDs
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        // Find completed bookings (status 4)
+        const completedBookings = bookings.filter(booking => booking.statusId === 4);
+        
+        // Check each completed booking for reviews
+        for (const booking of completedBookings) {
+          console.log(dismissedBookings, 'dismissedBookings', booking._id);
+          try {
+            // Skip if this booking has been dismissed
+            if (dismissedBookings.includes(booking._id)) {
+              continue;
+            }
+
+            const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
+            
+            // If user hasn't reviewed yet
+            const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
+            if (!userHasReviewed) {
+              // Make sure we have all the necessary information
+              if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                // For owner reviewing client
+                setIsClientReview(false);
+                setReviewBooking({
+                  ...booking,
+                  bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
+                  clientName: booking.user?.firstName + ' ' + booking.user?.secondName || 'User'
+                });
+                setModalState(true);
+                break;
+              }
+            }
+          } catch (error) {
+            console.error('Error checking booking review:', error);
+          }
+        }
+      } catch (error) {
+        console.error('Error checking bookings for review:', error);
+      }
+    };
+
+    if (userId && bookings) {
+      checkBookingsForReview();
+    }
+  }, [userId, bookings, activeTab, dispatch]);
 
   const earringsBookings = bookings?.filter(booking => {
     if (activeTab === 'earrings') {
@@ -257,10 +316,15 @@ export default function Earrings({ navigation }) {
       }));
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
+        
+        // Add this booking ID to the dismissed list since it's been reviewed
+        const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+        const dismissedBookings = JSON.parse(dismissedBookingsJson);
+        dismissedBookings.push(reviewBooking._id);
+        await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+        
         setReviewBooking(null);
         setModalState(false);
-        // Store the modal state to prevent showing it again
-        await setItem(MODAL_STATE_KEY, true);
       } else {
         Toast.show({ type: 'error', text1: 'Failed to add review', position: 'bottom' });
       }
@@ -271,6 +335,14 @@ export default function Earrings({ navigation }) {
   };
 
   const handleReviewClose = async () => {
+    if (reviewBooking && reviewBooking._id) {
+      // Add this booking ID to the dismissed list
+      const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
+      const dismissedBookings = JSON.parse(dismissedBookingsJson);
+      dismissedBookings.push(reviewBooking._id);
+      await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
+    }
+    
     setReviewBooking(null);
     setModalState(false);
   };
@@ -407,7 +479,7 @@ export default function Earrings({ navigation }) {
             bookingInfo={reviewBooking}
             onClose={handleReviewClose}
             onSubmit={handleReviewSubmit}
-            isClientReview={false}
+            isClientReview={isClientReview}
           />
         </>
       )}
