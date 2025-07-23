@@ -107,7 +107,7 @@ export default function Earrings({ navigation }) {
             if (!userHasReviewed) {
               // Check if isReviewModalShown property exists and is true
               // If the property doesn't exist, we'll still show the modal for backward compatibility
-              const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+              const shouldShowReviewModal = booking.isOwnerReviewModalShown === undefined || booking.isOwnerReviewModalShown === true;
               
               if (shouldShowReviewModal) {
                 // Make sure we have all the necessary information
@@ -345,7 +345,7 @@ export default function Earrings({ navigation }) {
       // Update the booking to not show the review modal again
       await dispatch(updateBookingReviewModalShown({
         bookingId: reviewBooking._id,
-        isReviewModalShown: false
+        isReviewModalShow: false
       }));
       
       // Add this booking ID to the dismissed list

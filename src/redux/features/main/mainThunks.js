@@ -15,7 +15,7 @@ export const getAllBicycles = createAsyncThunk(
   async ({ category }, { getState }) => {
     const { filters } = getState().main;
     let location = null;
-     if (filters?.location?.cityName) {
+    if (filters?.location?.cityName) {
       const geoHash = filters.location.lat && filters.location.lng
         ? geohash.encode(filters.location.lat, filters.location.lng)
         : null;
@@ -32,10 +32,10 @@ export const getAllBicycles = createAsyncThunk(
       maxPrice: filters.maxPrice,
     };
     try {
-       const response = await ApiManager.post('/bicycles', payload);
-       return response.data;
+      const response = await ApiManager.post('/bicycles', payload);
+      return response.data;
     } catch (error) {
-       if (error.response && error.response.data && error.response.data.msg) {
+      if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
       } else {
@@ -179,9 +179,9 @@ export const addBicycle = createAsyncThunk(
           'Content-Type': 'multipart/form-data',
         },
       });
-       return response.data;
+      return response.data;
     } catch (error) {
-       if (error.response && error.response.data && error.response.data.msg) {
+      if (error.response && error.response.data && error.response.data.msg) {
         if (
           error.response.data.msg ==
           'Solo las cuentas premium pueden crear mas de dos bicicletas'
@@ -365,7 +365,7 @@ export const bookBicycle = createAsyncThunk(
   async ({ bicycleId, dateFrom, dateEnd, price }, { getState }) => {
     const token = getState().auth.userToken;
     try {
- 
+
       const response = await ApiManager.put(
         '/bookings/startBooking/',
         {
@@ -380,9 +380,9 @@ export const bookBicycle = createAsyncThunk(
           },
         },
       );
-       return response.data;
+      return response.data;
     } catch (error) {
-       if (error.response && error.response.data && error.response.data.msg) {
+      if (error.response && error.response.data && error.response.data.msg) {
         const customMessage = await getErrorMessage(error.response.status);
         throw new Error(customMessage);
       } else {
@@ -611,7 +611,7 @@ export const checkAccount = createAsyncThunk(
         `${EnvConfig.api.baseUrl}/transactions/check-account/${accountIdClone}`,
         { headers: { Authorization: `${token}` } },
       );
- 
+
       // Update user info to ensure we have the latest account details
       const userId = getState().auth.userId;
       if (userId) {
@@ -696,7 +696,7 @@ export const addReview = createAsyncThunk(
   'reviews/add',
   async ({ bookingId, bicycleId, rating, comment, ownerId }, { getState }) => {
     const token = getState().auth.userToken;
-     try {
+    try {
       const response = await ApiManager.post(
         '/reviews',
         { bookingId, bicycleId, rating, comment, ownerId },
@@ -719,8 +719,8 @@ export const getReviewsByUserId = createAsyncThunk(
   'reviews/getByUserId',
   async (_, { getState }) => {
     const token = getState().auth.userToken;
-     const userId = getState().auth.user.id;
-     if (!userId) {
+    const userId = getState().auth.user.id;
+    if (!userId) {
       throw new Error('User ID not found');
     }
     try {
@@ -791,22 +791,31 @@ export const validateUser = createAsyncThunk(
         { accountId },
         { headers: { Authorization: `${token}` } }
       );
-       return res.data;
+      return res.data;
     } catch (err) {
       return rejectWithValue(err.response?.data || err.message);
     }
   }
 );
 
-// Update booking isReviewModalShown property
+// Update booking review modal status
 export const updateBookingReviewModalShown = createAsyncThunk(
   'bookings/updateReviewModalShown',
-  async ({ bookingId, isReviewModalShown }, { getState }) => {
+  async ({ bookingId, isClientReviewModalShown, isOwnerReviewModalShown }, { getState }) => {
     const token = getState().auth.userToken;
     try {
-      const response = await ApiManager.patch(
-        `/bookings/updateBooking/`,
-        { bookingId, isReviewModalShown },
+      // Create payload with only the provided flags
+      const payload = { bookingId };
+      if (isClientReviewModalShown !== undefined) {
+        payload.isClientReviewModalShown = isClientReviewModalShown;
+      }
+      if (isOwnerReviewModalShown !== undefined) {
+        payload.isOwnerReviewModalShown = isOwnerReviewModalShown;
+      }
+
+      const response = await ApiManager.put(
+        `/bookings/updateReviewModalStatus`,
+        payload,
         { headers: { Authorization: token } }
       );
       return response.data;

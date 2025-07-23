@@ -88,7 +88,7 @@ export default function InProgress({ navigation }) {
               if (!userHasReviewed) {
                 // Check if isReviewModalShown property exists and is true
                 // If the property doesn't exist, we'll still show the modal for backward compatibility
-                const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+                const shouldShowReviewModal = booking.isClientReviewModalShown === undefined || booking.isClientReviewModalShown === true;
                 
                 if (shouldShowReviewModal) {
                   // Make sure we have all the necessary information

@@ -468,14 +468,14 @@ const mainSlice = createSlice({
         if (state.clientBookings.length > 0) {
           state.clientBookings = state.clientBookings.map(booking => 
             booking._id === action.payload.bookingId 
-              ? { ...booking, isReviewModalShown: action.payload.isReviewModalShown } 
+              ? { ...booking, isClientReviewModalShown: action.payload.isClientReviewModalShown } 
               : booking
           );
         }
         if (state.ownerBookings.length > 0) {
           state.ownerBookings = state.ownerBookings.map(booking => 
             booking._id === action.payload.bookingId 
-              ? { ...booking, isReviewModalShown: action.payload.isReviewModalShown } 
+              ? { ...booking, isOwnerReviewModalShown: action.payload.isOwnerReviewModalShown } 
               : booking
           );
         }

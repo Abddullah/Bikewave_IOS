@@ -370,18 +370,14 @@ const Home = React.memo(({ navigation }) => {
               // If user hasn't reviewed yet
               const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
               if (!userHasReviewed) {
-                // Check if isReviewModalShown property exists and is true
+                // Check if isClientReviewModalShown property exists and is true
                 // If the property doesn't exist, we'll still show the modal for backward compatibility
-                 const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+                const shouldShowReviewModal = booking.isClientReviewModalShown === undefined || booking.isClientReviewModalShown === true;
 
                 if (shouldShowReviewModal) {
                   // Make sure we have all the necessary information
-                  if (booking.bicycle.ownerId === userId) {
-                    setIsClientReview(false);
-                  } else {
-                    setIsClientReview(true);
-                  }
                   if (booking.bicycle && booking.bicycle.brand && booking.bicycle.model) {
+                    setIsClientReview(true);
                     setBookingToReview({
                       ...booking,
                       bikeName: booking.bicycle.brand + ' ' + booking.bicycle.model,
@@ -406,19 +402,14 @@ const Home = React.memo(({ navigation }) => {
           // Check each completed booking for reviews
           for (const booking of completedBookings) {
             try {
-              // Skip if this booking has been dismissed
-              // if (dismissedBookings && dismissedBookings.includes(booking._id)) {
-              //   continue;
-              // }
-
               const reviews = await dispatch(checkBookingReview(booking._id)).unwrap();
  
               // If user hasn't reviewed yet  
               const userHasReviewed = reviews && reviews.some(review => review.authorId === userId);
               if (!userHasReviewed) {
-                // Check if isReviewModalShown property exists and is true
+                // Check if isOwnerReviewModalShown property exists and is true
                 // If the property doesn't exist, we'll still show the modal for backward compatibility
-                const shouldShowReviewModal = booking.isReviewModalShown === undefined || booking.isReviewModalShown === true;
+                const shouldShowReviewModal = booking.isOwnerReviewModalShown === undefined || booking.isOwnerReviewModalShown === true;
 
                 if (shouldShowReviewModal) {
                   setIsClientReview(false); // Owner is reviewing client
@@ -488,22 +479,20 @@ const Home = React.memo(({ navigation }) => {
 
   // Handle review modal close
   const handleReviewClose = async () => {
-    if (bookingToReview && bookingToReview._id) {
-      // Update the booking to not show the review modal again
-      await dispatch(updateBookingReviewModalShown({
-        bookingId: bookingToReview._id,
-        isReviewModalShown: false
-      }));
-
-      // Add this booking ID to the dismissed list
-      // const dismissedBookingsJson = await getItem(DISMISSED_BOOKINGS_KEY, '[]');
-      // const dismissedBookings = JSON.parse(dismissedBookingsJson);
-      // dismissedBookings.push(bookingToReview._id);
-      // await setItem(DISMISSED_BOOKINGS_KEY, JSON.stringify(dismissedBookings));
-    }
-
     setBookingToReview(null);
     setReviewModalState(false);
+    if (bookingToReview && bookingToReview._id) {
+      // Update the booking to not show the review modal again
+      // Use the appropriate flag based on whether it's a client or owner review
+      await dispatch(updateBookingReviewModalShown({
+        bookingId: bookingToReview._id,
+        ...(isClientReview 
+          ? { isClientReviewModalShown: false } 
+          : { isOwnerReviewModalShown: false })
+      }));
+
+     }
+
   };
 
   return (
