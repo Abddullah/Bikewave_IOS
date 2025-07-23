@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Platform, ActivityIndicator } from 'react-native';
+import { View, Text, Modal, TouchableOpacity, TextInput, StyleSheet, Platform, ActivityIndicator, KeyboardAvoidingView } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Colors from '../utilities/constants/colors';
 import { CrossBlack } from '../assets/svg';
@@ -80,7 +80,10 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
       transparent
       onRequestClose={handleClose}
     >
-      <View style={styles.overlay}>
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === 'ios' ? 'padding' : null}
+        style={styles.overlay}
+      >
         <View style={styles.sheet}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose} disabled={isClosing}>
             <CrossBlack/>
@@ -124,7 +127,7 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
           {/* Add extra padding for iOS */}
           {Platform.OS === 'ios' && <View style={{ height: 34 }} />}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 }
