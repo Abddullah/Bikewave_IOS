@@ -310,6 +310,16 @@ export default function Earrings({ navigation }) {
         comment,
         ownerId: reviewBooking.ownerId || reviewBooking.bicycle?.ownerId,
       }));
+      if (reviewBooking && reviewBooking._id) {
+        // Update the booking to not show the review modal again
+        // Use the appropriate flag based on whether it's a client or owner review
+        await dispatch(updateBookingReviewModalShown({
+          bookingId: reviewBooking._id,
+          ...(isClientReview 
+            ? { isClientReviewModalShown: false } 
+            : { isOwnerReviewModalShown: false })
+        }));
+      }
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
         

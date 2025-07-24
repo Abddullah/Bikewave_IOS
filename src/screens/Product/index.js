@@ -92,7 +92,7 @@ export default function Product({ navigation, route }) {
   const [datePickerModalVisible, setDatePickerModalVisible] = useState(false);
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
-
+  const [loadingReserve, setLoadingReserve] = useState(false);
   const isOwner = user_id === ownerId;
 
   const calculateDays = () => {
@@ -139,6 +139,7 @@ export default function Product({ navigation, route }) {
   };
 
   const handleReservePress = async () => {
+    setLoadingReserve(true);
     if (user_id) {
       const approvalRes = await dispatch(fetchApprovedInfo(user_id));
       if (
@@ -146,26 +147,26 @@ export default function Product({ navigation, route }) {
         approvalRes.payload &&
         approvalRes.payload.isApproved
       ) {
-        if (userDetails.accountId) {
+        // if (userDetails.accountId) {
           await navigation.navigate('Step1', {
             bicycle,
             selectedDateRange,
             totalPrice: calculateTotalPrice,
           });
           await refRBSheet.current.close();
-        } else {
-          const accountCreationRes = await dispatch(createAccount());
-          if (accountCreationRes && accountCreationRes.payload) {
-            const accountData = accountCreationRes.payload?.account;
-            await dispatch(createAccountSession(accountData));
-          }
-          await navigation.navigate('Step1', {
-            bicycle,
-            selectedDateRange,
-            totalPrice: calculateTotalPrice,
-          });
-          await refRBSheet.current.close();
-        }
+        // } else {
+        //   const accountCreationRes = await dispatch(createAccount());
+        //   if (accountCreationRes && accountCreationRes.payload) {
+        //     const accountData = accountCreationRes.payload?.account;
+        //     await dispatch(createAccountSession(accountData));
+        //   }
+        //   await navigation.navigate('Step1', {
+        //     bicycle,
+        //     selectedDateRange,
+        //     totalPrice: calculateTotalPrice,
+        //   });
+        //   await refRBSheet.current.close();
+        // }
       } else {
         // Show popup instead of directly navigating
         setShowApprovalPopup(true);
@@ -179,6 +180,7 @@ export default function Product({ navigation, route }) {
       });
       await refRBSheet.current.close();
     }
+    setLoadingReserve(false);
   };
 
   const handleDateRangeSelect = (startDate, endDate) => {
@@ -477,7 +479,7 @@ export default function Product({ navigation, route }) {
               <SafeAreaView>
                 <AppButton
                   title={
-                    auth_loading ? (
+                    loadingReserve ? (
                       <ActivityIndicator color={Colors.primary} />
                     ) : (
                       t('reserve')

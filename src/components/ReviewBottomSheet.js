@@ -24,7 +24,9 @@ export default function ReviewBottomSheet({ visible, onClose, onSubmit, bookingI
   const handleClose = async () => {
     setIsClosing(true);
     await onClose();
-    setIsClosing(false);
+    setTimeout(() => {
+      setIsClosing(false);
+    }, 2000);
   };
 
   const bike = bookingInfo?.bikeName || t('review.bike');

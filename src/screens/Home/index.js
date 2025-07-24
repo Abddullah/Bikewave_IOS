@@ -456,7 +456,16 @@ const Home = React.memo(({ navigation }) => {
         comment,
         ownerId: bookingToReview.bicycle?.ownerId || bookingToReview.ownerId,
       }));
-
+      if (bookingToReview && bookingToReview._id) {
+        // Update the booking to not show the review modal again
+        // Use the appropriate flag based on whether it's a client or owner review
+        await dispatch(updateBookingReviewModalShown({
+          bookingId: bookingToReview._id,
+          ...(isClientReview 
+            ? { isClientReviewModalShown: false } 
+            : { isOwnerReviewModalShown: false })
+        }));
+      }
       if (!res.error && (res.payload?.success || res.payload?.status === 'success' || res.payload)) {
         Toast.show({ type: 'success', text1: 'Review added successfully', position: 'bottom' });
         setBookingToReview(null);
@@ -485,7 +494,7 @@ const Home = React.memo(({ navigation }) => {
     setTimeout(() => {
       setBookingToReview(null);
       setReviewModalState(false);
-    }, 3000);
+    }, 2000);
 
   };
 
