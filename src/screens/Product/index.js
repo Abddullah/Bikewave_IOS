@@ -148,12 +148,12 @@ export default function Product({ navigation, route }) {
         approvalRes.payload.isApproved
       ) {
         // if (userDetails.accountId) {
-          await navigation.navigate('Step1', {
-            bicycle,
-            selectedDateRange,
-            totalPrice: calculateTotalPrice,
-          });
-          await refRBSheet.current.close();
+        await navigation.navigate('Step1', {
+          bicycle,
+          selectedDateRange,
+          totalPrice: calculateTotalPrice,
+        });
+        await refRBSheet.current.close();
         // } else {
         //   const accountCreationRes = await dispatch(createAccount());
         //   if (accountCreationRes && accountCreationRes.payload) {
@@ -331,6 +331,8 @@ export default function Product({ navigation, route }) {
                     </>
                   )}
                 </View>
+                <Text style={styles.descriptionText}>{bicycle.description}</Text>
+
               </View>
             </View>
             <ScrollView
@@ -609,7 +611,7 @@ const styles = StyleSheet.create({
     ...Typography.f_16_inter_regular,
     color: Colors.black,
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    // paddingHorizontal: 15,
   },
   ownerChatContainer: {
     paddingHorizontal: 15,
