@@ -54,17 +54,11 @@ export default function ProfileHeader({user}) {
         />
         <View style={styles.detailsContainer}>
           <Text style={styles.userName}>{user.name}</Text>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-              marginBottom: 10,
-              marginTop: -5,
-            }}>
+          <View style={styles.ratingContainer}>
             <Star />
             <Text style={[Typography.f_14_extra_bold, {color: Colors.black}]}>{averageRating}</Text>
             <TouchableOpacity
+              style={styles.reviewButton}
               onPress={handleOpenReviews}>
               <Text
                 style={[Typography.f_14_extra_bold, {color: Colors.primary}]}>
@@ -218,5 +212,16 @@ const styles = StyleSheet.create({
     color: Colors.black,
     ...Typography.f_12_inter_regular,
     top: RFValue(-6, screenResolution.screenHeight),
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginBottom: 10,
+    marginTop: -5,
+  },
+  reviewButton: {
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
 });

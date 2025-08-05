@@ -98,7 +98,7 @@ export const Step1 = ({ formData, updateFormData, onNext }) => {
           <ScrollView showsVerticalScrollIndicator={false}>
             <View style={{ paddingHorizontal: 20 }}>
               <View style={styles.form}>
-                <View>
+                <View style={styles.fieldContainer}>
                   <Text style={styles.label}>
                     {t('brand')} <Text style={styles.required}>*</Text>
                   </Text>
@@ -109,7 +109,7 @@ export const Step1 = ({ formData, updateFormData, onNext }) => {
                   />
                   {errors.brand ? <Text style={styles.errorText}>{errors.brand}</Text> : null}
                 </View>
-                <View>
+                <View style={styles.fieldContainer}>
                   <Text style={styles.label}>
                     {t('model')} <Text style={styles.required}>*</Text>
                   </Text>
@@ -120,7 +120,7 @@ export const Step1 = ({ formData, updateFormData, onNext }) => {
                   />
                   {errors.model ? <Text style={styles.errorText}>{errors.model}</Text> : null}
                 </View>
-                <View>
+                <View style={styles.fieldContainer}>
                   <Text style={styles.label}>{t('description')}</Text>
                   <AppTextInput
                     placeholder={t('description_placeholder')}
@@ -153,7 +153,10 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   form: {
-    gap: 15,
+    gap: 25,
+  },
+  fieldContainer: {
+    gap: 8,
   },
   label: {
     ...Typography.f_18_inter_semi_bold,

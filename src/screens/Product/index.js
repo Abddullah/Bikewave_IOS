@@ -341,7 +341,7 @@ export default function Product({ navigation, route }) {
               style={styles.overFlowContainer}>
               <Text style={styles.descriptionText}>{bicycle.desc}</Text>
               <View style={styles.ownerChatContainer}>
-                <View style={{ gap: -5 }}>
+                <View style={styles.ownerInfoContainer}>
                   <Text style={styles.ownerLabel}>{t('owner')}:</Text>
                   <Text style={styles.ownerName}>
                     {bicycle.owner?.firstName} {bicycle.owner?.secondName}
@@ -538,12 +538,12 @@ const styles = StyleSheet.create({
   },
   productDetailsContainer: {
     backgroundColor: Colors.white,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     marginTop: -23,
-    gap: 3,
+    gap: 10,
   },
   brandPriceContainer: {
     flexDirection: 'row',
@@ -618,6 +618,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  ownerInfoContainer: {
+    gap: 5,
   },
   ownerLabel: {
     ...Typography.f_20_inter_bold,

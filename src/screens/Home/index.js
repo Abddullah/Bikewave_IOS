@@ -503,7 +503,7 @@ const Home = React.memo(({ navigation }) => {
       <View>
         <AppStatusBar />
         <View style={styles.headerContainer}>
-          <View style={{ width: '83%', height: 50 }}>
+          <View style={styles.searchContainer}>
             <GooglePlacesAutocomplete
               ref={placesRef}
               placeholder={t('your_city')}
@@ -519,7 +519,7 @@ const Home = React.memo(({ navigation }) => {
               minLength={2}
               enablePoweredByContainer={false}
               renderLeftButton={() => (
-                <View style={{ alignSelf: 'center', top: 8 }}>
+                <View style={styles.searchIconContainer}>
                   <Search />
                 </View>
               )}
@@ -527,7 +527,7 @@ const Home = React.memo(({ navigation }) => {
                 city?.length > 0 && (
                   <TouchableOpacity
                     onPress={clearInput}
-                    style={{ alignSelf: 'center', top: 8 }}>
+                    style={styles.clearButtonContainer}>
                     <AntDesign
                       name={'close'}
                       size={RFValue(20, screenResolution.screenHeight)}
@@ -538,24 +538,24 @@ const Home = React.memo(({ navigation }) => {
               styles={{
                 container: {
                   backgroundColor: Colors.white,
-
                   borderRadius: 50,
-                  paddingHorizontal: 10,
+                  paddingHorizontal: 15,
                   shadowColor: '#000',
                   shadowOffset: {
                     width: 0,
-                    height: 1,
+                    height: 2,
                   },
                   shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 2,
+                  shadowRadius: 3,
+                  elevation: 3,
                 },
                 textInput: {
                   backgroundColor: Colors.white,
                   borderRadius: 25,
                   ...Typography.f_16_inter_medium,
                   color: Colors.black,
-                  height: 30,
+                  height: 45,
+                  paddingLeft: 10,
                 },
                 listView: {
                   backgroundColor: Colors.white,
@@ -567,34 +567,43 @@ const Home = React.memo(({ navigation }) => {
                   shadowColor: '#000',
                   shadowOffset: {
                     width: 0,
-                    height: 1,
+                    height: 2,
                   },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 2,
+                  shadowOpacity: 0.15,
+                  shadowRadius: 3,
+                  elevation: 3,
                 },
                 description: {
                   ...Typography.f_14_inter_medium,
                   color: Colors.black,
+                  paddingVertical: 12,
                 },
                 separator: {
-                  height: 0.5,
+                  height: 1,
                   backgroundColor: Colors.gray,
                 },
               }}
             />
-            <Text
-              onPress={() => navigation.navigate('DateFilter')}
-              style={[Typography.f_14_roboto_medium, styles.dateText]}>
-              {formattedDateRange}
-            </Text>
           </View>
           <TouchableOpacity
             activeOpacity={0.8}
+            style={styles.filterButton}
             onPress={() => navigation.navigate('PriceFilter')}>
             <Filter />
           </TouchableOpacity>
         </View>
+        
+        {/* Date selector moved to separate row for better spacing */}
+        <View style={styles.dateContainer}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate('DateFilter')}
+            style={styles.dateButton}>
+            <Text style={[Typography.f_14_roboto_medium, styles.dateText]}>
+              {formattedDateRange}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.categoryShadow}>
           <View style={styles.categoryContainer}>
             <FlatList
@@ -747,9 +756,7 @@ const styles = StyleSheet.create({
   },
   dateText: {
     color: Colors.primary,
-    position: 'absolute',
-    bottom: 5,
-    left: 47,
+    textAlign: 'center',
   },
   categoryListContainer: {
     marginVertical: 10,
@@ -799,6 +806,42 @@ const styles = StyleSheet.create({
     color: Colors.primary,
     textAlign: 'center',
     paddingHorizontal: 20,
+  },
+  searchContainer: {
+    width: '83%',
+    height: 50,
+  },
+  searchIconContainer: {
+    alignSelf: 'center',
+    top: 8,
+  },
+  clearButtonContainer: {
+    alignSelf: 'center',
+    top: 8,
+  },
+  filterButton: {
+    alignSelf: 'center',
+    top: 8,
+  },
+  dateContainer: {
+    marginTop: 10,
+    paddingHorizontal: 20,
+  },
+  dateButton: {
+    backgroundColor: Colors.white,
+    borderRadius: 25,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    ...Typography.f_16_inter_medium,
+    color: Colors.black,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
   },
 });
 
