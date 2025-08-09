@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Text, Platform } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {
@@ -7,6 +7,9 @@ import {
 } from '@react-navigation/bottom-tabs';
 import { Typography } from '../utilities/constants/constant.style';
 import { colors } from '../utilities/constants';
+import { useAuth } from '../utilities/authUtils';
+import AuthPrompt from '../components/AuthPrompt';
+import { useNavigation } from '@react-navigation/native';
 
 // icons
 import {
@@ -54,6 +57,49 @@ import { useTranslation } from 'react-i18next';
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
+// Authentication wrapper component for protected tabs
+const AuthenticatedTabWrapper = ({ children, feature, featureName }) => {
+  const { isAuthenticated } = useAuth();
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const navigation = useNavigation();
+
+  React.useEffect(() => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+    }
+  }, [isAuthenticated]);
+
+  // Reset modal state when tab focus changes
+  React.useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      if (!isAuthenticated) {
+        setShowAuthPrompt(true);
+      }
+    });
+
+    return unsubscribe;
+  }, [navigation, isAuthenticated]);
+
+  const handleClose = () => {
+    setShowAuthPrompt(false);
+    // Navigate back to Home tab when closing auth prompt
+    navigation.navigate('Home');
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <AuthPrompt
+        visible={showAuthPrompt}
+        onClose={handleClose}
+        feature={feature}
+        featureName={featureName}
+      />
+    );
+  }
+
+  return children;
+};
+
 function HomeRoutes() {
   return (
     <Stack.Navigator initialRouteName="Home1">
@@ -65,88 +111,104 @@ function HomeRoutes() {
     </Stack.Navigator>
   );
 }
+
 function FavoritesRoutes() {
+  const { t } = useTranslation();
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Favorites1"
-        component={Favorites}
-      />
-    </Stack.Navigator>
+    <AuthenticatedTabWrapper feature="favorites" featureName={t('add_to_favorites')}>
+      <Stack.Navigator>
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Favorites1"
+          component={Favorites}
+        />
+      </Stack.Navigator>
+    </AuthenticatedTabWrapper>
   );
 }
+
 function OfferRoutes() {
+  const { t } = useTranslation();
   return (
-    <Stack.Navigator initialRouteName="AddBicycle">
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="AddBicycle"
-        component={AddBicycleWrapper}
-      />
-    </Stack.Navigator>
+    <AuthenticatedTabWrapper feature="addProduct" featureName={t('list_your_bike')}>
+      <Stack.Navigator initialRouteName="AddBicycle">
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="AddBicycle"
+          component={AddBicycleWrapper}
+        />
+      </Stack.Navigator>
+    </AuthenticatedTabWrapper>
   );
 }
+
 function MessagesRoutes() {
+  const { t } = useTranslation();
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Messages1"
-        component={Messages}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Chat"
-        component={Chat}
-      />
-    </Stack.Navigator>
+    <AuthenticatedTabWrapper feature="messages" featureName={t('chat_with_owners')}>
+      <Stack.Navigator>
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Messages1"
+          component={Messages}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Chat"
+          component={Chat}
+        />
+      </Stack.Navigator>
+    </AuthenticatedTabWrapper>
   );
 }
+
 function ProfileRoutes() {
+  const { t } = useTranslation();
   return (
-    <Stack.Navigator>
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Profile1"
-        component={Profile}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Configuration"
-        component={Configuration}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="InProgress"
-        component={InProgress}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Past"
-        component={Past}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Earrings"
-        component={Earrings}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Confirmed"
-        component={Confirmed}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="Record"
-        component={Record}
-      />
-      <Stack.Screen
-        options={{ headerShown: false }}
-        name="FeaturedBikes"
-        component={FeaturedBikes}
-      />
-    </Stack.Navigator>
+    <AuthenticatedTabWrapper feature="profile" featureName={t('your_profile')}>
+      <Stack.Navigator>
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Profile1"
+          component={Profile}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Configuration"
+          component={Configuration}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="InProgress"
+          component={InProgress}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Past"
+          component={Past}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Earrings"
+          component={Earrings}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Confirmed"
+          component={Confirmed}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="Record"
+          component={Record}
+        />
+        <Stack.Screen
+          options={{ headerShown: false }}
+          name="FeaturedBikes"
+          component={FeaturedBikes}
+        />
+      </Stack.Navigator>
+    </AuthenticatedTabWrapper>
   );
 }
 

@@ -109,6 +109,11 @@ export default function Login({ navigation }) {
     navigation.navigate('Login');
   };
 
+  const handleGuestLogin = () => {
+    // Navigate to main app as guest without authentication
+    navigation.replace('Tabs');
+  };
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View style={styles.container}>
@@ -180,6 +185,16 @@ export default function Login({ navigation }) {
                 </>
               )}
             </Formik>
+            
+            {/* Guest Button */}
+            <AppButton
+              title={t('continue_as_guest')}
+              btnColor={Colors.white}
+              btnTitleColor={Colors.primary}
+              style={styles.guestButton}
+              onPress={handleGuestLogin}
+            />
+            
             <Text
               onPress={() => navigation.navigate('ForgotPassword')}
               style={styles.footerText}>
@@ -197,47 +212,21 @@ export default function Login({ navigation }) {
                 {t('register')}
               </Text>
             </Text>
-            <View
-              style={{
-                flexDirection: "row",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: 10,
-                marginTop: 20,
-              }}
-            >
+            
+            {/* Social Login Section */}
+            <View style={styles.socialLoginContainer}>
               {Platform.OS === "ios" ? (
                 <TouchableOpacity
                   activeOpacity={0.8}
                   onPress={handleAppleSignIn}
-                  style={{
-                    height: 50,
-                    width: 50,
-                    borderRadius: 50,
-                    justifyContent: "center",
-                    alignItems: "center",
-                    borderWidth: 1.5,
-                    borderColor: Colors.primary,
-                    backgroundColor: Colors.white,
-                  }}
-                >
+                  style={styles.socialButton}>
                   <Apple />
                 </TouchableOpacity>
               ) : null}
               <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={handleGoogleSignIn}
-                style={{
-                  height: 50,
-                  width: 50,
-                  borderRadius: 50,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                  borderWidth: 1.5,
-                  borderColor: Colors.primary,
-                  backgroundColor: Colors.white,
-                }}
-              >
+                style={styles.socialButton}>
                 <Google />
               </TouchableOpacity>
             </View>
@@ -272,5 +261,27 @@ const styles = StyleSheet.create({
     ...Typography.f_16_inter_regular,
     marginTop: 5,
     marginLeft: 15,
+  },
+  guestButton: {
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: Colors.primary,
+  },
+  socialLoginContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 10,
+    marginTop: 20,
+  },
+  socialButton: {
+    height: 50,
+    width: 50,
+    borderRadius: 50,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: Colors.primary,
+    backgroundColor: Colors.white,
   },
 });

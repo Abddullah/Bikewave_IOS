@@ -70,12 +70,15 @@ import axios from 'axios';
 import { createChat, getAllChats, getOneChat } from '../../redux/features/chat/chatThunks';
 import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
 import PopUp from '../../components/PopUp';
+import { useAuth } from '../../utilities/authUtils';
+import AuthPrompt from '../../components/AuthPrompt';
 
 export default function Product({ navigation, route }) {
   const refRBSheet = useRef();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { productId, ownerId } = route.params;
+  const { isAuthenticated } = useAuth();
   const bicycle = useSelector(selectBicycleDetails);
   const loading = useSelector(selectMainLoading);
   const auth_loading = useSelector(selectAuthLoading);
@@ -93,6 +96,9 @@ export default function Product({ navigation, route }) {
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const [loadingReserve, setLoadingReserve] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [authFeature, setAuthFeature] = useState('');
+  const [authFeatureName, setAuthFeatureName] = useState('');
   const isOwner = user_id === ownerId;
 
   const calculateDays = () => {
@@ -117,6 +123,13 @@ export default function Product({ navigation, route }) {
   }, [bicycle, selectedDateRange, days]);
 
   const openBottomSheet = React.useCallback(() => {
+    if (!isAuthenticated) {
+      setAuthFeature('booking');
+      setAuthFeatureName(t('make_a_reservation'));
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (!selectedDateRange) {
       setDatePickerModalVisible(true);
       return;
@@ -124,7 +137,7 @@ export default function Product({ navigation, route }) {
     if (refRBSheet.current) {
       refRBSheet.current.open();
     }
-  }, [selectedDateRange]);
+  }, [selectedDateRange, isAuthenticated, t]);
 
   useEffect(() => {
     dispatch(getBicycleById(productId));
@@ -192,19 +205,37 @@ export default function Product({ navigation, route }) {
   const favorites = useSelector(selectFavorites);
   const [fav, setFav] = useState(false);
   const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      setAuthFeature('favorites');
+      setAuthFeatureName(t('add_to_favorites'));
+      setShowAuthPrompt(true);
+      return;
+    }
+    
     await dispatch(updateFavorites(productId));
     setFav(!fav);
     await dispatch(getFavorites());
   };
   useEffect(() => {
-    const isFavorite = favorites.findIndex(e => e._id == productId);
-    if (isFavorite !== -1) setFav(true);
-    else {
+    if (isAuthenticated) {
+      const isFavorite = favorites.findIndex(e => e._id == productId);
+      if (isFavorite !== -1) setFav(true);
+      else {
+        setFav(false);
+      }
+    } else {
       setFav(false);
     }
-  }, [favorites]);
+  }, [favorites, isAuthenticated]);
 
   const handleChatPress = async () => {
+    if (!isAuthenticated) {
+      setAuthFeature('chat');
+      setAuthFeatureName(t('chat_with_owner'));
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (!route?.params?.ownerId) {
       alert('Chat can\'t be initialized because owner ID is missing');
       return;
@@ -499,6 +530,12 @@ export default function Product({ navigation, route }) {
             onClose={() => setDatePickerModalVisible(false)}
             onSelectRange={handleDateRangeSelect}
             existingBookings={bicycle?.bookings || []}
+          />
+          <AuthPrompt
+            visible={showAuthPrompt}
+            onClose={() => setShowAuthPrompt(false)}
+            feature={authFeature}
+            featureName={authFeatureName}
           />
         </>
       )}

@@ -10,6 +10,7 @@ export default function Splash() {
 
   useEffect(() => {
     const timeout = setTimeout(() => {
+      // Navigate to login screen to show login/guest options
       navigation.replace('Login');
     }, 3000);
 

@@ -45,12 +45,15 @@ const AppNavigator = React.forwardRef((props, ref) => {
           const token = parsed.token;
            await dispatch(setUserToken(token));
           await dispatch(setUser(parsed));
+          // If user is already logged in, go to main app
           setInitialRoute('Tabs');
         } else {
+          // If no user data, show login screen with guest option
           setInitialRoute('Splash');
         }
       } catch (error) {
         console.error('Auth check error:', error);
+        // On error, show login screen
         setInitialRoute('Splash');
       } finally {
         setIsLoading(false);

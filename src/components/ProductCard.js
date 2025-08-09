@@ -13,6 +13,8 @@ import { selectFavorites } from '../redux/features/main/mainSelectors';
 import { RFValue } from 'react-native-responsive-fontsize';
 import screenResolution from '../utilities/constants/screenResolution';
 import { colors } from '../utilities/constants';
+import { useAuth } from '../utilities/authUtils';
+import AuthPrompt from './AuthPrompt';
 
 const ProductCard = ({
   productId,
@@ -28,18 +30,31 @@ const ProductCard = ({
   const { t } = useTranslation();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useAuth();
   const favorites = useSelector(selectFavorites);
-  const [fav, setFav] = useState(false)
+  const [fav, setFav] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
   const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    
     await dispatch(updateFavorites(productId));
-    setFav(!fav)
+    setFav(!fav);
     await dispatch(getFavorites());
   };
+
   useEffect(() => {
-    const isFavorite = favorites.findIndex((e) => e._id == productId)
-    if (isFavorite !== -1) setFav(true)
-    else { setFav(false) }
-  }, [favorites])
+    if (isAuthenticated) {
+      const isFavorite = favorites.findIndex((e) => e._id == productId);
+      if (isFavorite !== -1) setFav(true);
+      else { setFav(false) }
+    } else {
+      setFav(false);
+    }
+  }, [favorites, isAuthenticated]);
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -93,6 +108,13 @@ const ProductCard = ({
           <AntDesign name={fav ? "heart" : "hearto"} color={colors.primary} size={RFValue(25, screenResolution.screenHeight)} />
         </TouchableOpacity>
       }
+      
+      <AuthPrompt
+        visible={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        feature="favorites"
+        featureName={t('add_to_favorites')}
+      />
     </TouchableOpacity>
   );
 };
