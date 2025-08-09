@@ -584,7 +584,7 @@ const Home = React.memo(({ navigation }) => {
                   description: {
                     ...Typography.f_14_inter_medium,
                     color: Colors.black,
-                    paddingVertical: 12,
+                    paddingVertical: 5,
                   },
                   separator: {
                     height: 1,
@@ -808,6 +808,7 @@ const styles = StyleSheet.create({
   actionsRow: {
     flexDirection: 'row',
     justifyContent: 'flex-start',
+    zIndex: -1,
     alignItems: 'center',
     width: '100%',
   },
