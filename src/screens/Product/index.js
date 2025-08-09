@@ -362,7 +362,7 @@ export default function Product({ navigation, route }) {
                     </>
                   )}
                 </View>
-                <Text style={styles.descriptionText}>{bicycle.description}</Text>
+                {/* <Text style={styles.descriptionText}>{bicycle.description}</Text> */}
 
               </View>
             </View>
@@ -370,7 +370,7 @@ export default function Product({ navigation, route }) {
               // contentContainerStyle={styles.contentContainer}
               contentContainerStyle={{ paddingBottom: !isOwner ? Platform.OS === 'ios' ? 80 : 30 : 0 }}
               style={styles.overFlowContainer}>
-              <Text style={styles.descriptionText}>{bicycle.desc}</Text>
+              <Text style={styles.descriptionText}>{bicycle.description}</Text>
               <View style={styles.ownerChatContainer}>
                 <View style={styles.ownerInfoContainer}>
                   <Text style={styles.ownerLabel}>{t('owner')}:</Text>
@@ -580,6 +580,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     marginTop: -23,
+    paddingBottom: 0,
+    marginBottom: 0,
     gap: 10,
   },
   brandPriceContainer: {
@@ -648,7 +650,7 @@ const styles = StyleSheet.create({
     ...Typography.f_16_inter_regular,
     color: Colors.black,
     paddingVertical: 10,
-    // paddingHorizontal: 15,
+    paddingHorizontal: 15,
   },
   ownerChatContainer: {
     paddingHorizontal: 15,
