@@ -235,7 +235,7 @@ export default function Profile({ navigation }) {
                 keyExtractor={item => item.id}
                 numColumns={2}
                 columnWrapperStyle={styles.bikeGrid}
-                contentContainerStyle={{ paddingBottom: 5,gap:20 }}
+                contentContainerStyle={styles.bikeListContainer}
               />
             )}
           </ScrollView>
@@ -361,7 +361,11 @@ const styles = StyleSheet.create({
   bikeGrid: {
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    // marginVertical:20
+    marginBottom: 15,
+  },
+  bikeListContainer: {
+    paddingBottom: 20,
+    gap: 15,
   },
   noBikesMessage: {
     textAlign: 'center',

@@ -35,23 +35,25 @@ const AppTextInput = ({
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 15,
+    marginTop: 10,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 14,
-    borderWidth: 0.3,
-    minHeight: 43,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    minHeight: 50,
     borderColor: Colors.gray,
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: Colors.white,
   },
   inputField: {
     ...Typography.f_16_inter_medium,
     color: Colors.black,
     flex: 1,
+    paddingVertical: 0,
   },
 });
 

@@ -74,6 +74,7 @@ import { fetchUserInfo } from '../../redux/features/auth/authThunks';
 import ReviewBottomSheet from '../../components/ReviewBottomSheet';
 import Toast from 'react-native-toast-message';
 import { getItem, setItem } from '../../services/assynsStorage';
+import { useAuth } from '../../utilities/authUtils';
 
 // Key for storing dismissed booking IDs
 const DISMISSED_BOOKINGS_KEY = 'dismissed_review_bookings';
@@ -134,8 +135,7 @@ const Home = React.memo(({ navigation }) => {
   const [showMap, setShowMap] = useState(false);
   const dispatch = useDispatch();
   const bicycles = useSelector(selectBicycles);
-  const userId = useSelector(selectAuthUserId);
-  const token = useSelector(selectAuthToken);
+  const { isAuthenticated, userId, token } = useAuth();
   const clientBookings = useSelector((state) => state.main.clientBookings);
   const ownerBookings = useSelector((state) => state.main.ownerBookings);
   const { dateFrom, dateEnd } = useSelector(state => state.main.filters);
@@ -197,11 +197,14 @@ const Home = React.memo(({ navigation }) => {
               : categories[selectedCategory - 1].label['en'].toLowerCase(),
         }),
       );
-      await dispatch(getFavorites());
+      // Only fetch favorites if user is authenticated
+      if (isAuthenticated) {
+        await dispatch(getFavorites());
+      }
       await setloader(false);
     };
     getData();
-  }, [dispatch, selectedCategory]);
+  }, [dispatch, selectedCategory, isAuthenticated]);
 
   const handleCategoryPress = useCallback(
     id => {
@@ -219,11 +222,11 @@ const Home = React.memo(({ navigation }) => {
   }, [bicycles]);
 
   useEffect(() => {
-    if (userId) {
+    if (isAuthenticated && userId) {
       dispatch(fetchUserInfo(userId));
       saveFCMToken(userId);
     }
-  }, [userId]);
+  }, [userId, isAuthenticated]);
   const handlePlaceSelect = useCallback(
     async (data, details = null) => {
       const { northeast, southwest } = details?.geometry?.viewport;
@@ -350,13 +353,16 @@ const Home = React.memo(({ navigation }) => {
     [bicycles],
   );
   useEffect(() => {
-    dispatch(getBookingsAsOwner());
-    dispatch(getBookingsAsClient());
-  }, [dispatch]);
-  // Check for completed bookings without reviews
+    if (isAuthenticated) {
+      dispatch(getBookingsAsOwner());
+      dispatch(getBookingsAsClient());
+    }
+  }, [dispatch, isAuthenticated]);
+
+  // Check for completed bookings without reviews - only for authenticated users
   useEffect(() => {
     const checkBookingsForReview = async () => {
-      if (!userId || !token) return;
+      if (!isAuthenticated || !userId || !token) return;
 
       try {
         // Use clientBookings state instead of API call
@@ -434,12 +440,12 @@ const Home = React.memo(({ navigation }) => {
       }
     };
 
-    if (userId && token) {
+    if (isAuthenticated && userId && token) {
       if (ownerBookings.length > 0 || clientBookings.length > 0) {
         checkBookingsForReview();
       }
     }
-  }, [userId, token, dispatch, ownerBookings, clientBookings]);
+  }, [userId, token, dispatch, ownerBookings, clientBookings, isAuthenticated]);
 
   // Remove the effect that updates AsyncStorage based on reviewModalState
   // since we now track dismissed bookings by ID
@@ -503,98 +509,117 @@ const Home = React.memo(({ navigation }) => {
       <View>
         <AppStatusBar />
         <View style={styles.headerContainer}>
-          <View style={{ width: '83%', height: 50 }}>
-            <GooglePlacesAutocomplete
-              ref={placesRef}
-              placeholder={t('your_city')}
-              onPress={handlePlaceSelect}
-              textInputProps={{
-                placeholderTextColor: colors.black
-              }}
-              query={{
-                key: EnvConfig.googleMaps.apiKey,
-                language: [DEFAULT_LANGUAGE],
-              }}
-              fetchDetails={true}
-              minLength={2}
-              enablePoweredByContainer={false}
-              renderLeftButton={() => (
-                <View style={{ alignSelf: 'center', top: 8 }}>
-                  <Search />
-                </View>
-              )}
-              renderRightButton={() =>
-                city?.length > 0 && (
-                  <TouchableOpacity
-                    onPress={clearInput}
-                    style={{ alignSelf: 'center', top: 8 }}>
-                    <AntDesign
-                      name={'close'}
-                      size={RFValue(20, screenResolution.screenHeight)}
-                    />
-                  </TouchableOpacity>
-                )
-              }
-              styles={{
-                container: {
-                  backgroundColor: Colors.white,
-
-                  borderRadius: 50,
-                  paddingHorizontal: 10,
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 1,
+          {/* Search Input Row */}
+          <View style={styles.searchRow}>
+            <View style={styles.searchContainer}>
+              <GooglePlacesAutocomplete
+                ref={placesRef}
+                placeholder={t('your_city')}
+                onPress={handlePlaceSelect}
+                textInputProps={{
+                  placeholderTextColor: colors.black
+                }}
+                query={{
+                  key: EnvConfig.googleMaps.apiKey,
+                  language: [DEFAULT_LANGUAGE],
+                }}
+                fetchDetails={true}
+                minLength={2}
+                enablePoweredByContainer={false}
+                renderLeftButton={() => (
+                  <View style={styles.searchIconContainer}>
+                    <Search />
+                  </View>
+                )}
+                renderRightButton={() =>
+                  city?.length > 0 && (
+                    <TouchableOpacity
+                      onPress={clearInput}
+                      style={styles.clearButtonContainer}>
+                      <AntDesign
+                        name={'close'}
+                        size={RFValue(18, screenResolution.screenHeight)}
+                      />
+                    </TouchableOpacity>
+                  )
+                }
+                styles={{
+                  container: {
+                    backgroundColor: Colors.white,
+                    borderRadius: 15,
+                    paddingHorizontal: 15,
+                    shadowColor: '#000',
+                    shadowOffset: {
+                      width: 0,
+                      height: 2,
+                    },
+                    shadowOpacity: 0.1,
+                    shadowRadius: 3,
+                    elevation: 3,
                   },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 2,
-                },
-                textInput: {
-                  backgroundColor: Colors.white,
-                  borderRadius: 25,
-                  ...Typography.f_16_inter_medium,
-                  color: Colors.black,
-                  height: 30,
-                },
-                listView: {
-                  backgroundColor: Colors.white,
-                  borderRadius: 10,
-                  position: 'absolute',
-                  top: '100%',
-                  marginTop: 10,
-                  paddingHorizontal: 20,
-                  shadowColor: '#000',
-                  shadowOffset: {
-                    width: 0,
-                    height: 1,
+                  textInput: {
+                    backgroundColor: Colors.white,
+                    borderRadius: 15,
+                    ...Typography.f_16_inter_medium,
+                    color: Colors.black,
+                    height: 48,
+                    paddingLeft: 10,
                   },
-                  shadowOpacity: 0.1,
-                  shadowRadius: 2,
-                  elevation: 2,
-                },
-                description: {
-                  ...Typography.f_14_inter_medium,
-                  color: Colors.black,
-                },
-                separator: {
-                  height: 0.5,
-                  backgroundColor: Colors.gray,
-                },
-              }}
-            />
-            <Text
-              onPress={() => navigation.navigate('DateFilter')}
-              style={[Typography.f_14_roboto_medium, styles.dateText]}>
-              {formattedDateRange}
-            </Text>
+                  listView: {
+                    backgroundColor: Colors.white,
+                    borderRadius: 12,
+                    position: 'absolute',
+                    top: '100%',
+                    marginTop: 8,
+                    paddingHorizontal: 20,
+                    shadowColor: '#000',
+                    shadowOffset: {
+                      width: 0,
+                      height: 4,
+                    },
+                    shadowOpacity: 0.15,
+                    shadowRadius: 8,
+                    elevation: 5,
+                  },
+                  description: {
+                    ...Typography.f_14_inter_medium,
+                    color: Colors.black,
+                    paddingVertical: 5,
+                  },
+                  separator: {
+                    height: 1,
+                    backgroundColor: Colors.lightGray,
+                  },
+                }}
+              />
+            </View>
+            
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.filterButton}
+              onPress={() => navigation.navigate('PriceFilter')}>
+              <Filter />
+            </TouchableOpacity>
           </View>
-          <TouchableOpacity
-            activeOpacity={0.8}
-            onPress={() => navigation.navigate('PriceFilter')}>
-            <Filter />
-          </TouchableOpacity>
+          
+          {/* Date and Actions Row */}
+          <View style={styles.actionsRow}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('DateFilter')}
+              style={styles.dateButton}>
+              <AntDesign 
+                name="calendar" 
+                size={RFValue(16, screenResolution.screenHeight)} 
+                color={Colors.primary} 
+                style={styles.dateIcon}
+              />
+              <Text style={[Typography.f_14_inter_medium, styles.dateText]}>
+                {formattedDateRange}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
         <View style={styles.categoryShadow}>
           <View style={styles.categoryContainer}>
             <FlatList
@@ -740,16 +765,77 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.white,
   },
   headerContainer: {
+    paddingHorizontal: 20,
+    paddingVertical: 20,
+    backgroundColor: Colors.white,
+  },
+  searchRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 12,
+  },
+  searchContainer: {
+    flex: 1,
+    marginRight: 12,
+  },
+  searchIconContainer: {
+    alignSelf: 'center',
+    paddingLeft: 8,
+  },
+  clearButtonContainer: {
+    alignSelf: 'center',
+    paddingRight: 8,
+    padding: 4,
+  },
+  filterButton: {
+    width: 48,
+    height: 48,
+    borderRadius: 15,
+    backgroundColor: Colors.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  actionsRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    zIndex: -1,
+    alignItems: 'center',
+    width: '100%',
+  },
+  dateButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 20,
+    backgroundColor: Colors.white,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+    borderWidth: 1,
+    borderColor: Colors.lightGray,
+  },
+  dateIcon: {
+    marginRight: 8,
   },
   dateText: {
     color: Colors.primary,
-    position: 'absolute',
-    bottom: 5,
-    left: 47,
+    fontWeight: '500',
   },
   categoryListContainer: {
     marginVertical: 10,

@@ -70,12 +70,15 @@ import axios from 'axios';
 import { createChat, getAllChats, getOneChat } from '../../redux/features/chat/chatThunks';
 import { clearCurrentChat } from '../../redux/features/chat/chatSlice';
 import PopUp from '../../components/PopUp';
+import { useAuth } from '../../utilities/authUtils';
+import AuthPrompt from '../../components/AuthPrompt';
 
 export default function Product({ navigation, route }) {
   const refRBSheet = useRef();
   const { t } = useTranslation();
   const dispatch = useDispatch();
   const { productId, ownerId } = route.params;
+  const { isAuthenticated } = useAuth();
   const bicycle = useSelector(selectBicycleDetails);
   const loading = useSelector(selectMainLoading);
   const auth_loading = useSelector(selectAuthLoading);
@@ -93,6 +96,9 @@ export default function Product({ navigation, route }) {
   const [selectedDateRange, setSelectedDateRange] = useState(null);
   const [showApprovalPopup, setShowApprovalPopup] = useState(false);
   const [loadingReserve, setLoadingReserve] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [authFeature, setAuthFeature] = useState('');
+  const [authFeatureName, setAuthFeatureName] = useState('');
   const isOwner = user_id === ownerId;
 
   const calculateDays = () => {
@@ -117,6 +123,13 @@ export default function Product({ navigation, route }) {
   }, [bicycle, selectedDateRange, days]);
 
   const openBottomSheet = React.useCallback(() => {
+    if (!isAuthenticated) {
+      setAuthFeature('booking');
+      setAuthFeatureName(t('make_a_reservation'));
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (!selectedDateRange) {
       setDatePickerModalVisible(true);
       return;
@@ -124,7 +137,7 @@ export default function Product({ navigation, route }) {
     if (refRBSheet.current) {
       refRBSheet.current.open();
     }
-  }, [selectedDateRange]);
+  }, [selectedDateRange, isAuthenticated, t]);
 
   useEffect(() => {
     dispatch(getBicycleById(productId));
@@ -148,12 +161,12 @@ export default function Product({ navigation, route }) {
         approvalRes.payload.isApproved
       ) {
         // if (userDetails.accountId) {
-          await navigation.navigate('Step1', {
-            bicycle,
-            selectedDateRange,
-            totalPrice: calculateTotalPrice,
-          });
-          await refRBSheet.current.close();
+        await navigation.navigate('Step1', {
+          bicycle,
+          selectedDateRange,
+          totalPrice: calculateTotalPrice,
+        });
+        await refRBSheet.current.close();
         // } else {
         //   const accountCreationRes = await dispatch(createAccount());
         //   if (accountCreationRes && accountCreationRes.payload) {
@@ -192,19 +205,37 @@ export default function Product({ navigation, route }) {
   const favorites = useSelector(selectFavorites);
   const [fav, setFav] = useState(false);
   const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      setAuthFeature('favorites');
+      setAuthFeatureName(t('add_to_favorites'));
+      setShowAuthPrompt(true);
+      return;
+    }
+    
     await dispatch(updateFavorites(productId));
     setFav(!fav);
     await dispatch(getFavorites());
   };
   useEffect(() => {
-    const isFavorite = favorites.findIndex(e => e._id == productId);
-    if (isFavorite !== -1) setFav(true);
-    else {
+    if (isAuthenticated) {
+      const isFavorite = favorites.findIndex(e => e._id == productId);
+      if (isFavorite !== -1) setFav(true);
+      else {
+        setFav(false);
+      }
+    } else {
       setFav(false);
     }
-  }, [favorites]);
+  }, [favorites, isAuthenticated]);
 
   const handleChatPress = async () => {
+    if (!isAuthenticated) {
+      setAuthFeature('chat');
+      setAuthFeatureName(t('chat_with_owner'));
+      setShowAuthPrompt(true);
+      return;
+    }
+
     if (!route?.params?.ownerId) {
       alert('Chat can\'t be initialized because owner ID is missing');
       return;
@@ -331,15 +362,17 @@ export default function Product({ navigation, route }) {
                     </>
                   )}
                 </View>
+                {/* <Text style={styles.descriptionText}>{bicycle.description}</Text> */}
+
               </View>
             </View>
             <ScrollView
               // contentContainerStyle={styles.contentContainer}
               contentContainerStyle={{ paddingBottom: !isOwner ? Platform.OS === 'ios' ? 80 : 30 : 0 }}
               style={styles.overFlowContainer}>
-              <Text style={styles.descriptionText}>{bicycle.desc}</Text>
+              <Text style={styles.descriptionText}>{bicycle.description}</Text>
               <View style={styles.ownerChatContainer}>
-                <View style={{ gap: -5 }}>
+                <View style={styles.ownerInfoContainer}>
                   <Text style={styles.ownerLabel}>{t('owner')}:</Text>
                   <Text style={styles.ownerName}>
                     {bicycle.owner?.firstName} {bicycle.owner?.secondName}
@@ -498,6 +531,12 @@ export default function Product({ navigation, route }) {
             onSelectRange={handleDateRangeSelect}
             existingBookings={bicycle?.bookings || []}
           />
+          <AuthPrompt
+            visible={showAuthPrompt}
+            onClose={() => setShowAuthPrompt(false)}
+            feature={authFeature}
+            featureName={authFeatureName}
+          />
         </>
       )}
     </View>
@@ -536,12 +575,14 @@ const styles = StyleSheet.create({
   },
   productDetailsContainer: {
     backgroundColor: Colors.white,
-    paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingVertical: 15,
+    paddingHorizontal: 20,
     borderTopLeftRadius: 25,
     borderTopRightRadius: 25,
     marginTop: -23,
-    gap: 3,
+    paddingBottom: 0,
+    marginBottom: 0,
+    gap: 10,
   },
   brandPriceContainer: {
     flexDirection: 'row',
@@ -616,6 +657,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  ownerInfoContainer: {
+    gap: 5,
   },
   ownerLabel: {
     ...Typography.f_20_inter_bold,

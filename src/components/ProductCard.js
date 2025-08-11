@@ -13,6 +13,8 @@ import { selectFavorites } from '../redux/features/main/mainSelectors';
 import { RFValue } from 'react-native-responsive-fontsize';
 import screenResolution from '../utilities/constants/screenResolution';
 import { colors } from '../utilities/constants';
+import { useAuth } from '../utilities/authUtils';
+import AuthPrompt from './AuthPrompt';
 
 const ProductCard = ({
   productId,
@@ -28,18 +30,31 @@ const ProductCard = ({
   const { t } = useTranslation();
   const navigation = useNavigation();
   const dispatch = useDispatch();
+  const { isAuthenticated } = useAuth();
   const favorites = useSelector(selectFavorites);
-  const [fav, setFav] = useState(false)
+  const [fav, setFav] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+
   const handleFavoriteToggle = async () => {
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    
     await dispatch(updateFavorites(productId));
-    setFav(!fav)
+    setFav(!fav);
     await dispatch(getFavorites());
   };
+
   useEffect(() => {
-    const isFavorite = favorites.findIndex((e) => e._id == productId)
-    if (isFavorite !== -1) setFav(true)
-    else { setFav(false) }
-  }, [favorites])
+    if (isAuthenticated) {
+      const isFavorite = favorites.findIndex((e) => e._id == productId);
+      if (isFavorite !== -1) setFav(true);
+      else { setFav(false) }
+    } else {
+      setFav(false);
+    }
+  }, [favorites, isAuthenticated]);
   return (
     <TouchableOpacity
       activeOpacity={0.8}
@@ -56,40 +71,30 @@ const ProductCard = ({
         <View style={styles.cardDetails}>
           <View style={styles.rowSpaceBetween}>
             <View style={styles.rowAligned}>
-              {/* <Text style={[Typography.f_18_inter_semi_bold, styles.text]}>
-                {t(`Brand`)}
-              </Text> */}
-              <Text style={[Typography.f_16_inter_regular, styles.text]}>
+              <Text style={[Typography.f_16_inter_semi_bold, styles.text]}>
                 {brand}
               </Text>
             </View>
             <Text
               style={[
                 Typography.f_18_inter_semi_bold,
-                styles.text,
+                styles.priceText,
               ]}>{`${price}€${t('per_day')}`}</Text>
           </View>
-          <View style={styles.rowSpaceBetween}>
-            <Text style={[Typography.f_16_inter_medium, styles.text]}>
+          <View style={styles.modelLocationContainer}>
+            <Text style={[Typography.f_15_inter_light, styles.modelText]}>
               {model}
             </Text>
-            <View style={styles.rowAligned}>
+            <View style={styles.locationContainer}>
               <Location />
-              <Text style={[Typography.f_16_inter_medium, styles.text]}>
+              <Text style={[Typography.f_14_inter_medium, styles.locationText]}>
                 {location}
               </Text>
             </View>
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              gap: 5,
-              marginTop: 5,
-            }}>
+          <View style={styles.ratingContainer}>
             <Star />
-            <Text
-              style={{ ...Typography.f_14_inter_medium, color: Colors.black }}>
+            <Text style={styles.ratingText}>
               4.8
             </Text>
           </View>
@@ -103,6 +108,13 @@ const ProductCard = ({
           <AntDesign name={fav ? "heart" : "hearto"} color={colors.primary} size={RFValue(25, screenResolution.screenHeight)} />
         </TouchableOpacity>
       }
+      
+      <AuthPrompt
+        visible={showAuthPrompt}
+        onClose={() => setShowAuthPrompt(false)}
+        feature="favorites"
+        featureName={t('add_to_favorites')}
+      />
     </TouchableOpacity>
   );
 };
@@ -131,9 +143,9 @@ const styles = StyleSheet.create({
     height: undefined,
   },
   cardDetails: {
-    padding: 10,
-    paddingBottom: 15,
-    gap: 3,
+    padding: 15,
+    paddingBottom: 20,
+    gap: 8,
   },
   text: {
     color: Colors.black,
@@ -152,6 +164,35 @@ const styles = StyleSheet.create({
     position: 'absolute',
     padding: 10,
     right: 0,
+  },
+  priceText: {
+    color: Colors.primary,
+  },
+  modelLocationContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  modelText: {
+    color: Colors.black,
+  },
+  locationContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  locationText: {
+    color: Colors.black,
+  },
+  ratingContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    marginTop: 5,
+  },
+  ratingText: {
+    color: Colors.black,
   },
 });
 
